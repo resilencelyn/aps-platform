@@ -1,6 +1,6 @@
 using System;
 
-namespace 高级计划与排产
+namespace Aps
 {
     public class WeatherForecast
     {

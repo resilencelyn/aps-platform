@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Aps.Entity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
-using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
-using 高级计划与排产.Entity;
 
-namespace 高级计划与排产.Infrastructure
+namespace Aps.Infrastructure
 {
     public class ApsContext : DbContext
     {

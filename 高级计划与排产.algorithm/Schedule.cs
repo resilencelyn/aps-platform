@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Google.OrTools.Sat;
 
-namespace 高级计划与排产.algorithm
+namespace Aps.algorithm
 {
     public class Schedule
     {

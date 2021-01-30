@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace 高级计划与排产.Entity
+
+namespace Aps.Entity
 {
     public class ApsProduct
     {

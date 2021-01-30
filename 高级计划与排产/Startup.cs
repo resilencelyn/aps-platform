@@ -1,4 +1,5 @@
 using System;
+using Aps.Infrastructure;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -8,9 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using 高级计划与排产.Infrastructure;
 
-namespace 高级计划与排产
+namespace Aps
 {
     public class Startup
     {

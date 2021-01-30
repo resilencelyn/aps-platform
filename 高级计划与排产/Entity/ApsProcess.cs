@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
-namespace 高级计划与排产.Entity
+namespace Aps.Entity
 {
     public abstract class ApsProcess
     {

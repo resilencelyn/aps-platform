@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿
 
-namespace 高级计划与排产.Entity
+namespace Aps.Entity
 {
     public enum ProductionMode
     {
