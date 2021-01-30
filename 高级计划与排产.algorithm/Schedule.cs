@@ -96,7 +96,7 @@ namespace 高级计划与排产.algorithm
             //半成品数量约束
             foreach (var semiProduct in allSemiProducts)
             {
-                model.AddReservoirConstraint();
+                // model.AddReservoirConstraint();
             }
 
             for (int semiProductId = 0; semiProductId < semiProductsData.Length; semiProductId++)
