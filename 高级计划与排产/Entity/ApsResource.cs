@@ -2,13 +2,7 @@
 
 namespace Aps.Entity
 {
-    public enum ResourceType
-    {
-        人员 = 1,
-        设备 = 2,
-        机床 = 3,
-    }
-
+    
     public class ApsResource
     {
         [Key] public string ResourceId { get; set; }
@@ -20,9 +14,5 @@ namespace Aps.Entity
         [Required] public Workspace Workspace { get; set; }
     }
 
-    public enum Workspace
-    {
-        加工 = 1,
-        装配 = 2,
-    }
+    
 }

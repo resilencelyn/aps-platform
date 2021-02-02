@@ -2,11 +2,7 @@
 
 namespace Aps.Entity
 {
-    public enum ProductionMode
-    {
-        Bp = 1,
-        Sp = 2,
-    }
+    
 
     public class ApsManufactureProcess : ApsProcess
     {

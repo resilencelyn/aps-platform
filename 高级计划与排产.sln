@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30914.41
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "高级计划与排产", "高级计划与排产\高级计划与排产.csproj", "{CE1777C9-B829-44CF-942D-019FD254A28D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aps", "高级计划与排产\Aps.csproj", "{CE1777C9-B829-44CF-942D-019FD254A28D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aps.algorithm", "高级计划与排产.algorithm\Aps.algorithm.csproj", "{DBA6A005-AF6B-4C27-A405-9510ABA9B751}"
 EndProject

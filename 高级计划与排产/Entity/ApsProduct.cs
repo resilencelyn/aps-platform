@@ -8,5 +8,6 @@ namespace Aps.Entity
     {
         [Key] public string ProductId { get; set; }
         [Required] public List<ApsSemiProduct> AssembleBySemiProducts { get; set; } = new();
+        public List<ApsOrder> ApsOrdersBy { get; set; }
     }
 }

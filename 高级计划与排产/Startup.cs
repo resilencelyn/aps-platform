@@ -28,9 +28,12 @@ namespace Aps
 
             services.AddDbContextPool<ApsContext>(options =>
             {
-                options.UseMySql("server = 121.5.26.37; database = data; user = root; password = zq19990821",
+                options.UseMySql("server = 121.5.26.37; database = ApsServer; user = root; password = zq19990821",
                     new MySqlServerVersion(new Version(5, 7, 30)),
-                    builder => { builder.CharSetBehavior(CharSetBehavior.NeverAppend); });
+                    builder =>
+                    {
+                        builder.CharSet(CharSet.Utf8Mb4);
+                    });
             });
 
             services.AddCors(options =>
