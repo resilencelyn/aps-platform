@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\高级计划与排产.algorithm\Aps.algorithm.csproj" />
+    <ProjectReference Include="..\Aps.algorithm\Aps.algorithm.csproj" />
   </ItemGroup>
 
 
