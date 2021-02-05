@@ -33,6 +33,6 @@ namespace Aps.Entity
         public uint? MinimumProductionQuantity { get; set; }
         public uint? MaximumProductionQuantity { get; set; }
         [Required] public Workspace Workspace { get; set; }
-        [Required] public List<ApsProcessResource> ApsResources { get; set; } = new();
+        [Required] public List<ApsProcessResource> ApsResources { get; set; } = new List<ApsProcessResource>();
     }
 }

@@ -9,7 +9,7 @@ namespace Aps.Entity
 
         [Required]
         public List<ApsManufactureProcess> ApsManufactureProcesses { get; set; } =
-            new();
+            new List<ApsManufactureProcess>();
 
         public List<ApsProduct> ApsAssemblyProducts { get; set; }
     }
