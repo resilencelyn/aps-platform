@@ -82,7 +82,7 @@ namespace Aps.Infrastructure
             modelBuilder.Entity<ApsAssemblyProcess>()
                 .HasData(new List<ApsAssemblyProcess>()
                 {
-                    new()
+                    new ApsAssemblyProcess()
                     {
                         PartId = "process_end_A",
                         PartName = "process_end_A",
@@ -97,7 +97,7 @@ namespace Aps.Infrastructure
             modelBuilder.Entity<ApsManufactureProcess>()
                 .HasData(new List<ApsManufactureProcess>()
                 {
-                    new()
+                    new ApsManufactureProcess()
                     {
                         PartId = "process_1_a",
                         PartName = "process_1_a",
@@ -125,74 +125,73 @@ namespace Aps.Infrastructure
             modelBuilder.Entity<ApsProcessResource>()
                 .HasData(new List<ApsProcessResource>()
                 {
-                    new()
+                    new ApsProcessResource()
                     {
                         Amount = 3,
                         ApsProcessId = "process_end_A",
                         ResourceAttribute = "机床",
                     },
-                    new()
+                    new ApsProcessResource()
                     {
                         Amount = 2,
                         ApsProcessId = "process_end_A",
                         ResourceAttribute = "高级机床",
                     },
-                    new()
+                    new ApsProcessResource()
                     {
                         Amount = 1,
                         ApsProcessId = "process_end_A",
                         ResourceAttribute = "人员",
                     },
-                    new()
+                    new ApsProcessResource()
                     {
                         Amount = 1,
                         ResourceAttribute = "高级人员",
                         ApsProcessId = "process_end_A",
                     },
-                    new()
+                    new ApsProcessResource()
                     {
                         Amount = 3,
                         ResourceAttribute = "设备",
                         ApsProcessId = "process_end_A",
                     },
-                    new()
+                    new ApsProcessResource()
                     {
                         Amount = 2,
                         ResourceAttribute = "高级设备",
                         ApsProcessId = "process_end_A",
                     },
 
-                    new()
+                    new ApsProcessResource()
                     {
                         Amount = 3,
                         ApsProcessId = "process_1_a",
                         ResourceAttribute = "机床",
                     },
-                    new()
+                    new ApsProcessResource()
                     {
                         Amount = 2,
                         ApsProcessId = "process_1_a",
                         ResourceAttribute = "高级机床",
                     },
-                    new()
+                    new ApsProcessResource()
                     {
                         Amount = 1,
                         ApsProcessId = "process_1_a",
                         ResourceAttribute = "人员",
                     },
-                    new()
+                    new ApsProcessResource()
                     {
                         Amount = 1,
                         ResourceAttribute = "高级人员",
                         ApsProcessId = "process_1_a",
                     },
-                    new()
+                    new ApsProcessResource()
                     {
-                        Amount = 3,
                         ResourceAttribute = "设备",
                         ApsProcessId = "process_1_a",
                     },
-                    new()
+                    new ApsProcessResource()
                     {
                         Amount = 2,
                         ResourceAttribute = "高级设备",
