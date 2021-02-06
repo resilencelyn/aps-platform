@@ -1,6 +1,5 @@
 ﻿
-
-namespace Aps.Entity
+namespace Aps.Shared.Entity
 {
     
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Aps.Entity;
+using Aps.Shared.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aps.Infrastructure
@@ -13,9 +13,8 @@ namespace Aps.Infrastructure
         public DbSet<ApsOrder> ApsOrders { get; set; }
         public DbSet<ApsResource> ApsResources { get; set; }
         public DbSet<ApsAssemblyProcess> ApsAssemblyProcesses { get; set; }
-
-        public DbSet<ApsAssemblyProcessSemiProduct> ApsAssemblyProcessSemiProducts { get; set; }
-        public DbSet<ApsProcessResource> ApsProcessResources { get; set; }
+        
+        public DbSet<ApsProduct> ApsProducts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,6 +43,12 @@ namespace Aps.Infrastructure
             modelBuilder.Entity<ApsProcessResource>()
                 .HasKey(x => new {x.ApsProcessId, x.ResourceAttribute});
 
+            modelBuilder.Entity<ApsProductSemiProduct>()
+                .HasKey(x => new {x.ApsSemiProductId, x.ApsProductId});
+
+            modelBuilder.Entity<ApsProduct>()
+                .HasOne(x => x.ApsAssemblyProcess)
+                .WithOne(p => p.OutputFinishedProduct);
 
             var list = "product_semi_d,product_semi_o," +
                        "product_semi_a,product_semi_j," +
@@ -204,6 +209,6 @@ namespace Aps.Infrastructure
         {
         }
 
-        public DbSet<Aps.Entity.ApsProduct> ApsProduct { get; set; }
+        public DbSet<ApsProduct> ApsProduct { get; set; }
     }
 }

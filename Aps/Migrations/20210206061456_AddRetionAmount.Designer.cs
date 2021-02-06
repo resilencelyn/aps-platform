@@ -3,14 +3,16 @@ using System;
 using Aps.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Aps.Migrations
 {
     [DbContext(typeof(ApsContext))]
-    partial class ApsContextModelSnapshot : ModelSnapshot
+    [Migration("20210206061456_AddRetionAmount")]
+    partial class AddRetionAmount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -230,13 +232,7 @@ namespace Aps.Migrations
                     b.Property<string>("ProductId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<string>("ApsAssemblyProcessId")
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
-
                     b.HasKey("ProductId");
-
-                    b.HasIndex("ApsAssemblyProcessId")
-                        .IsUnique();
 
                     b.ToTable("ApsProduct");
 
@@ -404,8 +400,10 @@ namespace Aps.Migrations
                 {
                     b.HasBaseType("Aps.Shared.Entity.ApsProcess");
 
-                    b.Property<string>("OutputFinishedProductId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<string>("OutputFinishedProductProductId")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+
+                    b.HasIndex("OutputFinishedProductProductId");
 
                     b.HasDiscriminator().HasValue("ApsAssemblyProcess");
 
@@ -490,15 +488,6 @@ namespace Aps.Migrations
                     b.Navigation("ApsProcess");
                 });
 
-            modelBuilder.Entity("Aps.Shared.Entity.ApsProduct", b =>
-                {
-                    b.HasOne("Aps.Entity.ApsAssemblyProcess", "ApsAssemblyProcess")
-                        .WithOne("OutputFinishedProduct")
-                        .HasForeignKey("Aps.Shared.Entity.ApsProduct", "ApsAssemblyProcessId");
-
-                    b.Navigation("ApsAssemblyProcess");
-                });
-
             modelBuilder.Entity("Aps.Shared.Entity.ApsProductSemiProduct", b =>
                 {
                     b.HasOne("Aps.Shared.Entity.ApsProduct", "ApsProduct")
@@ -516,6 +505,15 @@ namespace Aps.Migrations
                     b.Navigation("ApsProduct");
 
                     b.Navigation("ApsSemiProduct");
+                });
+
+            modelBuilder.Entity("Aps.Entity.ApsAssemblyProcess", b =>
+                {
+                    b.HasOne("Aps.Shared.Entity.ApsProduct", "OutputFinishedProduct")
+                        .WithMany()
+                        .HasForeignKey("OutputFinishedProductProductId");
+
+                    b.Navigation("OutputFinishedProduct");
                 });
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsManufactureProcess", b =>
@@ -555,9 +553,6 @@ namespace Aps.Migrations
             modelBuilder.Entity("Aps.Entity.ApsAssemblyProcess", b =>
                 {
                     b.Navigation("InputSemiFinishedProducts");
-
-                    b.Navigation("OutputFinishedProduct")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

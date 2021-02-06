@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Aps.Entity;
 using Aps.Infrastructure;
+using Aps.Shared.Entity;
 
 namespace Aps.Controllers
 {

@@ -1,4 +1,5 @@
-﻿namespace Aps.Entity
+﻿
+namespace Aps.Shared.Entity
 {
     public class ApsAssemblyProcessSemiProduct
     {

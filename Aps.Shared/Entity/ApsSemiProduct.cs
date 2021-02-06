@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Aps.Entity
+namespace Aps.Shared.Entity
 {
     public class ApsSemiProduct
     {
@@ -11,6 +11,7 @@ namespace Aps.Entity
         public List<ApsManufactureProcess> ApsManufactureProcesses { get; set; } =
             new List<ApsManufactureProcess>();
 
-        public List<ApsProduct> ApsAssemblyProducts { get; set; }
+        public List<ApsProductSemiProduct> ApsProductsFromRequisite { get; set; } =
+            new List<ApsProductSemiProduct>();
     }
 }

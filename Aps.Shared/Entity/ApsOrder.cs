@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Aps.Entity
+namespace Aps.Shared.Entity
 {
     public class ApsOrder
     {
