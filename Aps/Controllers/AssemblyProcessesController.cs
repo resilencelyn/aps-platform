@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Aps.Entity;
 using Aps.Infrastructure;
+using Aps.Services;
 
 namespace Aps.Controllers
 {
@@ -15,24 +16,27 @@ namespace Aps.Controllers
     public class ApsAssemblyProcessesController : ControllerBase
     {
         private readonly ApsContext _context;
+        private readonly IAssemblyProcessRepository _assemblyProcessRepository;
 
-        public ApsAssemblyProcessesController(ApsContext context)
+        public ApsAssemblyProcessesController(ApsContext context, IAssemblyProcessRepository assemblyProcessRepository)
         {
             _context = context;
+            _assemblyProcessRepository = assemblyProcessRepository;
         }
 
         // GET: api/ApsAssemblyProcesses
-        [HttpGet]
+        [HttpGet(Name = nameof(GetApsAssemblyProcesses))]
         public async Task<ActionResult<IEnumerable<ApsAssemblyProcess>>> GetApsAssemblyProcesses()
         {
-            return await _context.ApsAssemblyProcesses.ToListAsync();
+            var assemblyProcesses = await _assemblyProcessRepository.GetApsAssemblyProcessesAsync();
+            return Ok(assemblyProcesses);
         }
 
         // GET: api/ApsAssemblyProcesses/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ApsAssemblyProcess>> GetApsAssemblyProcess(string id)
+        [HttpGet("{id}", Name = nameof(GetApsAssemblyProcess))]
+        public async Task<ActionResult<ApsAssemblyProcess>> GetApsAssemblyProcess([FromRoute] string id)
         {
-            var apsAssemblyProcess = await _context.ApsAssemblyProcesses.FindAsync(id);
+            var apsAssemblyProcess = await _assemblyProcessRepository.GetApsAssemblyProcessAsync(id);
 
             if (apsAssemblyProcess == null)
             {
@@ -76,16 +80,18 @@ namespace Aps.Controllers
         // POST: api/ApsAssemblyProcesses
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ApsAssemblyProcess>> PostApsAssemblyProcess(ApsAssemblyProcess apsAssemblyProcess)
+        public async Task<ActionResult<ApsAssemblyProcess>> PostApsAssemblyProcess(
+            ApsAssemblyProcess AssemblyProcess)
         {
-            _context.ApsAssemblyProcesses.Add(apsAssemblyProcess);
+            _assemblyProcessRepository.AddAssemblyProcess(AssemblyProcess);
+            _context.ApsAssemblyProcesses.Add(AssemblyProcess);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (ApsAssemblyProcessExists(apsAssemblyProcess.PartId))
+                if (ApsAssemblyProcessExists(AssemblyProcess.PartId))
                 {
                     return Conflict();
                 }
@@ -95,7 +101,7 @@ namespace Aps.Controllers
                 }
             }
 
-            return CreatedAtAction("GetApsAssemblyProcess", new { id = apsAssemblyProcess.PartId }, apsAssemblyProcess);
+            return CreatedAtAction("GetApsAssemblyProcess", new { id = AssemblyProcess.PartId }, AssemblyProcess);
         }
 
         // DELETE: api/ApsAssemblyProcesses/5
