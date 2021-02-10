@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Aps.Shared.Entity
 {
@@ -9,10 +10,7 @@ namespace Aps.Shared.Entity
         [Required] public ResourceType ResourceType { get; set; }
 
         public int? Amount { get; set; }
-        [Required] public string ResourceAttributes { get; set; }
-        [Required] public string BasicAttributes { get; set; }
+        [Required] public List<ResourceClassWithResource> ResourceAttributes { get; set; }
         [Required] public Workspace Workspace { get; set; }
     }
-
-    
 }

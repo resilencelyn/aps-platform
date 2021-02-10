@@ -25,14 +25,14 @@ namespace Aps.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ApsProduct>>> GetApsProduct()
         {
-            return await _context.ApsProduct.ToListAsync();
+            return await _context.ApsProducts.ToListAsync();
         }
 
         // GET: api/ApsProducts/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ApsProduct>> GetApsProduct(string id)
         {
-            var apsProduct = await _context.ApsProduct.FindAsync(id);
+            var apsProduct = await _context.ApsProducts.FindAsync(id);
 
             if (apsProduct == null)
             {
@@ -78,7 +78,7 @@ namespace Aps.Controllers
         [HttpPost]
         public async Task<ActionResult<ApsProduct>> PostApsProduct(ApsProduct apsProduct)
         {
-            _context.ApsProduct.Add(apsProduct);
+            _context.ApsProducts.Add(apsProduct);
             try
             {
                 await _context.SaveChangesAsync();
@@ -102,13 +102,13 @@ namespace Aps.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApsProduct(string id)
         {
-            var apsProduct = await _context.ApsProduct.FindAsync(id);
+            var apsProduct = await _context.ApsProducts.FindAsync(id);
             if (apsProduct == null)
             {
                 return NotFound();
             }
 
-            _context.ApsProduct.Remove(apsProduct);
+            _context.ApsProducts.Remove(apsProduct);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -116,7 +116,7 @@ namespace Aps.Controllers
 
         private bool ApsProductExists(string id)
         {
-            return _context.ApsProduct.Any(e => e.ProductId == id);
+            return _context.ApsProducts.Any(e => e.ProductId == id);
         }
     }
 }

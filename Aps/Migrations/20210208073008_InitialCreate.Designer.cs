@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Aps.Migrations
 {
     [DbContext(typeof(ApsContext))]
-    [Migration("20210206061456_AddRetionAmount")]
-    partial class AddRetionAmount
+    [Migration("20210208073008_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -112,11 +112,11 @@ namespace Aps.Migrations
                         .IsRequired()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<uint?>("MaximumProductionQuantity")
-                        .HasColumnType("int unsigned");
+                    b.Property<int?>("MaximumProductionQuantity")
+                        .HasColumnType("int");
 
-                    b.Property<uint?>("MinimumProductionQuantity")
-                        .HasColumnType("int unsigned");
+                    b.Property<int?>("MinimumProductionQuantity")
+                        .HasColumnType("int");
 
                     b.Property<string>("PartName")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
@@ -124,8 +124,8 @@ namespace Aps.Migrations
                     b.Property<int>("ProductionMode")
                         .HasColumnType("int");
 
-                    b.Property<uint>("ProductionTime")
-                        .HasColumnType("int unsigned");
+                    b.Property<TimeSpan>("ProductionTime")
+                        .HasColumnType("time(6)");
 
                     b.Property<int>("Workspace")
                         .HasColumnType("int");
@@ -142,89 +142,17 @@ namespace Aps.Migrations
                     b.Property<string>("ApsProcessId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<string>("ResourceAttribute")
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+                    b.Property<int>("ResourceClassId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.HasKey("ApsProcessId", "ResourceAttribute");
+                    b.HasKey("ApsProcessId", "ResourceClassId");
+
+                    b.HasIndex("ResourceClassId");
 
                     b.ToTable("ApsProcessResource");
-
-                    b.HasData(
-                        new
-                        {
-                            ApsProcessId = "process_end_A",
-                            ResourceAttribute = "机床",
-                            Amount = 3
-                        },
-                        new
-                        {
-                            ApsProcessId = "process_end_A",
-                            ResourceAttribute = "高级机床",
-                            Amount = 2
-                        },
-                        new
-                        {
-                            ApsProcessId = "process_end_A",
-                            ResourceAttribute = "人员",
-                            Amount = 1
-                        },
-                        new
-                        {
-                            ApsProcessId = "process_end_A",
-                            ResourceAttribute = "高级人员",
-                            Amount = 1
-                        },
-                        new
-                        {
-                            ApsProcessId = "process_end_A",
-                            ResourceAttribute = "设备",
-                            Amount = 3
-                        },
-                        new
-                        {
-                            ApsProcessId = "process_end_A",
-                            ResourceAttribute = "高级设备",
-                            Amount = 2
-                        },
-                        new
-                        {
-                            ApsProcessId = "process_1_a",
-                            ResourceAttribute = "机床",
-                            Amount = 3
-                        },
-                        new
-                        {
-                            ApsProcessId = "process_1_a",
-                            ResourceAttribute = "高级机床",
-                            Amount = 2
-                        },
-                        new
-                        {
-                            ApsProcessId = "process_1_a",
-                            ResourceAttribute = "人员",
-                            Amount = 1
-                        },
-                        new
-                        {
-                            ApsProcessId = "process_1_a",
-                            ResourceAttribute = "高级人员",
-                            Amount = 1
-                        },
-                        new
-                        {
-                            ApsProcessId = "process_1_a",
-                            ResourceAttribute = "设备",
-                            Amount = 0
-                        },
-                        new
-                        {
-                            ApsProcessId = "process_1_a",
-                            ResourceAttribute = "高级设备",
-                            Amount = 2
-                        });
                 });
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsProduct", b =>
@@ -232,9 +160,15 @@ namespace Aps.Migrations
                     b.Property<string>("ProductId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
+                    b.Property<string>("ApsAssemblyProcessId")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+
                     b.HasKey("ProductId");
 
-                    b.ToTable("ApsProduct");
+                    b.HasIndex("ApsAssemblyProcessId")
+                        .IsUnique();
+
+                    b.ToTable("ApsProducts");
 
                     b.HasData(
                         new
@@ -288,14 +222,6 @@ namespace Aps.Migrations
 
                     b.Property<int?>("Amount")
                         .HasColumnType("int");
-
-                    b.Property<string>("BasicAttributes")
-                        .IsRequired()
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
-
-                    b.Property<string>("ResourceAttributes")
-                        .IsRequired()
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<int>("ResourceType")
                         .HasColumnType("int");
@@ -396,14 +322,44 @@ namespace Aps.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Aps.Entity.ApsAssemblyProcess", b =>
+            modelBuilder.Entity("Aps.Shared.Entity.ResourceClass", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("ResourceClassName")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ResourceClass");
+                });
+
+            modelBuilder.Entity("Aps.Shared.Entity.ResourceClassWithResource", b =>
+                {
+                    b.Property<int>("ResourceClassId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ApsResourceId")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+
+                    b.Property<bool>("IsBasic")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("ResourceClassId", "ApsResourceId");
+
+                    b.HasIndex("ApsResourceId");
+
+                    b.ToTable("ResourceClassWithResource");
+                });
+
+            modelBuilder.Entity("Aps.Shared.Entity.ApsAssemblyProcess", b =>
                 {
                     b.HasBaseType("Aps.Shared.Entity.ApsProcess");
 
-                    b.Property<string>("OutputFinishedProductProductId")
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
-
-                    b.HasIndex("OutputFinishedProductProductId");
+                    b.Property<string>("OutputFinishedProductId")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasDiscriminator().HasValue("ApsAssemblyProcess");
 
@@ -411,11 +367,11 @@ namespace Aps.Migrations
                         new
                         {
                             PartId = "process_end_A",
-                            MaximumProductionQuantity = 1u,
-                            MinimumProductionQuantity = 1u,
+                            MaximumProductionQuantity = 1,
+                            MinimumProductionQuantity = 1,
                             PartName = "process_end_A",
                             ProductionMode = 2,
-                            ProductionTime = 4u,
+                            ProductionTime = new TimeSpan(0, 0, 4, 0, 0),
                             Workspace = 2
                         });
                 });
@@ -438,18 +394,18 @@ namespace Aps.Migrations
                         new
                         {
                             PartId = "process_1_a",
-                            MaximumProductionQuantity = 1u,
-                            MinimumProductionQuantity = 1u,
+                            MaximumProductionQuantity = 1,
+                            MinimumProductionQuantity = 1,
                             PartName = "process_1_a",
                             ProductionMode = 2,
-                            ProductionTime = 1u,
+                            ProductionTime = new TimeSpan(0, 0, 0, 1, 0),
                             Workspace = 1
                         });
                 });
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsAssemblyProcessSemiProduct", b =>
                 {
-                    b.HasOne("Aps.Entity.ApsAssemblyProcess", "ApsAssemblyProcess")
+                    b.HasOne("Aps.Shared.Entity.ApsAssemblyProcess", "ApsAssemblyProcess")
                         .WithMany("InputSemiFinishedProducts")
                         .HasForeignKey("ApsAssemblyProcessId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -485,7 +441,24 @@ namespace Aps.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Aps.Shared.Entity.ResourceClass", "ResourceClass")
+                        .WithMany()
+                        .HasForeignKey("ResourceClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("ApsProcess");
+
+                    b.Navigation("ResourceClass");
+                });
+
+            modelBuilder.Entity("Aps.Shared.Entity.ApsProduct", b =>
+                {
+                    b.HasOne("Aps.Shared.Entity.ApsAssemblyProcess", "ApsAssemblyProcess")
+                        .WithOne("OutputFinishedProduct")
+                        .HasForeignKey("Aps.Shared.Entity.ApsProduct", "ApsAssemblyProcessId");
+
+                    b.Navigation("ApsAssemblyProcess");
                 });
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsProductSemiProduct", b =>
@@ -507,13 +480,23 @@ namespace Aps.Migrations
                     b.Navigation("ApsSemiProduct");
                 });
 
-            modelBuilder.Entity("Aps.Entity.ApsAssemblyProcess", b =>
+            modelBuilder.Entity("Aps.Shared.Entity.ResourceClassWithResource", b =>
                 {
-                    b.HasOne("Aps.Shared.Entity.ApsProduct", "OutputFinishedProduct")
-                        .WithMany()
-                        .HasForeignKey("OutputFinishedProductProductId");
+                    b.HasOne("Aps.Shared.Entity.ApsResource", "ApsResource")
+                        .WithMany("ResourceAttributes")
+                        .HasForeignKey("ApsResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("OutputFinishedProduct");
+                    b.HasOne("Aps.Shared.Entity.ResourceClass", "ResourceClass")
+                        .WithMany("ApsResources")
+                        .HasForeignKey("ResourceClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApsResource");
+
+                    b.Navigation("ResourceClass");
                 });
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsManufactureProcess", b =>
@@ -543,6 +526,11 @@ namespace Aps.Migrations
                     b.Navigation("AssembleBySemiProducts");
                 });
 
+            modelBuilder.Entity("Aps.Shared.Entity.ApsResource", b =>
+                {
+                    b.Navigation("ResourceAttributes");
+                });
+
             modelBuilder.Entity("Aps.Shared.Entity.ApsSemiProduct", b =>
                 {
                     b.Navigation("ApsManufactureProcesses");
@@ -550,9 +538,17 @@ namespace Aps.Migrations
                     b.Navigation("ApsProductsFromRequisite");
                 });
 
-            modelBuilder.Entity("Aps.Entity.ApsAssemblyProcess", b =>
+            modelBuilder.Entity("Aps.Shared.Entity.ResourceClass", b =>
+                {
+                    b.Navigation("ApsResources");
+                });
+
+            modelBuilder.Entity("Aps.Shared.Entity.ApsAssemblyProcess", b =>
                 {
                     b.Navigation("InputSemiFinishedProducts");
+
+                    b.Navigation("OutputFinishedProduct")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

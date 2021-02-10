@@ -13,8 +13,14 @@ namespace Aps.Infrastructure
         public DbSet<ApsOrder> ApsOrders { get; set; }
         public DbSet<ApsResource> ApsResources { get; set; }
         public DbSet<ApsAssemblyProcess> ApsAssemblyProcesses { get; set; }
-        
         public DbSet<ApsProduct> ApsProducts { get; set; }
+
+        public DbSet<ApsAssemblyJob> ApsAssemblyJobs { get; set; }
+        public DbSet<ApsManufactureJob> ApsManufactureJobs { get; set; }
+
+        public DbSet<ResourceClass> ResourceClasses { get; set; }
+        public DbSet<ProductInstance> ProductInstances { get; set; }
+        public DbSet<SemiProductInstance> SemiProductInstances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,15 +46,41 @@ namespace Aps.Infrastructure
                 .WithMany()
                 .HasForeignKey(x => x.ApsSemiProductId);
 
-            modelBuilder.Entity<ApsProcessResource>()
-                .HasKey(x => new {x.ApsProcessId, x.ResourceAttribute});
-
             modelBuilder.Entity<ApsProductSemiProduct>()
                 .HasKey(x => new {x.ApsSemiProductId, x.ApsProductId});
+
 
             modelBuilder.Entity<ApsProduct>()
                 .HasOne(x => x.ApsAssemblyProcess)
                 .WithOne(p => p.OutputFinishedProduct);
+
+
+            modelBuilder.Entity<ApsProcessResource>()
+                .HasKey(x => new {x.ApsProcessId, x.ResourceClassId});
+
+            modelBuilder.Entity<ApsProcess>()
+                .HasMany(x => x.ApsResources)
+                .WithOne(x => x.ApsProcess)
+                .HasForeignKey(x => x.ApsProcessId);
+
+            modelBuilder.Entity<ResourceClass>()
+                .HasMany<ApsProcessResource>()
+                .WithOne(x => x.ResourceClass)
+                .HasForeignKey(x => x.ResourceClassId);
+
+
+            modelBuilder.Entity<ResourceClassWithResource>()
+                .HasKey(x => new {x.ResourceClassId, x.ApsResourceId});
+
+            modelBuilder.Entity<ApsResource>()
+                .HasMany(x => x.ResourceAttributes)
+                .WithOne(x => x.ApsResource)
+                .HasForeignKey(r => r.ApsResourceId);
+
+            modelBuilder.Entity<ResourceClass>()
+                .HasMany(x => x.ApsResources)
+                .WithOne(x => x.ResourceClass)
+                .HasForeignKey(x => x.ResourceClassId);
 
             var list = "product_semi_d,product_semi_o," +
                        "product_semi_a,product_semi_j," +
@@ -95,7 +127,7 @@ namespace Aps.Infrastructure
                         MinimumProductionQuantity = 1,
                         MaximumProductionQuantity = 1,
                         Workspace = Workspace.装配,
-                        ProductionTime = 4,
+                        ProductionTime = TimeSpan.FromMinutes(4),
                     }
                 });
 
@@ -110,7 +142,7 @@ namespace Aps.Infrastructure
                         MaximumProductionQuantity = 1,
                         MinimumProductionQuantity = 1,
                         Workspace = Workspace.加工,
-                        ProductionTime = 1,
+                        ProductionTime = new TimeSpan(0, 0, 1),
                     }
                 });
 
@@ -125,90 +157,88 @@ namespace Aps.Infrastructure
 
             modelBuilder.Entity<ApsAssemblyProcessSemiProduct>()
                 .HasData(apsAssemblyProcessSemiProducts);
-
-
-            modelBuilder.Entity<ApsProcessResource>()
-                .HasData(new List<ApsProcessResource>()
-                {
-                    new ApsProcessResource()
-                    {
-                        Amount = 3,
-                        ApsProcessId = "process_end_A",
-                        ResourceAttribute = "机床",
-                    },
-                    new ApsProcessResource()
-                    {
-                        Amount = 2,
-                        ApsProcessId = "process_end_A",
-                        ResourceAttribute = "高级机床",
-                    },
-                    new ApsProcessResource()
-                    {
-                        Amount = 1,
-                        ApsProcessId = "process_end_A",
-                        ResourceAttribute = "人员",
-                    },
-                    new ApsProcessResource()
-                    {
-                        Amount = 1,
-                        ResourceAttribute = "高级人员",
-                        ApsProcessId = "process_end_A",
-                    },
-                    new ApsProcessResource()
-                    {
-                        Amount = 3,
-                        ResourceAttribute = "设备",
-                        ApsProcessId = "process_end_A",
-                    },
-                    new ApsProcessResource()
-                    {
-                        Amount = 2,
-                        ResourceAttribute = "高级设备",
-                        ApsProcessId = "process_end_A",
-                    },
-
-                    new ApsProcessResource()
-                    {
-                        Amount = 3,
-                        ApsProcessId = "process_1_a",
-                        ResourceAttribute = "机床",
-                    },
-                    new ApsProcessResource()
-                    {
-                        Amount = 2,
-                        ApsProcessId = "process_1_a",
-                        ResourceAttribute = "高级机床",
-                    },
-                    new ApsProcessResource()
-                    {
-                        Amount = 1,
-                        ApsProcessId = "process_1_a",
-                        ResourceAttribute = "人员",
-                    },
-                    new ApsProcessResource()
-                    {
-                        Amount = 1,
-                        ResourceAttribute = "高级人员",
-                        ApsProcessId = "process_1_a",
-                    },
-                    new ApsProcessResource()
-                    {
-                        ResourceAttribute = "设备",
-                        ApsProcessId = "process_1_a",
-                    },
-                    new ApsProcessResource()
-                    {
-                        Amount = 2,
-                        ResourceAttribute = "高级设备",
-                        ApsProcessId = "process_1_a",
-                    }
-                });
+            //
+            //
+            // modelBuilder.Entity<ApsProcessResource>()
+            //     .HasData(new List<ApsProcessResource>()
+            //     {
+            //         new ApsProcessResource()
+            //         {
+            //             Amount = 3,
+            //             ApsProcessId = "process_end_A",
+            //             // ResourceClass = "机床",
+            //         },
+            //         new ApsProcessResource()
+            //         {
+            //             Amount = 2,
+            //             ApsProcessId = "process_end_A",
+            //             // ResourceClass = "高级机床",
+            //         },
+            //         new ApsProcessResource()
+            //         {
+            //             Amount = 1,
+            //             ApsProcessId = "process_end_A",
+            //             // ResourceClass = "人员",
+            //         },
+            //         new ApsProcessResource()
+            //         {
+            //             Amount = 1,
+            //             // ResourceClass = "高级人员",
+            //             ApsProcessId = "process_end_A",
+            //         },
+            //         new ApsProcessResource()
+            //         {
+            //             Amount = 3,
+            //             // ResourceClass = "设备",
+            //             ApsProcessId = "process_end_A",
+            //         },
+            //         new ApsProcessResource()
+            //         {
+            //             Amount = 2,
+            //             // ResourceClass = "高级设备",
+            //             ApsProcessId = "process_end_A",
+            //         },
+            //
+            //         new ApsProcessResource()
+            //         {
+            //             Amount = 3,
+            //             ApsProcessId = "process_1_a",
+            //             // ResourceClass = "机床",
+            //         },
+            //         new ApsProcessResource()
+            //         {
+            //             Amount = 2,
+            //             ApsProcessId = "process_1_a",
+            //             // ResourceClass = "高级机床",
+            //         },
+            //         new ApsProcessResource()
+            //         {
+            //             Amount = 1,
+            //             ApsProcessId = "process_1_a",
+            //             // ResourceClass = "人员",
+            //         },
+            //         new ApsProcessResource()
+            //         {
+            //             Amount = 1,
+            //             // ResourceClass = "高级人员",
+            //             ApsProcessId = "process_1_a",
+            //         },
+            //         new ApsProcessResource()
+            //         {
+            //             // ResourceClass = "设备",
+            //             ApsProcessId = "process_1_a",
+            //         },
+            //         new ApsProcessResource()
+            //         {
+            //             Amount = 2,
+            //             // ResourceClass = "高级设备",
+            //             ApsProcessId = "process_1_a",
+            //         }
+            //     });
         }
 
         public ApsContext(DbContextOptions<ApsContext> options) : base(options)
         {
         }
-
-        public DbSet<ApsProduct> ApsProduct { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 using System;
 using Aps.Infrastructure;
-using AutoMapper;
+using Aps.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -24,16 +24,15 @@ namespace Aps
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
 
             services.AddDbContextPool<ApsContext>(options =>
             {
                 options.UseMySql("server = 121.5.26.37; database = ApsServer; user = root; password = zq19990821",
                     new MySqlServerVersion(new Version(5, 7, 30)),
-                    builder =>
-                    {
-                        builder.CharSet(CharSet.Utf8Mb4);
-                    });
+                    builder => { builder.CharSet(CharSet.Utf8Mb4); });
             });
 
             services.AddCors(options =>
@@ -42,8 +41,10 @@ namespace Aps
             });
 
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "Aps", Version = "v1"}); });
-
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddTransient<IAssemblyProcessRepository, AssemblyProcessRepository>();
+            services.AddScoped<IScheduleTool, ScheduleTool>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

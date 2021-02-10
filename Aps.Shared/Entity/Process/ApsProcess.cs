@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Aps.Shared.Entity
@@ -28,10 +29,10 @@ namespace Aps.Shared.Entity
         public string PartName { get; set; }
         [Required] public ProductionMode ProductionMode { get; set; }
 
-        [Required] public uint ProductionTime { get; set; }
+        [Required] public TimeSpan ProductionTime { get; set; }
 
-        public uint? MinimumProductionQuantity { get; set; }
-        public uint? MaximumProductionQuantity { get; set; }
+        public int? MinimumProductionQuantity { get; set; }
+        public int? MaximumProductionQuantity { get; set; }
         [Required] public Workspace Workspace { get; set; }
         [Required] public List<ApsProcessResource> ApsResources { get; set; } = new List<ApsProcessResource>();
     }
