@@ -370,37 +370,37 @@ namespace Aps.Services
             }
 
 
-            // JobVar[,] resourceIntervals = new JobVar[jobCount, resourcesCount];
-            //
-            // for (int i = 0; i < jobCount; i++)
-            // {
-            //     resourceJobs[i].Vars.Deconstruct(out IntVar startVar, out IntVar endVar, out IntervalVar intervalVar);
-            //     var duration = (int) resourceJobs[i].Duration.TotalMinutes;
-            //
-            //     for (int j = 0; j < resourcesCount; j++)
-            //     {
-            //         var performed = Model.NewIntVar(0, 1, $"Performed:[{i}, {j}]");
-            //
-            //         Model.Add(performed == LinearExpr.Sum(resourceJobMatrix[i, j]
-            //             .Select(x => x.Value)));
-            //
-            //         var optionalIntervalVar = Model.NewOptionalIntervalVar(startVar, duration, endVar, performed,
-            //             $"Resource:{i}, Job:{j}");
-            //
-            //         resourceIntervals[i, j] = new JobVar(startVar, endVar, optionalIntervalVar);
-            //     }
-            // }
-            //
-            // for (int i = 0; i < resourcesCount; i++)
-            // {
-            //     var resourceInterval = new List<IntervalVar>();
-            //     for (int j = 0; j < jobCount; j++)
-            //     {
-            //         resourceInterval.Add(resourceIntervals[j, i].Interval);
-            //     }
-            //
-            //     Model.AddNoOverlap(resourceInterval);
-            // }
+            JobVar[,] resourceIntervals = new JobVar[jobCount, resourcesCount];
+            
+            for (int i = 0; i < jobCount; i++)
+            {
+                resourceJobs[i].Vars.Deconstruct(out IntVar startVar, out IntVar endVar, out IntervalVar intervalVar);
+                var duration = (int) resourceJobs[i].Duration.TotalMinutes;
+            
+                for (int j = 0; j < resourcesCount; j++)
+                {
+                    var performed = Model.NewIntVar(0, 1, $"Performed:[{i}, {j}]");
+            
+                    Model.Add(performed == LinearExpr.Sum(resourceJobMatrix[i, j]
+                        .Select(x => x.Value)));
+            
+                    var optionalIntervalVar = Model.NewOptionalIntervalVar(startVar, duration, endVar, performed,
+                        $"Resource:{i}, Job:{j}");
+            
+                    resourceIntervals[i, j] = new JobVar(startVar, endVar, optionalIntervalVar);
+                }
+            }
+            
+            for (int i = 0; i < resourcesCount; i++)
+            {
+                var resourceInterval = new List<IntervalVar>();
+                for (int j = 0; j < jobCount; j++)
+                {
+                    resourceInterval.Add(resourceIntervals[j, i].Interval);
+                }
+            
+                Model.AddNoOverlap(resourceInterval);
+            }
         }
 
         public void SetPreJobConstraint()
