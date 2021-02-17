@@ -1,11 +1,11 @@
 ﻿using Aps.Infrastructure;
+using Aps.Shared.Entity;
 using Google.OrTools.Sat;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Aps.Shared.Entity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Aps.Services
 {
@@ -59,7 +59,8 @@ namespace Aps.Services
 
 
         public Dictionary<(ApsOrder, ProductInstance, SemiProductInstance, ApsManufactureProcess),
-            ScheduleManufactureJob> ScheduleManufactureJobs { get; private set; }
+            ScheduleManufactureJob> ScheduleManufactureJobs
+        { get; private set; }
             = new Dictionary<(ApsOrder, ProductInstance, SemiProductInstance, ApsManufactureProcess),
                 ScheduleManufactureJob>();
 
@@ -68,7 +69,8 @@ namespace Aps.Services
             new Dictionary<ApsOrder, List<ProductInstance>>();
 
         public Dictionary<(ApsOrder order, ProductInstance productInstance), List<SemiProductInstance>>
-            SemiProductInstances { get; private set; } =
+            SemiProductInstances
+        { get; private set; } =
             new Dictionary<(ApsOrder apsOrder, ProductInstance productInstance), List<SemiProductInstance>>();
 
 
@@ -167,10 +169,10 @@ namespace Aps.Services
                             foreach (var manufactureProcess in processes)
                             {
                                 var duration = manufactureProcess.ProductionTime;
-                                string suffix = $"Order:{order.OrderId}_" +
-                                                $"Product:{productInstance.ProductId}_" +
-                                                $"SemiProduct:{semiProductInstance.SemiProductId}_" +
-                                                $"Process:{manufactureProcess.PartId}_" +
+                                string suffix = $"Order:{order.Id}_" +
+                                                $"Product:{productInstance.Id}_" +
+                                                $"SemiProduct:{semiProductInstance.Id}_" +
+                                                $"Process:{manufactureProcess.Id}_" +
                                                 $"Duration:{duration}";
 
                                 if (manufactureProcess.ProductionMode == ProductionMode.Bp)
@@ -193,7 +195,7 @@ namespace Aps.Services
                                     IntVar startVar = Model.NewIntVar(0, Ub, "start" + suffix);
                                     IntVar endVar = Model.NewIntVar(0, Ub, "end" + suffix);
                                     IntervalVar interval =
-                                        Model.NewIntervalVar(startVar, (int) duration.TotalMinutes, endVar,
+                                        Model.NewIntervalVar(startVar, (int)duration.TotalMinutes, endVar,
                                             "interval" + suffix);
 
                                     ScheduleManufactureJobs.Add(
@@ -256,17 +258,17 @@ namespace Aps.Services
                 {
                     var jobDuration = job.Duration;
 
-                    string suffix = $"Order:{job.ApsOrder.OrderId}_" +
-                                    $"Product:{job.ProductInstance.ProductId}_" +
-                                    $"SemiProduct:{job.SemiProductInstance.SemiProductId}_" +
-                                    $"Process:{job.ApsManufactureProcess.PartId}_" +
+                    string suffix = $"Order:{job.ApsOrder.Id}_" +
+                                    $"Product:{job.ProductInstance.Id}_" +
+                                    $"SemiProduct:{job.SemiProductInstance.Id}_" +
+                                    $"Process:{job.ApsManufactureProcess.Id}_" +
                                     $"Duration:{jobDuration}";
 
 
                     IntVar startVar = Model.NewIntVar(0, Ub, "start" + suffix);
                     IntVar endVar = Model.NewIntVar(0, Ub, "end" + suffix);
                     IntervalVar interval =
-                        Model.NewIntervalVar(startVar, (int) jobDuration.TotalMinutes, endVar,
+                        Model.NewIntervalVar(startVar, (int)jobDuration.TotalMinutes, endVar,
                             "interval" + suffix);
 
 
@@ -318,7 +320,7 @@ namespace Aps.Services
                     {
                         var intVar = Model.NewIntVar(0, 1,
                             $"Job:{resourceJobs[i].ApsManufactureProcess.PrevPart}_," +
-                            $"Resource:{resource.ResourceId}_," +
+                            $"Resource:{resource.Id}_," +
                             $"Class:{resourceAttribute.ResourceClass.ResourceClassName}");
                         resourceJobMatrix[i, j].Add(resourceAttribute.ResourceClass.Id, intVar);
                     }
@@ -346,7 +348,7 @@ namespace Aps.Services
                         }
                         else
                         {
-                            processResourcesVarFromClass.Add(resourceClassId, new List<IntVar> {performed});
+                            processResourcesVarFromClass.Add(resourceClassId, new List<IntVar> { performed });
                         }
                     }
                     Model.Add(LinearExpr.Sum(resourceAsClass) <= 1);
@@ -364,33 +366,33 @@ namespace Aps.Services
                     {
                         performedResourcesAmount = 0;
                     }
-                
+
                     Model.Add(LinearExpr.Sum(performedResources) == 0);
                 }
             }
 
 
             JobVar[,] resourceIntervals = new JobVar[jobCount, resourcesCount];
-            
+
             for (int i = 0; i < jobCount; i++)
             {
                 resourceJobs[i].Vars.Deconstruct(out IntVar startVar, out IntVar endVar, out IntervalVar intervalVar);
-                var duration = (int) resourceJobs[i].Duration.TotalMinutes;
-            
+                var duration = (int)resourceJobs[i].Duration.TotalMinutes;
+
                 for (int j = 0; j < resourcesCount; j++)
                 {
                     var performed = Model.NewIntVar(0, 1, $"Performed:[{i}, {j}]");
-            
+
                     Model.Add(performed == LinearExpr.Sum(resourceJobMatrix[i, j]
                         .Select(x => x.Value)));
-            
+
                     var optionalIntervalVar = Model.NewOptionalIntervalVar(startVar, duration, endVar, performed,
                         $"Resource:{i}, Job:{j}");
-            
+
                     resourceIntervals[i, j] = new JobVar(startVar, endVar, optionalIntervalVar);
                 }
             }
-            
+
             for (int i = 0; i < resourcesCount; i++)
             {
                 var resourceInterval = new List<IntervalVar>();
@@ -398,7 +400,7 @@ namespace Aps.Services
                 {
                     resourceInterval.Add(resourceIntervals[j, i].Interval);
                 }
-            
+
                 Model.AddNoOverlap(resourceInterval);
             }
         }
@@ -411,7 +413,7 @@ namespace Aps.Services
                 if (apsManufactureProcess.PrevPartId != null)
                 {
                     ApsManufactureProcess process =
-                        ManufactureProcesses.First(x => x.PartId == apsManufactureProcess.PrevPartId);
+                        ManufactureProcesses.First(x => x.Id == apsManufactureProcess.PrevPartId);
                     Model.Add(ScheduleManufactureJobs
                             [(apsOrder, productInstance, semiProductInstance, process)]
                         .Vars.EndVar < job.Vars.StartVar);

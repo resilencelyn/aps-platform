@@ -1,12 +1,14 @@
-﻿using System;
+﻿using Aps.Infrastructure;
+using Aps.Infrastructure.Repositories;
+using Aps.Shared.Entity;
+using Aps.Shared.Model;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Aps.Infrastructure;
-using Aps.Shared.Entity;
 
 namespace Aps.Controllers
 {
@@ -15,39 +17,47 @@ namespace Aps.Controllers
     public class ManufactureProcessesController : ControllerBase
     {
         private readonly ApsContext _context;
+        private readonly IRepository<ApsManufactureProcess, string> _repository;
+        private readonly IMapper _mapper;
 
-        public ManufactureProcessesController(ApsContext context)
+        public ManufactureProcessesController(ApsContext context,
+            IRepository<ApsManufactureProcess, string> repository,
+            IMapper mapper)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // GET: api/ManufactureProcesses
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ApsManufactureProcess>>> GetApsManufactureProcesses()
+        [HttpGet(Name = nameof(GetManufactureProcesses))]
+        public async Task<ActionResult<List<ManufactureProcessDto>>> GetManufactureProcesses()
         {
-            return await _context.ApsManufactureProcesses.ToListAsync();
+            return Ok(_mapper.Map<List<ApsManufactureProcess>, List<ManufactureProcessDto>>(
+                await _repository.GetAllListAsync()));
         }
 
         // GET: api/ManufactureProcesses/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ApsManufactureProcess>> GetApsManufactureProcess(string id)
+        [HttpGet("{id}", Name = nameof(GetManufactureProcess))]
+        public async Task<ActionResult<ManufactureProcessDto>> GetManufactureProcess(string id)
         {
-            var apsManufactureProcess = await _context.ApsManufactureProcesses.FindAsync(id);
+            var apsManufactureProcess = await _repository.FirstOrDefaultAsync(x =>
+                string.Equals(x.Id, id, StringComparison.InvariantCultureIgnoreCase));
 
             if (apsManufactureProcess == null)
             {
                 return NotFound();
             }
 
-            return apsManufactureProcess;
+            return Ok(_mapper.Map<ApsManufactureProcess, ManufactureProcessDto>(apsManufactureProcess));
         }
 
-        // PUT: api/ManufactureProcesses/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutApsManufactureProcess(string id, ApsManufactureProcess apsManufactureProcess)
+        public async Task<IActionResult> PutApsManufactureProcess(string id,
+            ApsManufactureProcess apsManufactureProcess)
         {
-            if (id != apsManufactureProcess.PartId)
+            if (id != apsManufactureProcess.Id)
             {
                 return BadRequest();
             }
@@ -64,59 +74,54 @@ namespace Aps.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
         }
 
-        // POST: api/ManufactureProcesses
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<ApsManufactureProcess>> PostApsManufactureProcess(ApsManufactureProcess apsManufactureProcess)
+
+        [HttpPost(Name = nameof(PostApsManufactureProcess))]
+        public async Task<ActionResult<ApsManufactureProcess>> PostApsManufactureProcess(
+            ApsManufactureProcess apsManufactureProcess)
         {
-            _context.ApsManufactureProcesses.Add(apsManufactureProcess);
+            await _context.ApsManufactureProcesses.AddAsync(apsManufactureProcess);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (ApsManufactureProcessExists(apsManufactureProcess.PartId))
+                if (ApsManufactureProcessExists(apsManufactureProcess.Id))
                 {
                     return Conflict();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
-            return CreatedAtAction("GetApsManufactureProcess", new { id = apsManufactureProcess.PartId }, apsManufactureProcess);
+            return CreatedAtAction(nameof(GetManufactureProcess), new {id = apsManufactureProcess.Id},
+                apsManufactureProcess);
         }
 
-        // DELETE: api/ManufactureProcesses/5
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApsManufactureProcess(string id)
         {
-            var apsManufactureProcess = await _context.ApsManufactureProcesses.FindAsync(id);
+            var apsManufactureProcess = await _repository.FirstOrDefaultAsync(x => x.Id == id);
             if (apsManufactureProcess == null)
             {
                 return NotFound();
             }
 
-            _context.ApsManufactureProcesses.Remove(apsManufactureProcess);
-            await _context.SaveChangesAsync();
-
+            await _repository.DeleteAsync(apsManufactureProcess);
             return NoContent();
         }
 
         private bool ApsManufactureProcessExists(string id)
         {
-            return _context.ApsManufactureProcesses.Any(e => e.PartId == id);
+            return _context.ApsManufactureProcesses.Any(e => e.Id == id);
         }
     }
 }

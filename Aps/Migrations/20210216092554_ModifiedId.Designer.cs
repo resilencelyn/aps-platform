@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Aps.Migrations
 {
     [DbContext(typeof(ApsContext))]
-    [Migration("20210210080953_Jobs")]
-    partial class Jobs
+    [Migration("20210216092554_ModifiedId")]
+    partial class ModifiedId
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,17 +21,17 @@ namespace Aps.Migrations
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsAssemblyJob", b =>
                 {
-                    b.Property<int>("JobId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("ApsAssemblyProcessPartId")
+                    b.Property<string>("ApsAssemblyProcessId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<string>("ApsOrderOrderId")
+                    b.Property<string>("ApsOrderId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<string>("ApsProductProductId")
+                    b.Property<string>("ApsProductId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<TimeSpan>("Duration")
@@ -40,21 +40,21 @@ namespace Aps.Migrations
                     b.Property<DateTime?>("End")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<Guid?>("ProductInstanceProductId")
+                    b.Property<Guid?>("ProductInstanceId")
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime?>("Start")
                         .HasColumnType("datetime(6)");
 
-                    b.HasKey("JobId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ApsAssemblyProcessPartId");
+                    b.HasIndex("ApsAssemblyProcessId");
 
-                    b.HasIndex("ApsOrderOrderId");
+                    b.HasIndex("ApsOrderId");
 
-                    b.HasIndex("ApsProductProductId");
+                    b.HasIndex("ApsProductId");
 
-                    b.HasIndex("ProductInstanceProductId");
+                    b.HasIndex("ProductInstanceId");
 
                     b.ToTable("ApsAssemblyJobs");
                 });
@@ -117,20 +117,20 @@ namespace Aps.Migrations
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsManufactureJob", b =>
                 {
-                    b.Property<int>("JobId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("ApsManufactureProcessPartId")
+                    b.Property<string>("ApsManufactureProcessId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<string>("ApsOrderOrderId")
+                    b.Property<string>("ApsOrderId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<string>("ApsProductProductId")
+                    b.Property<string>("ApsProductId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<string>("ApsSemiProductSemiProductId")
+                    b.Property<string>("ApsSemiProductId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<TimeSpan>("Duration")
@@ -139,35 +139,35 @@ namespace Aps.Migrations
                     b.Property<DateTime?>("End")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<Guid?>("ProductInstanceProductId")
+                    b.Property<Guid?>("ProductInstanceId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("SemiProductInstanceSemiProductId")
+                    b.Property<Guid?>("SemiProductInstanceId")
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime?>("Start")
                         .HasColumnType("datetime(6)");
 
-                    b.HasKey("JobId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ApsManufactureProcessPartId");
+                    b.HasIndex("ApsManufactureProcessId");
 
-                    b.HasIndex("ApsOrderOrderId");
+                    b.HasIndex("ApsOrderId");
 
-                    b.HasIndex("ApsProductProductId");
+                    b.HasIndex("ApsProductId");
 
-                    b.HasIndex("ApsSemiProductSemiProductId");
+                    b.HasIndex("ApsSemiProductId");
 
-                    b.HasIndex("ProductInstanceProductId");
+                    b.HasIndex("ProductInstanceId");
 
-                    b.HasIndex("SemiProductInstanceSemiProductId");
+                    b.HasIndex("SemiProductInstanceId");
 
                     b.ToTable("ApsManufactureJobs");
                 });
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsOrder", b =>
                 {
-                    b.Property<string>("OrderId")
+                    b.Property<string>("Id")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<int>("Amount")
@@ -186,7 +186,7 @@ namespace Aps.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.HasKey("OrderId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ProductId");
 
@@ -195,7 +195,7 @@ namespace Aps.Migrations
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsProcess", b =>
                 {
-                    b.Property<string>("PartId")
+                    b.Property<string>("Id")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<string>("Discriminator")
@@ -220,7 +220,7 @@ namespace Aps.Migrations
                     b.Property<int>("Workspace")
                         .HasColumnType("int");
 
-                    b.HasKey("PartId");
+                    b.HasKey("Id");
 
                     b.ToTable("ApsProcess");
 
@@ -229,7 +229,7 @@ namespace Aps.Migrations
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsProcessResource", b =>
                 {
-                    b.Property<string>("ApsProcessId")
+                    b.Property<string>("ProcessId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<int>("ResourceClassId")
@@ -238,7 +238,7 @@ namespace Aps.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.HasKey("ApsProcessId", "ResourceClassId");
+                    b.HasKey("ProcessId", "ResourceClassId");
 
                     b.HasIndex("ResourceClassId");
 
@@ -247,13 +247,13 @@ namespace Aps.Migrations
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsProduct", b =>
                 {
-                    b.Property<string>("ProductId")
+                    b.Property<string>("Id")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<string>("ApsAssemblyProcessId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.HasKey("ProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ApsAssemblyProcessId")
                         .IsUnique();
@@ -263,27 +263,27 @@ namespace Aps.Migrations
                     b.HasData(
                         new
                         {
-                            ProductId = "product_1"
+                            Id = "product_1"
                         },
                         new
                         {
-                            ProductId = "product_2"
+                            Id = "product_2"
                         },
                         new
                         {
-                            ProductId = "product_3"
+                            Id = "product_3"
                         },
                         new
                         {
-                            ProductId = "product_4"
+                            Id = "product_4"
                         },
                         new
                         {
-                            ProductId = "product_5"
+                            Id = "product_5"
                         },
                         new
                         {
-                            ProductId = "product_6"
+                            Id = "product_6"
                         });
                 });
 
@@ -292,13 +292,16 @@ namespace Aps.Migrations
                     b.Property<string>("ApsSemiProductId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<string>("ApsProductId")
+                    b.Property<string>("ProductId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.HasKey("ApsSemiProductId", "ApsProductId");
+                    b.Property<string>("ApsProductId")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+
+                    b.HasKey("ApsSemiProductId", "ProductId");
 
                     b.HasIndex("ApsProductId");
 
@@ -307,138 +310,138 @@ namespace Aps.Migrations
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsResource", b =>
                 {
-                    b.Property<string>("ResourceId")
+                    b.Property<string>("Id")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<int?>("Amount")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ApsAssemblyJobJobId")
+                    b.Property<int?>("ApsAssemblyJobId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ApsManufactureJobJobId")
+                    b.Property<int?>("ApsManufactureJobId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ResourceType")
+                    b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.Property<int>("Workspace")
                         .HasColumnType("int");
 
-                    b.HasKey("ResourceId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ApsAssemblyJobJobId");
+                    b.HasIndex("ApsAssemblyJobId");
 
-                    b.HasIndex("ApsManufactureJobJobId");
+                    b.HasIndex("ApsManufactureJobId");
 
                     b.ToTable("ApsResources");
                 });
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsSemiProduct", b =>
                 {
-                    b.Property<string>("SemiProductId")
+                    b.Property<string>("Id")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.HasKey("SemiProductId");
+                    b.HasKey("Id");
 
                     b.ToTable("ApsSemiProducts");
 
                     b.HasData(
                         new
                         {
-                            SemiProductId = "product_semi_d"
+                            Id = "product_semi_d"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_o"
+                            Id = "product_semi_o"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_a"
+                            Id = "product_semi_a"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_j"
+                            Id = "product_semi_j"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_r"
+                            Id = "product_semi_r"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_f"
+                            Id = "product_semi_f"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_s"
+                            Id = "product_semi_s"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_e"
+                            Id = "product_semi_e"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_n"
+                            Id = "product_semi_n"
                         },
                         new
                         {
-                            SemiProductId = " product_semi_f"
+                            Id = " product_semi_f"
                         },
                         new
                         {
-                            SemiProductId = " product_semi_a"
+                            Id = " product_semi_a"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_p"
+                            Id = "product_semi_p"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_g"
+                            Id = "product_semi_g"
                         },
                         new
                         {
-                            SemiProductId = " product_semi_d"
+                            Id = " product_semi_d"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_c"
+                            Id = "product_semi_c"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_t"
+                            Id = "product_semi_t"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_l"
+                            Id = "product_semi_l"
                         },
                         new
                         {
-                            SemiProductId = "product_semi_q"
+                            Id = "product_semi_q"
                         },
                         new
                         {
-                            SemiProductId = ""
+                            Id = ""
                         });
                 });
 
             modelBuilder.Entity("Aps.Shared.Entity.ProductInstance", b =>
                 {
-                    b.Property<Guid>("ProductId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("ApsProductProductId")
+                    b.Property<string>("ApsProductId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<string>("OrderedByOrderId")
+                    b.Property<string>("OrderedById")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.HasKey("ProductId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ApsProductProductId");
+                    b.HasIndex("ApsProductId");
 
-                    b.HasIndex("OrderedByOrderId");
+                    b.HasIndex("OrderedById");
 
                     b.ToTable("ProductInstances");
                 });
@@ -477,21 +480,21 @@ namespace Aps.Migrations
 
             modelBuilder.Entity("Aps.Shared.Entity.SemiProductInstance", b =>
                 {
-                    b.Property<Guid>("SemiProductId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("ApsSemiProductSemiProductId")
+                    b.Property<string>("ApsSemiProductId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<Guid?>("ProductAssemblyToProductId")
+                    b.Property<Guid?>("ProductAssemblyToId")
                         .HasColumnType("char(36)");
 
-                    b.HasKey("SemiProductId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ApsSemiProductSemiProductId");
+                    b.HasIndex("ApsSemiProductId");
 
-                    b.HasIndex("ProductAssemblyToProductId");
+                    b.HasIndex("ProductAssemblyToId");
 
                     b.ToTable("SemiProductInstances");
                 });
@@ -508,7 +511,7 @@ namespace Aps.Migrations
                     b.HasData(
                         new
                         {
-                            PartId = "process_end_A",
+                            Id = "process_end_A",
                             MaximumProductionQuantity = 1,
                             MinimumProductionQuantity = 1,
                             PartName = "process_end_A",
@@ -522,20 +525,20 @@ namespace Aps.Migrations
                 {
                     b.HasBaseType("Aps.Shared.Entity.ApsProcess");
 
-                    b.Property<string>("ApsSemiProductSemiProductId")
+                    b.Property<string>("ApsSemiProductId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<string>("PrevPartId")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.HasIndex("ApsSemiProductSemiProductId");
+                    b.HasIndex("ApsSemiProductId");
 
                     b.HasDiscriminator().HasValue("ApsManufactureProcess");
 
                     b.HasData(
                         new
                         {
-                            PartId = "process_1_a",
+                            Id = "process_1_a",
                             MaximumProductionQuantity = 1,
                             MinimumProductionQuantity = 1,
                             PartName = "process_1_a",
@@ -549,19 +552,19 @@ namespace Aps.Migrations
                 {
                     b.HasOne("Aps.Shared.Entity.ApsAssemblyProcess", "ApsAssemblyProcess")
                         .WithMany()
-                        .HasForeignKey("ApsAssemblyProcessPartId");
+                        .HasForeignKey("ApsAssemblyProcessId");
 
                     b.HasOne("Aps.Shared.Entity.ApsOrder", "ApsOrder")
                         .WithMany()
-                        .HasForeignKey("ApsOrderOrderId");
+                        .HasForeignKey("ApsOrderId");
 
                     b.HasOne("Aps.Shared.Entity.ApsProduct", "ApsProduct")
                         .WithMany()
-                        .HasForeignKey("ApsProductProductId");
+                        .HasForeignKey("ApsProductId");
 
                     b.HasOne("Aps.Shared.Entity.ProductInstance", "ProductInstance")
                         .WithMany()
-                        .HasForeignKey("ProductInstanceProductId");
+                        .HasForeignKey("ProductInstanceId");
 
                     b.Navigation("ApsAssemblyProcess");
 
@@ -595,27 +598,27 @@ namespace Aps.Migrations
                 {
                     b.HasOne("Aps.Shared.Entity.ApsManufactureProcess", "ApsManufactureProcess")
                         .WithMany()
-                        .HasForeignKey("ApsManufactureProcessPartId");
+                        .HasForeignKey("ApsManufactureProcessId");
 
                     b.HasOne("Aps.Shared.Entity.ApsOrder", "ApsOrder")
                         .WithMany()
-                        .HasForeignKey("ApsOrderOrderId");
+                        .HasForeignKey("ApsOrderId");
 
                     b.HasOne("Aps.Shared.Entity.ApsProduct", "ApsProduct")
                         .WithMany()
-                        .HasForeignKey("ApsProductProductId");
+                        .HasForeignKey("ApsProductId");
 
                     b.HasOne("Aps.Shared.Entity.ApsSemiProduct", "ApsSemiProduct")
                         .WithMany()
-                        .HasForeignKey("ApsSemiProductSemiProductId");
+                        .HasForeignKey("ApsSemiProductId");
 
                     b.HasOne("Aps.Shared.Entity.ProductInstance", "ProductInstance")
                         .WithMany()
-                        .HasForeignKey("ProductInstanceProductId");
+                        .HasForeignKey("ProductInstanceId");
 
                     b.HasOne("Aps.Shared.Entity.SemiProductInstance", "SemiProductInstance")
                         .WithMany()
-                        .HasForeignKey("SemiProductInstanceSemiProductId");
+                        .HasForeignKey("SemiProductInstanceId");
 
                     b.Navigation("ApsManufactureProcess");
 
@@ -645,7 +648,7 @@ namespace Aps.Migrations
                 {
                     b.HasOne("Aps.Shared.Entity.ApsProcess", "ApsProcess")
                         .WithMany("ApsResources")
-                        .HasForeignKey("ApsProcessId")
+                        .HasForeignKey("ProcessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -673,9 +676,7 @@ namespace Aps.Migrations
                 {
                     b.HasOne("Aps.Shared.Entity.ApsProduct", "ApsProduct")
                         .WithMany("AssembleBySemiProducts")
-                        .HasForeignKey("ApsProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ApsProductId");
 
                     b.HasOne("Aps.Shared.Entity.ApsSemiProduct", "ApsSemiProduct")
                         .WithMany("ApsProductsFromRequisite")
@@ -692,22 +693,22 @@ namespace Aps.Migrations
                 {
                     b.HasOne("Aps.Shared.Entity.ApsAssemblyJob", null)
                         .WithMany("ApsResource")
-                        .HasForeignKey("ApsAssemblyJobJobId");
+                        .HasForeignKey("ApsAssemblyJobId");
 
                     b.HasOne("Aps.Shared.Entity.ApsManufactureJob", null)
                         .WithMany("ApsResource")
-                        .HasForeignKey("ApsManufactureJobJobId");
+                        .HasForeignKey("ApsManufactureJobId");
                 });
 
             modelBuilder.Entity("Aps.Shared.Entity.ProductInstance", b =>
                 {
                     b.HasOne("Aps.Shared.Entity.ApsProduct", "ApsProduct")
                         .WithMany()
-                        .HasForeignKey("ApsProductProductId");
+                        .HasForeignKey("ApsProductId");
 
                     b.HasOne("Aps.Shared.Entity.ApsOrder", "OrderedBy")
                         .WithMany()
-                        .HasForeignKey("OrderedByOrderId");
+                        .HasForeignKey("OrderedById");
 
                     b.Navigation("ApsProduct");
 
@@ -737,11 +738,11 @@ namespace Aps.Migrations
                 {
                     b.HasOne("Aps.Shared.Entity.ApsSemiProduct", "ApsSemiProduct")
                         .WithMany()
-                        .HasForeignKey("ApsSemiProductSemiProductId");
+                        .HasForeignKey("ApsSemiProductId");
 
                     b.HasOne("Aps.Shared.Entity.ProductInstance", "ProductAssemblyTo")
                         .WithMany()
-                        .HasForeignKey("ProductAssemblyToProductId");
+                        .HasForeignKey("ProductAssemblyToId");
 
                     b.Navigation("ApsSemiProduct");
 
@@ -752,11 +753,11 @@ namespace Aps.Migrations
                 {
                     b.HasOne("Aps.Shared.Entity.ApsSemiProduct", null)
                         .WithMany("ApsManufactureProcesses")
-                        .HasForeignKey("ApsSemiProductSemiProductId");
+                        .HasForeignKey("ApsSemiProductId");
 
                     b.HasOne("Aps.Shared.Entity.ApsManufactureProcess", "PrevPart")
                         .WithOne()
-                        .HasForeignKey("Aps.Shared.Entity.ApsManufactureProcess", "PartId")
+                        .HasForeignKey("Aps.Shared.Entity.ApsManufactureProcess", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

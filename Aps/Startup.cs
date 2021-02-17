@@ -1,5 +1,5 @@
-using System;
 using Aps.Infrastructure;
+using Aps.Infrastructure.Repositories;
 using Aps.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using System;
+using Aps.Shared.Entity;
 
 namespace Aps
 {
@@ -40,11 +42,21 @@ namespace Aps
                 options.AddPolicy("Open", builder => builder.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());
             });
 
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "Aps", Version = "v1"}); });
+            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "Aps", Version = "v1" }); });
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddTransient<IAssemblyProcessRepository, AssemblyProcessRepository>();
             services.AddScoped<IScheduleTool, ScheduleTool>();
+
+            services.AddTransient(typeof(IRepository<,>), typeof(RepositoryBase<,>));
+            services.AddTransient<IRepository<ApsManufactureProcess, string>, ManufactureProcessRepository>();
+
+            services.AddTransient<IRepository<ApsOrder, string>, OrderRepository>();
+
+            services.AddTransient<IRepository<ApsProduct, string>, ProductRepository>();
+            services.AddTransient<IRepository<ApsSemiProduct, string>, SemiProductRepository>();
+
+            services.AddTransient<IRepository<ApsResource, string>, ResourceRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,7 +66,7 @@ namespace Aps
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DataAnalyse.Net v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Aps.Net v1"));
             }
 
             app.UseHttpsRedirection();

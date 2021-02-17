@@ -1,12 +1,14 @@
 ﻿using System;
+using Aps.Infrastructure;
+using Aps.Shared.Entity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Aps.Infrastructure;
-using Aps.Shared.Entity;
+using Aps.Infrastructure.Repositories;
+using Aps.Shared.Model;
+using AutoMapper;
 
 namespace Aps.Controllers
 {
@@ -15,31 +17,36 @@ namespace Aps.Controllers
     public class ApsProductsController : ControllerBase
     {
         private readonly ApsContext _context;
+        private readonly IRepository<ApsProduct, string> _repository;
+        private readonly IMapper _mapper;
 
-        public ApsProductsController(ApsContext context)
+        public ApsProductsController(ApsContext context, IRepository<ApsProduct, string> repository, IMapper mapper)
         {
             _context = context;
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // GET: api/ApsProducts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ApsProduct>>> GetApsProduct()
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetApsProduct()
         {
-            return await _context.ApsProducts.ToListAsync();
+            return Ok(_mapper.Map<List<ApsProduct>, IEnumerable<ProductDto>>(await _repository.GetAllListAsync()));
         }
 
         // GET: api/ApsProducts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApsProduct>> GetApsProduct(string id)
+        public async Task<ActionResult<ProductDto>> GetApsProduct(string id)
         {
-            var apsProduct = await _context.ApsProducts.FindAsync(id);
+            var apsProduct = await _repository.FirstOrDefaultAsync(x =>
+                string.Equals(x.Id, id, StringComparison.InvariantCultureIgnoreCase));
 
             if (apsProduct == null)
             {
                 return NotFound();
             }
 
-            return apsProduct;
+            return _mapper.Map<ApsProduct, ProductDto>(apsProduct);
         }
 
         // PUT: api/ApsProducts/5
@@ -47,7 +54,7 @@ namespace Aps.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApsProduct(string id, ApsProduct apsProduct)
         {
-            if (id != apsProduct.ProductId)
+            if (id != apsProduct.Id)
             {
                 return BadRequest();
             }
@@ -73,29 +80,26 @@ namespace Aps.Controllers
             return NoContent();
         }
 
-        // POST: api/ApsProducts
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPost]
         public async Task<ActionResult<ApsProduct>> PostApsProduct(ApsProduct apsProduct)
         {
-            _context.ApsProducts.Add(apsProduct);
+            ApsProduct product;
             try
             {
-                await _context.SaveChangesAsync();
+                product = await _repository.InsertAsync(apsProduct);
             }
             catch (DbUpdateException)
             {
-                if (ApsProductExists(apsProduct.ProductId))
+                if (ApsProductExists(apsProduct.Id))
                 {
                     return Conflict();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
-            return CreatedAtAction("GetApsProduct", new { id = apsProduct.ProductId }, apsProduct);
+            return CreatedAtAction(nameof(GetApsProduct), new {id = product.Id}, product);
         }
 
         // DELETE: api/ApsProducts/5
@@ -108,6 +112,7 @@ namespace Aps.Controllers
                 return NotFound();
             }
 
+            await _repository.DeleteAsync(apsProduct);
             _context.ApsProducts.Remove(apsProduct);
             await _context.SaveChangesAsync();
 
@@ -116,7 +121,7 @@ namespace Aps.Controllers
 
         private bool ApsProductExists(string id)
         {
-            return _context.ApsProducts.Any(e => e.ProductId == id);
+            return _context.ApsProducts.Any(e => e.Id == id);
         }
     }
 }

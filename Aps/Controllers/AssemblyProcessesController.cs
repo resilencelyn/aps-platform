@@ -1,13 +1,14 @@
-﻿using System;
+﻿using Aps.Infrastructure;
+using Aps.Services;
+using Aps.Shared.Entity;
+using Aps.Shared.Model;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Aps.Infrastructure;
-using Aps.Services;
-using Aps.Shared.Entity;
 
 namespace Aps.Controllers
 {
@@ -17,19 +18,27 @@ namespace Aps.Controllers
     {
         private readonly ApsContext _context;
         private readonly IAssemblyProcessRepository _assemblyProcessRepository;
+        private readonly IMapper _mapper;
 
-        public ApsAssemblyProcessesController(ApsContext context, IAssemblyProcessRepository assemblyProcessRepository)
+        public ApsAssemblyProcessesController(
+            ApsContext context,
+            IAssemblyProcessRepository assemblyProcessRepository,
+            IMapper mapper)
         {
-            _context = context;
-            _assemblyProcessRepository = assemblyProcessRepository;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _assemblyProcessRepository = assemblyProcessRepository ??
+                                         throw new ArgumentNullException(nameof(assemblyProcessRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // GET: api/ApsAssemblyProcesses
         [HttpGet(Name = nameof(GetApsAssemblyProcesses))]
-        public async Task<ActionResult<IEnumerable<ApsAssemblyProcess>>> GetApsAssemblyProcesses()
+        public async Task<ActionResult<IEnumerable<AssemblyProcessDto>>> GetApsAssemblyProcesses()
         {
             var assemblyProcesses = await _assemblyProcessRepository.GetApsAssemblyProcessesAsync();
-            return Ok(assemblyProcesses);
+            var assemblyProcessDtos =
+                _mapper.Map<IEnumerable<ApsAssemblyProcess>, IEnumerable<AssemblyProcessDto>>(assemblyProcesses);
+            return Ok(assemblyProcessDtos);
         }
 
         // GET: api/ApsAssemblyProcesses/5
@@ -43,24 +52,25 @@ namespace Aps.Controllers
                 return NotFound();
             }
 
-            return apsAssemblyProcess;
+            return Ok(_mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(apsAssemblyProcess));
         }
 
         // PUT: api/ApsAssemblyProcesses/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutApsAssemblyProcess(string id, ApsAssemblyProcess apsAssemblyProcess)
+        [HttpPut("{id}", Name = nameof(PutApsAssemblyProcess))]
+        public async Task<IActionResult> PutApsAssemblyProcess([FromRoute] string id,
+            [FromBody] ApsAssemblyProcess apsAssemblyProcess)
         {
-            if (id != apsAssemblyProcess.PartId)
+            if (id != apsAssemblyProcess.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(apsAssemblyProcess).State = EntityState.Modified;
+            _assemblyProcessRepository.UpdateAssemblyProcess(apsAssemblyProcess);
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _assemblyProcessRepository.SaveAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -79,19 +89,18 @@ namespace Aps.Controllers
 
         // POST: api/ApsAssemblyProcesses
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost(Name = nameof(PostApsAssemblyProcess))]
         public async Task<ActionResult<ApsAssemblyProcess>> PostApsAssemblyProcess(
-            ApsAssemblyProcess AssemblyProcess)
+            ApsAssemblyProcess assemblyProcess)
         {
-            _assemblyProcessRepository.AddAssemblyProcess(AssemblyProcess);
-            _context.ApsAssemblyProcesses.Add(AssemblyProcess);
+            _assemblyProcessRepository.AddAssemblyProcess(assemblyProcess);
             try
             {
-                await _context.SaveChangesAsync();
+                await _assemblyProcessRepository.SaveAsync();
             }
             catch (DbUpdateException)
             {
-                if (ApsAssemblyProcessExists(AssemblyProcess.PartId))
+                if (ApsAssemblyProcessExists(assemblyProcess.Id))
                 {
                     return Conflict();
                 }
@@ -101,20 +110,20 @@ namespace Aps.Controllers
                 }
             }
 
-            return CreatedAtAction("GetApsAssemblyProcess", new { id = AssemblyProcess.PartId }, AssemblyProcess);
+            return CreatedAtAction(nameof(GetApsAssemblyProcess), new { id = assemblyProcess.Id }, assemblyProcess);
         }
 
         // DELETE: api/ApsAssemblyProcesses/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApsAssemblyProcess(string id)
         {
-            var apsAssemblyProcess = await _context.ApsAssemblyProcesses.FindAsync(id);
-            if (apsAssemblyProcess == null)
+            var assemblyProcess = await _assemblyProcessRepository.GetApsAssemblyProcessAsync(id);
+            if (assemblyProcess == null)
             {
                 return NotFound();
             }
 
-            _context.ApsAssemblyProcesses.Remove(apsAssemblyProcess);
+            _context.ApsAssemblyProcesses.Remove(assemblyProcess);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -122,7 +131,7 @@ namespace Aps.Controllers
 
         private bool ApsAssemblyProcessExists(string id)
         {
-            return _context.ApsAssemblyProcesses.Any(e => e.PartId == id);
+            return _context.ApsAssemblyProcesses.Any(e => e.Id == id);
         }
     }
 }

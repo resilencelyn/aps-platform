@@ -4,9 +4,14 @@ namespace Aps.Shared.Model
 {
     public class JobDto
     {
-        public int JobId { get; set; }
+        public int Id { get; set; }
+        public string ApsOrderId { get; set; }
+        public string ProductId { get; set; }
+        public int ProductInstanceId { get; set; }
+
+
         public DateTime? Start { get; set; }
         public DateTime? End { get; set; }
-        public TimeSpan Duration { get; set; }
+        public int Duration { get; set; }
     }
 }

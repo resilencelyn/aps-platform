@@ -6,12 +6,12 @@ namespace Aps.Shared.Entity
     public class SemiProductInstance
     {
         [Key]
-        public Guid SemiProductId { get; set; }
+        public Guid Id { get; set; }
         public ApsSemiProduct ApsSemiProduct { get; set; }
         public ProductInstance ProductAssemblyTo { get; set; }
-        public SemiProductInstance(Guid semiProductId, ApsSemiProduct apsSemiProduct, ProductInstance productAssemblyTo)
+        public SemiProductInstance(Guid id, ApsSemiProduct apsSemiProduct, ProductInstance productAssemblyTo)
         {
-            SemiProductId = semiProductId;
+            Id = id;
             ApsSemiProduct = apsSemiProduct ?? throw new ArgumentNullException(nameof(apsSemiProduct));
             ProductAssemblyTo = productAssemblyTo ?? throw new ArgumentNullException(nameof(productAssemblyTo));
         }

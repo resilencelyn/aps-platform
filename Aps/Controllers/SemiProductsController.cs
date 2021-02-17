@@ -1,12 +1,14 @@
 ﻿using System;
+using Aps.Infrastructure;
+using Aps.Shared.Entity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Aps.Infrastructure;
-using Aps.Shared.Entity;
+using Aps.Infrastructure.Repositories;
+using Aps.Shared.Model;
+using AutoMapper;
 
 namespace Aps.Controllers
 {
@@ -15,22 +17,28 @@ namespace Aps.Controllers
     public class ApsSemiProductsController : ControllerBase
     {
         private readonly ApsContext _context;
+        private readonly IRepository<ApsSemiProduct, string> _repository;
+        private readonly IMapper _mapper;
 
-        public ApsSemiProductsController(ApsContext context)
+        public ApsSemiProductsController(ApsContext context, IRepository<ApsSemiProduct, string> repository,
+            IMapper mapper)
         {
             _context = context;
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // GET: api/ApsSemiProducts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ApsSemiProduct>>> GetApsSemiProducts()
+        public async Task<ActionResult<IEnumerable<SemiProductDto>>> GetApsSemiProducts()
         {
-            return await _context.ApsSemiProducts.ToListAsync();
+            return Ok(_mapper.Map<List<ApsSemiProduct>, IEnumerable<SemiProductDto>>(
+                await _repository.GetAllListAsync()));
         }
 
         // GET: api/ApsSemiProducts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApsSemiProduct>> GetApsSemiProduct(string id)
+        public async Task<ActionResult<SemiProductDto>> GetApsSemiProduct(string id)
         {
             var apsSemiProduct = await _context.ApsSemiProducts.FindAsync(id);
 
@@ -39,15 +47,14 @@ namespace Aps.Controllers
                 return NotFound();
             }
 
-            return apsSemiProduct;
+            return _mapper.Map<ApsSemiProduct, SemiProductDto>(apsSemiProduct);
         }
 
-        // PUT: api/ApsSemiProducts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApsSemiProduct(string id, ApsSemiProduct apsSemiProduct)
         {
-            if (id != apsSemiProduct.SemiProductId)
+            if (id != apsSemiProduct.Id)
             {
                 return BadRequest();
             }
@@ -64,10 +71,8 @@ namespace Aps.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
@@ -85,7 +90,7 @@ namespace Aps.Controllers
             }
             catch (DbUpdateException)
             {
-                if (ApsSemiProductExists(apsSemiProduct.SemiProductId))
+                if (ApsSemiProductExists(apsSemiProduct.Id))
                 {
                     return Conflict();
                 }
@@ -95,7 +100,7 @@ namespace Aps.Controllers
                 }
             }
 
-            return CreatedAtAction("GetApsSemiProduct", new { id = apsSemiProduct.SemiProductId }, apsSemiProduct);
+            return CreatedAtAction("GetApsSemiProduct", new {id = apsSemiProduct.Id}, apsSemiProduct);
         }
 
         // DELETE: api/ApsSemiProducts/5
@@ -116,7 +121,7 @@ namespace Aps.Controllers
 
         private bool ApsSemiProductExists(string id)
         {
-            return _context.ApsSemiProducts.Any(e => e.SemiProductId == id);
+            return _context.ApsSemiProducts.Any(e => e.Id == id);
         }
     }
 }

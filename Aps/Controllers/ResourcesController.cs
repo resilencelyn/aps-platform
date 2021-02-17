@@ -1,12 +1,14 @@
 ﻿using System;
+using Aps.Infrastructure;
+using Aps.Shared.Entity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Aps.Infrastructure;
-using Aps.Shared.Entity;
+using Aps.Infrastructure.Repositories;
+using Aps.Shared.Model;
+using AutoMapper;
 
 namespace Aps.Controllers
 {
@@ -15,22 +17,26 @@ namespace Aps.Controllers
     public class ApsResourcesController : ControllerBase
     {
         private readonly ApsContext _context;
+        private readonly IRepository<ApsResource, string> _repository;
+        private readonly IMapper _mapper;
 
-        public ApsResourcesController(ApsContext context)
+        public ApsResourcesController(ApsContext context, IRepository<ApsResource, string> repository, IMapper mapper)
         {
             _context = context;
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         // GET: api/ApsResources
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ApsResource>>> GetApsResources()
+        public async Task<ActionResult<IEnumerable<ResourceDto>>> GetResources()
         {
-            return await _context.ApsResources.ToListAsync();
+            return Ok(_mapper.Map<List<ApsResource>, IEnumerable<ResourceDto>>(await _repository.GetAllListAsync()));
         }
 
         // GET: api/ApsResources/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApsResource>> GetApsResource(string id)
+        public async Task<ActionResult<ResourceDto>> GetApsResource(string id)
         {
             var apsResource = await _context.ApsResources.FindAsync(id);
 
@@ -39,7 +45,7 @@ namespace Aps.Controllers
                 return NotFound();
             }
 
-            return apsResource;
+            return _mapper.Map<ApsResource, ResourceDto>(apsResource);
         }
 
         // PUT: api/ApsResources/5
@@ -47,7 +53,7 @@ namespace Aps.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApsResource(string id, ApsResource apsResource)
         {
-            if (id != apsResource.ResourceId)
+            if (id != apsResource.Id)
             {
                 return BadRequest();
             }
@@ -85,7 +91,7 @@ namespace Aps.Controllers
             }
             catch (DbUpdateException)
             {
-                if (ApsResourceExists(apsResource.ResourceId))
+                if (ApsResourceExists(apsResource.Id))
                 {
                     return Conflict();
                 }
@@ -95,7 +101,7 @@ namespace Aps.Controllers
                 }
             }
 
-            return CreatedAtAction("GetApsResource", new { id = apsResource.ResourceId }, apsResource);
+            return CreatedAtAction("GetApsResource", new {id = apsResource.Id}, apsResource);
         }
 
         // DELETE: api/ApsResources/5
@@ -116,7 +122,7 @@ namespace Aps.Controllers
 
         private bool ApsResourceExists(string id)
         {
-            return _context.ApsResources.Any(e => e.ResourceId == id);
+            return _context.ApsResources.Any(e => e.Id == id);
         }
     }
 }

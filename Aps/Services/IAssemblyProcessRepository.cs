@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Aps.Shared.Entity;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Aps.Shared.Entity;
 
 namespace Aps.Services
 {

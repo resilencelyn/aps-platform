@@ -1,13 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Aps.Infrastructure;
+using Aps.Services;
+using Aps.Shared.Entity;
 using Microsoft.AspNetCore.Mvc;
-using System;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Aps.Infrastructure;
-using Aps.Services;
-using Aps.Shared.Entity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Aps.Controllers
 {

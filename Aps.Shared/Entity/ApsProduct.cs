@@ -6,7 +6,7 @@ namespace Aps.Shared.Entity
 {
     public class ApsProduct
     {
-        [Key] public string ProductId { get; set; }
+        [Key] public string Id { get; set; }
 
         [Required]
         public List<ApsProductSemiProduct> AssembleBySemiProducts { get; set; } = new List<ApsProductSemiProduct>();

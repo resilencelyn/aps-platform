@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Aps.Infrastructure;
+using Aps.Shared.Entity;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Aps.Infrastructure;
-using Aps.Shared.Entity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Aps.Services
 {
@@ -35,7 +35,7 @@ namespace Aps.Services
                 .Include(x => x.OutputFinishedProduct)
                 .Include(x => x.ApsResources)
                 .FirstOrDefaultAsync(p =>
-                    string.Equals(p.PartId, assemblyProcessIdId, StringComparison.CurrentCulture));
+                    string.Equals(p.Id, assemblyProcessIdId, StringComparison.CurrentCulture));
         }
 
         public async Task<IEnumerable<ApsAssemblyProcess>> GetAssemblyProcessesAsync(
@@ -46,7 +46,7 @@ namespace Aps.Services
                 .Include(x => x.InputSemiFinishedProducts)
                 .Include(x => x.OutputFinishedProduct)
                 .Include(x => x.ApsResources)
-                .Where(p => assemblyProcessIds.Contains(p.PartId))
+                .Where(p => assemblyProcessIds.Contains(p.Id))
                 .ToListAsync();
         }
 
@@ -73,7 +73,7 @@ namespace Aps.Services
             }
 
             return await _context.ApsAssemblyProcesses.AnyAsync(p =>
-                string.Equals(p.PartId, assemblyProcessId, StringComparison.CurrentCulture));
+                string.Equals(p.Id, assemblyProcessId, StringComparison.CurrentCulture));
         }
 
         public async Task<bool> SaveAsync()

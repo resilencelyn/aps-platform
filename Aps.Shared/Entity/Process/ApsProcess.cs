@@ -6,34 +6,38 @@ namespace Aps.Shared.Entity
 {
     public enum ProductionMode
     {
-        Bp = 1,
-        Sp = 2,
+        [Display(Name = "批处理")] Bp = 1,
+        [Display(Name = "流处理")] Sp = 2,
     }
 
     public enum ResourceType
     {
-        人员 = 1,
-        设备 = 2,
-        机床 = 3,
+        [Display(Name = nameof(人员))] 人员 = 1,
+        [Display(Name = nameof(设备))] 设备 = 2,
+        [Display(Name = nameof(机床))] 机床 = 3,
     }
 
     public enum Workspace
     {
-        加工 = 1,
-        装配 = 2,
+        [Display(Name = nameof(加工))] 加工 = 1,
+        [Display(Name = nameof(装配))] 装配 = 2,
     }
 
     public abstract class ApsProcess
     {
-        [Key] public string PartId { get; set; }
-        public string PartName { get; set; }
-        [Required] public ProductionMode ProductionMode { get; set; }
+        [Display(Name = "工序ID")] [Key] public string Id { get; set; }
+        [Display(Name = "工序名称")] public string PartName { get; set; }
 
-        [Required] public TimeSpan ProductionTime { get; set; }
+        [Display(Name = "工艺")] [Required] public ProductionMode ProductionMode { get; set; }
 
-        public int? MinimumProductionQuantity { get; set; }
-        public int? MaximumProductionQuantity { get; set; }
-        [Required] public Workspace Workspace { get; set; }
-        [Required] public List<ApsProcessResource> ApsResources { get; set; } = new List<ApsProcessResource>();
+        [Display(Name = "工序执行时间")] [Required] public TimeSpan ProductionTime { get; set; }
+
+        [Display(Name = "最小可执行数量")] public int? MinimumProductionQuantity { get; set; }
+        [Display(Name = "最大可执行数量")] public int? MaximumProductionQuantity { get; set; }
+        [Display(Name = "生产车间")] [Required] public Workspace Workspace { get; set; }
+
+        [Display(Name = "工序所需资源")]
+        [Required]
+        public List<ApsProcessResource> ApsResources { get; set; } = new List<ApsProcessResource>();
     }
 }

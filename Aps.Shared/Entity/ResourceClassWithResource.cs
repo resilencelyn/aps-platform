@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Aps.Shared.Entity
+﻿namespace Aps.Shared.Entity
 {
     public class ResourceClassWithResource
     {

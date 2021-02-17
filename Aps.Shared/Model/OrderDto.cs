@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace Aps.Shared.Entity
+namespace Aps.Shared.Model
 {
-    public class ApsOrder
+    public class OrderDto
     {
         public string Id { get; set; }
         public string Description { get; set; }
         public DateTime EarliestStartTime { get; set; }
         public DateTime LatestEndTime { get; set; }
 
-        public ApsProduct Product { get; set; }
+        public ProductDto Product { get; set; }
         public int Amount { get; set; }
     }
 }

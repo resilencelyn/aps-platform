@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Aps.Shared.Entity;
+﻿using Aps.Shared.Entity;
 using Google.OrTools.Sat;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Aps.Services
 {
