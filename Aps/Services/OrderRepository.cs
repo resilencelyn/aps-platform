@@ -1,8 +1,8 @@
-﻿using System.Linq;
-using Aps.Infrastructure;
+﻿using Aps.Infrastructure;
 using Aps.Infrastructure.Repositories;
 using Aps.Shared.Entity;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Aps.Services
 {

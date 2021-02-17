@@ -1,14 +1,14 @@
-﻿using System;
-using Aps.Infrastructure;
+﻿using Aps.Infrastructure;
+using Aps.Infrastructure.Repositories;
 using Aps.Shared.Entity;
+using Aps.Shared.Model;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Aps.Infrastructure.Repositories;
-using Aps.Shared.Model;
-using AutoMapper;
 
 namespace Aps.Controllers
 {
@@ -100,7 +100,7 @@ namespace Aps.Controllers
                 }
             }
 
-            return CreatedAtAction("GetApsSemiProduct", new {id = apsSemiProduct.Id}, apsSemiProduct);
+            return CreatedAtAction("GetApsSemiProduct", new { id = apsSemiProduct.Id }, apsSemiProduct);
         }
 
         // DELETE: api/ApsSemiProducts/5

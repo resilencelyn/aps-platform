@@ -1,6 +1,7 @@
 using Aps.Infrastructure;
 using Aps.Infrastructure.Repositories;
 using Aps.Services;
+using Aps.Shared.Entity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System;
-using Aps.Shared.Entity;
 
 namespace Aps
 {

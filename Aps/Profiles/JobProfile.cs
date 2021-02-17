@@ -1,5 +1,5 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
+using System;
 
 namespace Aps.Profiles
 {
