@@ -9,6 +9,7 @@ namespace Aps.Profiles
         public SemiProductProfile()
         {
             CreateMap<ApsSemiProduct, SemiProductDto>();
+
         }
     }
 }

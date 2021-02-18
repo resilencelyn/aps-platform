@@ -9,7 +9,7 @@ namespace Aps.Profiles
         {
             // CreateMap<ApsJob, JobDto>()
             //     .IncludeMembers(e => e.ApsOrder)
-            //     .IncludeMembers(e => e.ApsProduct)
+            //     .IncludeMembers(e => e.Product)
             //     .IncludeMembers(e => e.ProductInstance);
             //
             CreateMap<TimeSpan, int>().ConvertUsing(e => (int)e.TotalMinutes);

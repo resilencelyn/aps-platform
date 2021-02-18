@@ -86,7 +86,7 @@ namespace Aps.Infrastructure.Repositories
         /// 添加一个新实体信息 
         /// </summary>
         /// <param name="entity">被添加的实体</param>
-        /// <returns></returns> 
+        /// <returns></returns>
         Task<TEntity> InsertAsync(TEntity entity);
 
         #endregion
@@ -151,5 +151,8 @@ namespace Aps.Infrastructure.Repositories
         Task<long> LongCountAsync(Expression<Func<TEntity, bool>> predicate);
 
         #endregion
+
+        void Save();
+        Task SaveAsync();
     }
 }

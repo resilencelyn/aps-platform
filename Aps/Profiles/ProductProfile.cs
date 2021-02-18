@@ -8,8 +8,11 @@ namespace Aps.Profiles
     {
         public ProductProfile()
         {
-            CreateMap<ApsProduct, ProductDto>();
+            CreateMap<ApsProduct, ProductDto>().ReverseMap();
             CreateMap<ApsProductSemiProduct, ProductSemiProductDto>();
+
+            CreateMap<ProductAddDto, ApsProduct>();
+            CreateMap<ProductSemiProductAddDto, ApsProductSemiProduct>();
         }
     }
 }

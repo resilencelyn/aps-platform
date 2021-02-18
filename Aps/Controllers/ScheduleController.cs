@@ -32,13 +32,13 @@ namespace Aps.Controllers
                 .ThenInclude(x => x.ApsAssemblyProcess)
                 .ThenInclude(x => x.ApsResources)
                 .ThenInclude(x => x.ResourceClass)
-
                 .Include(x => x.Product)
                 .ThenInclude(x => x.AssembleBySemiProducts)
                 .ThenInclude(x => x.ApsSemiProduct)
                 .ThenInclude(x => x.ApsManufactureProcesses)
                 .ThenInclude(x => x.ApsResources)
                 .ThenInclude(x => x.ResourceClass)
+                .AsSplitQuery()
                 .ToListAsync();
             _scheduleTool.SetPrerequisite(orders);
             _scheduleTool.GenerateProcess();

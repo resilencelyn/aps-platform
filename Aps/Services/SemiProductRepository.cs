@@ -14,7 +14,8 @@ namespace Aps.Services
 
         public override IQueryable<ApsSemiProduct> GetAll()
         {
-            return base.GetAll().Include(x => x.ApsManufactureProcesses);
+            return base.GetAll().Include(x => x.ApsManufactureProcesses)
+                .AsSplitQuery();
         }
     }
 }

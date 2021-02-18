@@ -9,6 +9,7 @@ namespace Aps.Profiles
         public OrderProfile()
         {
             CreateMap<ApsOrder, OrderDto>();
+            CreateMap<OrderAddDto, ApsOrder>();
         }
     }
 }

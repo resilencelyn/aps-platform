@@ -29,14 +29,14 @@ namespace Aps.Controllers
 
         // GET: api/ApsProducts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetApsProduct()
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProduct()
         {
             return Ok(_mapper.Map<List<ApsProduct>, IEnumerable<ProductDto>>(await _repository.GetAllListAsync()));
         }
 
         // GET: api/ApsProducts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDto>> GetApsProduct(string id)
+        public async Task<ActionResult<ProductDto>> GetProduct(string id)
         {
             var apsProduct = await _repository.FirstOrDefaultAsync(x =>
                 string.Equals(x.Id, id, StringComparison.InvariantCultureIgnoreCase));
@@ -49,10 +49,9 @@ namespace Aps.Controllers
             return _mapper.Map<ApsProduct, ProductDto>(apsProduct);
         }
 
-        // PUT: api/ApsProducts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutApsProduct(string id, ApsProduct apsProduct)
+
+        [HttpPut("{id}", Name = nameof(PutProduct))]
+        public async Task<IActionResult> PutProduct(string id, ApsProduct apsProduct)
         {
             if (id != apsProduct.Id)
             {
@@ -82,16 +81,17 @@ namespace Aps.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<ApsProduct>> PostApsProduct(ApsProduct apsProduct)
+        public async Task<ActionResult<ApsProduct>> PostApsProduct(ProductAddDto product)
         {
-            ApsProduct product;
+            var apsProduct = _mapper.Map<ProductAddDto, ApsProduct>(product);
+            ApsProduct productInserted;
             try
             {
-                product = await _repository.InsertAsync(apsProduct);
+                productInserted = await _repository.InsertAsync(apsProduct);
             }
             catch (DbUpdateException)
             {
-                if (ApsProductExists(apsProduct.Id))
+                if (ApsProductExists(product.Id))
                 {
                     return Conflict();
                 }
@@ -99,7 +99,8 @@ namespace Aps.Controllers
                 throw;
             }
 
-            return CreatedAtAction(nameof(GetApsProduct), new { id = product.Id }, product);
+            return CreatedAtAction(nameof(GetProduct), new {id = productInserted.Id},
+                _mapper.Map<ApsProduct, ProductDto>(productInserted));
         }
 
         // DELETE: api/ApsProducts/5
@@ -113,8 +114,6 @@ namespace Aps.Controllers
             }
 
             await _repository.DeleteAsync(apsProduct);
-            _context.ApsProducts.Remove(apsProduct);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

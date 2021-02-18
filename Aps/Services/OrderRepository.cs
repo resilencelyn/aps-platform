@@ -14,7 +14,8 @@ namespace Aps.Services
 
         public override IQueryable<ApsOrder> GetAll()
         {
-            return base.GetAll().Include(o => o.Product);
+            return base.GetAll().Include(o => o.Product)
+                .AsSplitQuery();
         }
     }
 }

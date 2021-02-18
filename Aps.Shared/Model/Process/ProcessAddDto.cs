@@ -4,7 +4,7 @@ using Aps.Shared.Entity;
 
 namespace Aps.Shared.Model
 {
-    public class ProcessDto
+    public class ProcessAddDto
     {
         [Display(Name = "工序ID")] public string Id { get; set; }
         [Display(Name = "工序名称")] public string PartName { get; set; }
@@ -17,6 +17,6 @@ namespace Aps.Shared.Model
         [Display(Name = "最大可执行数量")] public int? MaximumProductionQuantity { get; set; }
         [Display(Name = "生产车间")] public Workspace Workspace { get; set; }
 
-        [Display(Name = "工序所需资源")] public List<ProcessResourceDto> ApsResources { get; set; }
+        [Display(Name = "工序所需资源")] public List<ProcessResourceAddDto> ApsResources { get; set; }
     }
 }

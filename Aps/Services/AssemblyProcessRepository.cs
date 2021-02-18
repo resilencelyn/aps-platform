@@ -24,6 +24,8 @@ namespace Aps.Services
                 .Include(x => x.InputSemiFinishedProducts)
                 .Include(x => x.OutputFinishedProduct)
                 .Include(x => x.ApsResources)
+                .ThenInclude(x=> x.ResourceClass)
+                .AsSplitQuery()
                 .ToListAsync();
         }
 
@@ -34,6 +36,7 @@ namespace Aps.Services
                 .Include(x => x.InputSemiFinishedProducts)
                 .Include(x => x.OutputFinishedProduct)
                 .Include(x => x.ApsResources)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(p =>
                     string.Equals(p.Id, assemblyProcessIdId, StringComparison.CurrentCulture));
         }
@@ -46,13 +49,14 @@ namespace Aps.Services
                 .Include(x => x.InputSemiFinishedProducts)
                 .Include(x => x.OutputFinishedProduct)
                 .Include(x => x.ApsResources)
+                .AsSplitQuery()
                 .Where(p => assemblyProcessIds.Contains(p.Id))
                 .ToListAsync();
         }
 
-        public void AddAssemblyProcess(ApsAssemblyProcess assemblyProcess)
+        public async Task AddAssemblyProcess(ApsAssemblyProcess assemblyProcess)
         {
-            _context.ApsAssemblyProcesses.Add(assemblyProcess);
+            await _context.ApsAssemblyProcesses.AddAsync(assemblyProcess);
         }
 
         public void UpdateAssemblyProcess(ApsAssemblyProcess assemblyProcess)

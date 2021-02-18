@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System;
+using Newtonsoft.Json.Converters;
 
 namespace Aps
 {
@@ -27,14 +28,15 @@ namespace Aps
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers().AddNewtonsoftJson(options =>
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-            );
+            {
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+            });
 
             services.AddDbContextPool<ApsContext>(options =>
             {
                 options.UseMySql("server = 121.5.26.37; database = ApsServer; user = root; password = zq19990821",
-                    new MySqlServerVersion(new Version(5, 7, 30)),
-                    builder => { builder.CharSet(CharSet.Utf8Mb4); });
+                    new MySqlServerVersion(new Version(5, 7, 30)), builder => { builder.CharSet(CharSet.Utf8Mb4); });
             });
 
             services.AddCors(options =>
@@ -42,7 +44,7 @@ namespace Aps
                 options.AddPolicy("Open", builder => builder.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());
             });
 
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "Aps", Version = "v1" }); });
+            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "Aps", Version = "v1"}); });
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddTransient<IAssemblyProcessRepository, AssemblyProcessRepository>();

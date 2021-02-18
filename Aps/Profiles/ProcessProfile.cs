@@ -12,6 +12,8 @@ namespace Aps.Profiles
             CreateMap<ProductionMode, string>().ConvertUsing(src => src.ToString());
             CreateMap<ResourceType, string>().ConvertUsing(src => src.ToString());
 
+            #region Dto
+
             CreateMap<ApsProcess, ProcessDto>()
                 .Include<ApsManufactureProcess, ManufactureProcessDto>()
                 .Include<ApsAssemblyProcess, AssemblyProcessDto>();
@@ -19,7 +21,25 @@ namespace Aps.Profiles
             CreateMap<ApsManufactureProcess, ManufactureProcessDto>();
             CreateMap<ApsAssemblyProcess, AssemblyProcessDto>();
 
-            CreateMap<ApsProcessResource, ProcessResourceDto>();
+            CreateMap<ApsProcessResource, ProcessResourceDto>()
+                .IncludeMembers(x => x.ResourceClass);
+            CreateMap<ResourceClass, ProcessResourceDto>();
+
+            CreateMap<ApsAssemblyProcessSemiProduct, AssemblyProcessSemiProductDto>();
+
+            #endregion
+
+            #region AddDto
+
+            CreateMap<AssemblyProcessAddDto, ApsAssemblyProcess>();
+            CreateMap<ManufactureProcessAddDto, ApsManufactureProcess>();
+
+            CreateMap<ProcessResourceAddDto, ApsProcessResource>();
+
+            CreateMap<ProcessResourceAddDto, ApsProcessResource>();
+            CreateMap<AssemblyProcessSemiProductAddDto, ApsAssemblyProcessSemiProduct>();
+
+            #endregion
         }
     }
 }

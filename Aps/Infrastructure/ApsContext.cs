@@ -15,6 +15,7 @@ namespace Aps.Infrastructure
         public DbSet<ApsAssemblyProcess> ApsAssemblyProcesses { get; set; }
         public DbSet<ApsProduct> ApsProducts { get; set; }
 
+
         public DbSet<ApsAssemblyJob> ApsAssemblyJobs { get; set; }
         public DbSet<ApsManufactureJob> ApsManufactureJobs { get; set; }
 
@@ -24,217 +25,91 @@ namespace Aps.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            {
+                relationship.DeleteBehavior = DeleteBehavior.Restrict;
+            }
+
             modelBuilder.Entity<ApsSemiProduct>()
                 .HasMany(x => x.ApsManufactureProcesses)
-                .WithOne();
+                .WithOne()
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ApsManufactureProcess>()
                 .HasOne(x => x.PrevPart)
                 .WithOne()
-                .HasForeignKey<ApsManufactureProcess>(x => x.Id);
+                .HasForeignKey<ApsManufactureProcess>(x => x.Id)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ApsAssemblyProcessSemiProduct>()
-                .HasKey(k => new { k.ApsAssemblyProcessId, k.ApsSemiProductId });
+                .HasKey(k => new {k.ApsAssemblyProcessId, k.ApsSemiProductId});
 
             modelBuilder.Entity<ApsAssemblyProcessSemiProduct>()
                 .HasOne(x => x.ApsAssemblyProcess)
                 .WithMany(x => x.InputSemiFinishedProducts)
-                .HasForeignKey(x => x.ApsAssemblyProcessId);
+                .HasForeignKey(x => x.ApsAssemblyProcessId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ApsAssemblyProcessSemiProduct>()
                 .HasOne(x => x.ApsSemiProduct)
                 .WithMany()
-                .HasForeignKey(x => x.ApsSemiProductId);
+                .HasForeignKey(x => x.ApsSemiProductId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ApsProductSemiProduct>()
-                .HasKey(x => new { x.ApsSemiProductId, ApsProductId = x.ProductId });
+                .HasKey(x => new {x.ApsSemiProductId, x.ApsProductId});
+
+            modelBuilder.Entity<ApsProduct>()
+                .HasMany(x => x.AssembleBySemiProducts)
+                .WithOne(x => x.ApsProduct)
+                .HasForeignKey(x => x.ApsProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ApsSemiProduct>()
+                .HasMany(x => x.ApsProductsFromRequisite)
+                .WithOne(x => x.ApsSemiProduct)
+                .HasForeignKey(x => x.ApsSemiProductId)
+                .OnDelete(DeleteBehavior.NoAction);
 
 
             modelBuilder.Entity<ApsProduct>()
                 .HasOne(x => x.ApsAssemblyProcess)
-                .WithOne(p => p.OutputFinishedProduct);
+                .WithOne(p => p.OutputFinishedProduct)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
             modelBuilder.Entity<ApsProcessResource>()
-                .HasKey(x => new { ApsProcessId = x.ProcessId, x.ResourceClassId });
+                .HasKey(x => new {x.ProcessId, x.ResourceClassId});
 
             modelBuilder.Entity<ApsProcess>()
                 .HasMany(x => x.ApsResources)
                 .WithOne(x => x.ApsProcess)
-                .HasForeignKey(x => x.ProcessId);
+                .HasForeignKey(x => x.ProcessId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ResourceClass>()
                 .HasMany<ApsProcessResource>()
                 .WithOne(x => x.ResourceClass)
-                .HasForeignKey(x => x.ResourceClassId);
+                .HasForeignKey(x => x.ResourceClassId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
             modelBuilder.Entity<ResourceClassWithResource>()
-                .HasKey(x => new { x.ResourceClassId, x.ApsResourceId });
+                .HasKey(x => new {x.ResourceClassId, x.ApsResourceId});
 
             modelBuilder.Entity<ApsResource>()
                 .HasMany(x => x.ResourceAttributes)
                 .WithOne(x => x.ApsResource)
-                .HasForeignKey(r => r.ApsResourceId);
+                .HasForeignKey(r => r.ApsResourceId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ResourceClass>()
                 .HasMany(x => x.ApsResources)
                 .WithOne(x => x.ResourceClass)
-                .HasForeignKey(x => x.ResourceClassId);
+                .HasForeignKey(x => x.ResourceClassId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            var list = "product_semi_d,product_semi_o," +
-                       "product_semi_a,product_semi_j," +
-                       "product_semi_r,product_semi_f";
-            var allSemiProductString =
-                "product_semi_d,product_semi_o,product_semi_a,product_semi_j,product_semi_r,product_semi_f," +
-                "product_semi_s,product_semi_e,product_semi_o,product_semi_n, product_semi_f, product_semi_a," +
-                "product_semi_p,product_semi_g,product_semi_s,product_semi_j, product_semi_d," +
-                "product_semi_f,product_semi_s,product_semi_n,product_semi_c,product_semi_t,product_semi_e," +
-                "product_semi_f,product_semi_l,product_semi_q,product_semi_g,product_semi_d,product_semi_j,";
-
-            var allProductString =
-                "product_1,product_1,product_1,product_1,product_1,product_1,product_1,product_2,product_2,product_2,product_2,product_2,product_2,product_2,product_3,product_3,product_3,product_3,product_3,product_3,product_4,product_4,product_4,product_4,product_4,product_4,product_4,product_5,product_5,product_5,product_5,product_5,product_5,product_5,product_6,product_6,product_6";
-
-            var allProduct = allProductString.Split(',')
-                .Select(x => x.Trim())
-                .ToHashSet()
-                .Select(x => new ApsProduct()
-                {
-                    Id = x,
-                });
-
-
-            var allSemiProduct = allSemiProductString.Split(',').ToHashSet().Select(x => new ApsSemiProduct()
-            {
-                Id = x,
-            });
-
-            modelBuilder.Entity<ApsProduct>()
-                .HasData(allProduct);
-
-            modelBuilder.Entity<ApsSemiProduct>()
-                .HasData(allSemiProduct);
-
-
-            modelBuilder.Entity<ApsAssemblyProcess>()
-                .HasData(new List<ApsAssemblyProcess>()
-                {
-                    new ApsAssemblyProcess()
-                    {
-                        Id = "process_end_A",
-                        PartName = "process_end_A",
-                        ProductionMode = ProductionMode.Sp,
-                        MinimumProductionQuantity = 1,
-                        MaximumProductionQuantity = 1,
-                        Workspace = Workspace.装配,
-                        ProductionTime = TimeSpan.FromMinutes(4),
-                    }
-                });
-
-            modelBuilder.Entity<ApsManufactureProcess>()
-                .HasData(new List<ApsManufactureProcess>()
-                {
-                    new ApsManufactureProcess()
-                    {
-                        Id = "process_1_a",
-                        PartName = "process_1_a",
-                        ProductionMode = ProductionMode.Sp,
-                        MaximumProductionQuantity = 1,
-                        MinimumProductionQuantity = 1,
-                        Workspace = Workspace.加工,
-                        ProductionTime = new TimeSpan(0, 0, 1),
-                    }
-                });
-
-            var apsAssemblyProcessSemiProducts = list.Split(',')
-                .Select(x => x.Trim())
-                .Select(x => new ApsAssemblyProcessSemiProduct()
-                {
-                    Amount = 1,
-                    ApsSemiProductId = x,
-                    ApsAssemblyProcessId = "process_end_A",
-                }).ToList();
-
-            modelBuilder.Entity<ApsAssemblyProcessSemiProduct>()
-                .HasData(apsAssemblyProcessSemiProducts);
-            //
-            //
-            // modelBuilder.Entity<ApsProcessResource>()
-            //     .HasData(new List<ApsProcessResource>()
-            //     {
-            //         new ApsProcessResource()
-            //         {
-            //             Amount = 3,
-            //             ProcessId = "process_end_A",
-            //             // ResourceClass = "机床",
-            //         },
-            //         new ApsProcessResource()
-            //         {
-            //             Amount = 2,
-            //             ProcessId = "process_end_A",
-            //             // ResourceClass = "高级机床",
-            //         },
-            //         new ApsProcessResource()
-            //         {
-            //             Amount = 1,
-            //             ProcessId = "process_end_A",
-            //             // ResourceClass = "人员",
-            //         },
-            //         new ApsProcessResource()
-            //         {
-            //             Amount = 1,
-            //             // ResourceClass = "高级人员",
-            //             ProcessId = "process_end_A",
-            //         },
-            //         new ApsProcessResource()
-            //         {
-            //             Amount = 3,
-            //             // ResourceClass = "设备",
-            //             ProcessId = "process_end_A",
-            //         },
-            //         new ApsProcessResource()
-            //         {
-            //             Amount = 2,
-            //             // ResourceClass = "高级设备",
-            //             ProcessId = "process_end_A",
-            //         },
-            //
-            //         new ApsProcessResource()
-            //         {
-            //             Amount = 3,
-            //             ProcessId = "process_1_a",
-            //             // ResourceClass = "机床",
-            //         },
-            //         new ApsProcessResource()
-            //         {
-            //             Amount = 2,
-            //             ProcessId = "process_1_a",
-            //             // ResourceClass = "高级机床",
-            //         },
-            //         new ApsProcessResource()
-            //         {
-            //             Amount = 1,
-            //             ProcessId = "process_1_a",
-            //             // ResourceClass = "人员",
-            //         },
-            //         new ApsProcessResource()
-            //         {
-            //             Amount = 1,
-            //             // ResourceClass = "高级人员",
-            //             ProcessId = "process_1_a",
-            //         },
-            //         new ApsProcessResource()
-            //         {
-            //             // ResourceClass = "设备",
-            //             ProcessId = "process_1_a",
-            //         },
-            //         new ApsProcessResource()
-            //         {
-            //             Amount = 2,
-            //             // ResourceClass = "高级设备",
-            //             ProcessId = "process_1_a",
-            //         }
-            //     });
+            
         }
 
         public ApsContext(DbContextOptions<ApsContext> options) : base(options)

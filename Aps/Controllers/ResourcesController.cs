@@ -47,9 +47,8 @@ namespace Aps.Controllers
 
             return _mapper.Map<ApsResource, ResourceDto>(apsResource);
         }
+        
 
-        // PUT: api/ApsResources/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApsResource(string id, ApsResource apsResource)
         {
@@ -79,15 +78,13 @@ namespace Aps.Controllers
             return NoContent();
         }
 
-        // POST: api/ApsResources
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPost]
         public async Task<ActionResult<ApsResource>> PostApsResource(ApsResource apsResource)
         {
-            _context.ApsResources.Add(apsResource);
             try
             {
-                await _context.SaveChangesAsync();
+                await _repository.InsertAsync(apsResource);
             }
             catch (DbUpdateException)
             {
@@ -100,7 +97,7 @@ namespace Aps.Controllers
                     throw;
                 }
             }
-
+            
             return CreatedAtAction("GetApsResource", new { id = apsResource.Id }, apsResource);
         }
 

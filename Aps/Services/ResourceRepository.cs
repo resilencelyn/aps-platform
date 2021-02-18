@@ -15,7 +15,8 @@ namespace Aps.Services
         public override IQueryable<ApsResource> GetAll()
         {
             return base.GetAll().Include(r => r.ResourceAttributes)
-                .ThenInclude(x => x.ResourceClass);
+                .ThenInclude(x => x.ResourceClass)
+                .AsSplitQuery();
         }
     }
 }

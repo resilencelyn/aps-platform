@@ -55,8 +55,7 @@ namespace Aps.Controllers
             return Ok(_mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(apsAssemblyProcess));
         }
 
-        // PUT: api/ApsAssemblyProcesses/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPut("{id}", Name = nameof(PutApsAssemblyProcess))]
         public async Task<IActionResult> PutApsAssemblyProcess([FromRoute] string id,
             [FromBody] ApsAssemblyProcess apsAssemblyProcess)
@@ -87,30 +86,29 @@ namespace Aps.Controllers
             return NoContent();
         }
 
-        // POST: api/ApsAssemblyProcesses
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPost(Name = nameof(PostApsAssemblyProcess))]
-        public async Task<ActionResult<ApsAssemblyProcess>> PostApsAssemblyProcess(
-            ApsAssemblyProcess assemblyProcess)
+        public async Task<ActionResult<AssemblyProcessDto>> PostApsAssemblyProcess(
+            [FromBody] AssemblyProcessAddDto model)
         {
-            _assemblyProcessRepository.AddAssemblyProcess(assemblyProcess);
+            var assemblyProcess = _mapper.Map<AssemblyProcessAddDto, ApsAssemblyProcess>(model);
+
             try
             {
-                await _assemblyProcessRepository.SaveAsync();
+                await _assemblyProcessRepository.AddAssemblyProcess(assemblyProcess);
             }
             catch (DbUpdateException)
             {
-                if (ApsAssemblyProcessExists(assemblyProcess.Id))
+                if (ApsAssemblyProcessExists(model.Id))
                 {
                     return Conflict();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
-            return CreatedAtAction(nameof(GetApsAssemblyProcess), new { id = assemblyProcess.Id }, assemblyProcess);
+            var returnDto = _mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(assemblyProcess);
+            return CreatedAtRoute(nameof(GetApsAssemblyProcess), new {id = model.Id}, returnDto);
         }
 
         // DELETE: api/ApsAssemblyProcesses/5
@@ -124,7 +122,6 @@ namespace Aps.Controllers
             }
 
             _context.ApsAssemblyProcesses.Remove(assemblyProcess);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

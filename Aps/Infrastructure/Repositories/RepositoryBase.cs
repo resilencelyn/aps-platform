@@ -75,7 +75,7 @@ namespace Aps.Infrastructure.Repositories
             return await GetAll().FirstOrDefaultAsync(predicate);
         }
 
-        public TEntity Insert(TEntity entity)
+        public virtual TEntity Insert(TEntity entity)
         {
             var newEntity = Table.Add(entity).Entity;
             Save();
@@ -84,7 +84,7 @@ namespace Aps.Infrastructure.Repositories
         }
 
 
-        public async Task<TEntity> InsertAsync(TEntity entity)
+        public virtual async Task<TEntity> InsertAsync(TEntity entity)
         {
             var entityEntry = await Table.AddAsync(entity);
 
@@ -92,7 +92,7 @@ namespace Aps.Infrastructure.Repositories
             return entityEntry.Entity;
         }
 
-        public TEntity Update(TEntity entity)
+        public virtual TEntity Update(TEntity entity)
         {
             AttachIfNot(entity);
             _apsContext.Entry(entity).State = EntityState.Modified;
@@ -100,7 +100,7 @@ namespace Aps.Infrastructure.Repositories
             return entity;
         }
 
-        public async Task<TEntity> UpdateAsync(TEntity entity)
+        public virtual async Task<TEntity> UpdateAsync(TEntity entity)
         {
             AttachIfNot(entity);
             _apsContext.Entry(entity).State = EntityState.Modified;
@@ -109,14 +109,14 @@ namespace Aps.Infrastructure.Repositories
             return entity;
         }
 
-        public void Delete(TEntity entity)
+        public virtual void Delete(TEntity entity)
         {
             AttachIfNot(entity);
             Table.Remove(entity);
             Save();
         }
 
-        public async Task DeleteAsync(TEntity entity)
+        public virtual async Task DeleteAsync(TEntity entity)
         {
             AttachIfNot(entity);
             Table.Remove(entity);
@@ -192,12 +192,12 @@ namespace Aps.Infrastructure.Repositories
             Table.Attach(entity);
         }
 
-        protected void Save()
+        public void Save()
         {
             _apsContext.SaveChanges();
         }
 
-        protected async Task SaveAsync()
+        public async Task SaveAsync()
         {
             await _apsContext.SaveChangesAsync();
         }
