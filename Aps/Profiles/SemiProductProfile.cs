@@ -1,4 +1,5 @@
-﻿using Aps.Shared.Entity;
+﻿using Aps.Services;
+using Aps.Shared.Entity;
 using Aps.Shared.Model;
 using AutoMapper;
 
@@ -10,6 +11,7 @@ namespace Aps.Profiles
         {
             CreateMap<ApsSemiProduct, SemiProductDto>();
 
+            CreateMap<SemiProductAddDto, ApsSemiProduct>();
         }
     }
 }

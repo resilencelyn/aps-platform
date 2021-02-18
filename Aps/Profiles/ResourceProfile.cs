@@ -13,6 +13,10 @@ namespace Aps.Profiles
                 .IncludeMembers(x => x.ResourceClass);
 
             CreateMap<ResourceClass, ResourceClassWithResourceDto>();
+
+
+            CreateMap<ResourceAddDto, ApsResource>();
+            CreateMap<ResourceClassWithResourceAddDto, ResourceClassWithResource>();
         }
     }
 }

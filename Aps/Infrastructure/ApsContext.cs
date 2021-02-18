@@ -33,7 +33,7 @@ namespace Aps.Infrastructure
             modelBuilder.Entity<ApsSemiProduct>()
                 .HasMany(x => x.ApsManufactureProcesses)
                 .WithOne()
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ApsManufactureProcess>()
                 .HasOne(x => x.PrevPart)
@@ -48,7 +48,7 @@ namespace Aps.Infrastructure
                 .HasOne(x => x.ApsAssemblyProcess)
                 .WithMany(x => x.InputSemiFinishedProducts)
                 .HasForeignKey(x => x.ApsAssemblyProcessId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ApsAssemblyProcessSemiProduct>()
                 .HasOne(x => x.ApsSemiProduct)
@@ -85,7 +85,7 @@ namespace Aps.Infrastructure
                 .HasMany(x => x.ApsResources)
                 .WithOne(x => x.ApsProcess)
                 .HasForeignKey(x => x.ProcessId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ResourceClass>()
                 .HasMany<ApsProcessResource>()
@@ -101,7 +101,7 @@ namespace Aps.Infrastructure
                 .HasMany(x => x.ResourceAttributes)
                 .WithOne(x => x.ApsResource)
                 .HasForeignKey(r => r.ApsResourceId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ResourceClass>()
                 .HasMany(x => x.ApsResources)

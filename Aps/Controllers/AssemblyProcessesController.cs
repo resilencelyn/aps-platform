@@ -14,13 +14,13 @@ namespace Aps.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ApsAssemblyProcessesController : ControllerBase
+    public class AssemblyProcessesController : ControllerBase
     {
         private readonly ApsContext _context;
         private readonly IAssemblyProcessRepository _assemblyProcessRepository;
         private readonly IMapper _mapper;
 
-        public ApsAssemblyProcessesController(
+        public AssemblyProcessesController(
             ApsContext context,
             IAssemblyProcessRepository assemblyProcessRepository,
             IMapper mapper)
@@ -96,6 +96,7 @@ namespace Aps.Controllers
             try
             {
                 await _assemblyProcessRepository.AddAssemblyProcess(assemblyProcess);
+                await _assemblyProcessRepository.SaveAsync();
             }
             catch (DbUpdateException)
             {
@@ -108,7 +109,7 @@ namespace Aps.Controllers
             }
 
             var returnDto = _mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(assemblyProcess);
-            return CreatedAtRoute(nameof(GetApsAssemblyProcess), new {id = model.Id}, returnDto);
+            return CreatedAtRoute(nameof(GetApsAssemblyProcess), new {id = returnDto.Id}, returnDto);
         }
 
         // DELETE: api/ApsAssemblyProcesses/5
@@ -121,7 +122,8 @@ namespace Aps.Controllers
                 return NotFound();
             }
 
-            _context.ApsAssemblyProcesses.Remove(assemblyProcess);
+            _assemblyProcessRepository.DeleteAssemblyProcess(assemblyProcess);
+            await _assemblyProcessRepository.SaveAsync();
 
             return NoContent();
         }

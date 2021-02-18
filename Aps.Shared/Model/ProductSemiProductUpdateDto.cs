@@ -1,6 +1,6 @@
 ﻿namespace Aps.Shared.Model
 {
-    public class ProductSemiProductAddDto
+    public class ProductSemiProductUpdateDto
     {
         public string ApsSemiProductId { get; set; }
         public int Amount { get; set; }

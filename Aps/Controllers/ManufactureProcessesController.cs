@@ -83,13 +83,15 @@ namespace Aps.Controllers
 
 
         [HttpPost(Name = nameof(PostApsManufactureProcess))]
-        public async Task<ActionResult<ApsManufactureProcess>> PostApsManufactureProcess(
-            ApsManufactureProcess apsManufactureProcess)
+        public async Task<ActionResult<ManufactureProcessDto>> PostApsManufactureProcess(
+            ManufactureProcessAddDto model)
         {
-            await _context.ApsManufactureProcesses.AddAsync(apsManufactureProcess);
+            var apsManufactureProcess = _mapper.Map<ManufactureProcessAddDto, ApsManufactureProcess>(model);
+
+
             try
             {
-                await _context.SaveChangesAsync();
+                await _repository.InsertAsync(apsManufactureProcess);
             }
             catch (DbUpdateException)
             {
@@ -100,9 +102,9 @@ namespace Aps.Controllers
 
                 throw;
             }
+            var returnDto = _mapper.Map<ApsManufactureProcess, ManufactureProcessDto>(apsManufactureProcess);
 
-            return CreatedAtAction(nameof(GetManufactureProcess), new { id = apsManufactureProcess.Id },
-                apsManufactureProcess);
+            return CreatedAtAction(nameof(GetManufactureProcess), new {id = returnDto.Id}, returnDto);
         }
 
 

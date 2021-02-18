@@ -9,31 +9,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Aps.Services;
 
 namespace Aps.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ApsSemiProductsController : ControllerBase
+    public class SemiProductsController : ControllerBase
     {
         private readonly ApsContext _context;
         private readonly IRepository<ApsSemiProduct, string> _repository;
         private readonly IMapper _mapper;
+        private readonly IRepository<ApsManufactureProcess, string> _manufactureRepository;
 
-        public ApsSemiProductsController(ApsContext context, IRepository<ApsSemiProduct, string> repository,
-            IMapper mapper)
+        public SemiProductsController(ApsContext context, IRepository<ApsSemiProduct, string> repository,
+            IMapper mapper, IRepository<ApsManufactureProcess, string> manufactureRepository)
         {
             _context = context;
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _manufactureRepository =
+                manufactureRepository ?? throw new ArgumentNullException(nameof(manufactureRepository));
         }
 
         // GET: api/ApsSemiProducts
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SemiProductDto>>> GetApsSemiProducts()
         {
-            return Ok(_mapper.Map<List<ApsSemiProduct>, IEnumerable<SemiProductDto>>(
-                await _repository.GetAllListAsync()));
+            var semiProducts = await _repository.GetAllListAsync();
+            var returnDto = _mapper.Map<List<ApsSemiProduct>, IEnumerable<SemiProductDto>>(semiProducts);
+            return Ok(returnDto);
         }
 
         // GET: api/ApsSemiProducts/5
@@ -78,29 +83,37 @@ namespace Aps.Controllers
             return NoContent();
         }
 
-        // POST: api/ApsSemiProducts
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPost]
-        public async Task<ActionResult<ApsSemiProduct>> PostApsSemiProduct(ApsSemiProduct apsSemiProduct)
+        public async Task<ActionResult<SemiProductDto>> CreateSemiProduct(SemiProductAddDto model)
         {
-            _context.ApsSemiProducts.Add(apsSemiProduct);
-            try
+            var semiProduct = _mapper.Map<SemiProductAddDto, ApsSemiProduct>(model);
+
+            foreach (var manufactureProcess in semiProduct.ApsManufactureProcesses)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ApsSemiProductExists(apsSemiProduct.Id))
+                if (await _manufactureRepository.FirstOrDefaultAsync(x => x.Id == manufactureProcess.Id) != null)
                 {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
+                    return BadRequest($"创建半成品时，其加工工序必须编写新的加工工序");
                 }
             }
 
-            return CreatedAtAction("GetApsSemiProduct", new { id = apsSemiProduct.Id }, apsSemiProduct);
+            try
+            {
+                await _repository.InsertAsync(semiProduct);
+            }
+            catch (DbUpdateException)
+            {
+                if (ApsSemiProductExists(semiProduct.Id))
+                {
+                    return Conflict();
+                }
+
+                throw;
+            }
+
+            var returnDto = _mapper.Map<ApsSemiProduct, SemiProductDto>(semiProduct);
+
+            return CreatedAtAction("GetApsSemiProduct", new {id = returnDto.Id}, returnDto);
         }
 
         // DELETE: api/ApsSemiProducts/5

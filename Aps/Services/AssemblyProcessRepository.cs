@@ -62,10 +62,12 @@ namespace Aps.Services
         public void UpdateAssemblyProcess(ApsAssemblyProcess assemblyProcess)
         {
             _context.ApsAssemblyProcesses.Attach(assemblyProcess);
+
         }
 
         public void DeleteAssemblyProcess(ApsAssemblyProcess assemblyProcess)
         {
+            _context.RemoveRange(assemblyProcess.ApsResources);
             _context.ApsAssemblyProcesses.Remove(assemblyProcess);
         }
 

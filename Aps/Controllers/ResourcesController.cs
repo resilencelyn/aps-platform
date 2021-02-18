@@ -14,13 +14,13 @@ namespace Aps.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ApsResourcesController : ControllerBase
+    public class ResourcesController : ControllerBase
     {
         private readonly ApsContext _context;
         private readonly IRepository<ApsResource, string> _repository;
         private readonly IMapper _mapper;
 
-        public ApsResourcesController(ApsContext context, IRepository<ApsResource, string> repository, IMapper mapper)
+        public ResourcesController(ApsContext context, IRepository<ApsResource, string> repository, IMapper mapper)
         {
             _context = context;
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
@@ -47,7 +47,7 @@ namespace Aps.Controllers
 
             return _mapper.Map<ApsResource, ResourceDto>(apsResource);
         }
-        
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApsResource(string id, ApsResource apsResource)
@@ -80,30 +80,34 @@ namespace Aps.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<ApsResource>> PostApsResource(ApsResource apsResource)
+        public async Task<ActionResult<ResourceDto>> CreateResource(ResourceAddDto model)
         {
+            var resource = _mapper.Map<ResourceAddDto, ApsResource>(model);
+            foreach (var resourceClassWithResource in resource.ResourceAttributes)
+            {
+                resourceClassWithResource.ApsResourceId = resource.Id;
+            }
+
             try
             {
-                await _repository.InsertAsync(apsResource);
+                await _repository.InsertAsync(resource);
             }
             catch (DbUpdateException)
             {
-                if (ApsResourceExists(apsResource.Id))
+                if (ApsResourceExists(resource.Id))
                 {
                     return Conflict();
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
-            
-            return CreatedAtAction("GetApsResource", new { id = apsResource.Id }, apsResource);
+
+            var returnDto = _mapper.Map<ApsResource, ResourceDto>(resource);
+            return CreatedAtAction("GetApsResource", new {id = returnDto.Id}, returnDto);
         }
 
         // DELETE: api/ApsResources/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteApsResource(string id)
+        public async Task<IActionResult> DeleteResource(string id)
         {
             var apsResource = await _context.ApsResources.FindAsync(id);
             if (apsResource == null)

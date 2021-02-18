@@ -6,6 +6,5 @@ namespace Aps.Shared.Model
     {
         public string OutputFinishedProductId { get; set; }
         public List<AssemblyProcessSemiProductAddDto> InputSemiFinishedProducts { get; set; }
-            = new List<AssemblyProcessSemiProductAddDto>();
     }
 }

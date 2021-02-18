@@ -14,13 +14,13 @@ namespace Aps.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ApsProductsController : ControllerBase
+    public class ProductsController : ControllerBase
     {
         private readonly ApsContext _context;
         private readonly IRepository<ApsProduct, string> _repository;
         private readonly IMapper _mapper;
 
-        public ApsProductsController(ApsContext context, IRepository<ApsProduct, string> repository, IMapper mapper)
+        public ProductsController(ApsContext context, IRepository<ApsProduct, string> repository, IMapper mapper)
         {
             _context = context;
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));

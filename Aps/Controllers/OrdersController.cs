@@ -14,14 +14,14 @@ namespace Aps.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ApsOrdersController : ControllerBase
+    public class OrdersController : ControllerBase
     {
         private readonly ApsContext _context;
         private readonly IRepository<ApsOrder, string> _repository;
         private readonly IMapper _mapper;
         private readonly IRepository<ApsProduct, string> _productRepository;
 
-        public ApsOrdersController(ApsContext context, IRepository<ApsOrder, string> repository, IMapper mapper,
+        public OrdersController(ApsContext context, IRepository<ApsOrder, string> repository, IMapper mapper,
             IRepository<ApsProduct, string> productRepository)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -55,18 +55,18 @@ namespace Aps.Controllers
         // PUT: api/ApsOrders/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutApsOrder(string id, ApsOrder apsOrder)
+        public async Task<IActionResult> PutApsOrder(string id, OrderUpdateDto model)
         {
-            if (id != apsOrder.Id)
+            if (id != model.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(apsOrder).State = EntityState.Modified;
+            var order = _mapper.Map<OrderUpdateDto, ApsOrder>(model);
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _repository.UpdateAsync(order);
             }
             catch (DbUpdateConcurrencyException)
             {
