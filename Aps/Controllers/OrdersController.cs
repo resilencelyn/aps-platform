@@ -42,7 +42,7 @@ namespace Aps.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDto>> GetOrder(string id)
         {
-            var apsOrder = await _context.ApsOrders.FindAsync(id);
+            var apsOrder = await _repository.FirstOrDefaultAsync(x => x.Id == id);
 
             if (apsOrder == null)
             {
