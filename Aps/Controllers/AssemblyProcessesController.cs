@@ -31,7 +31,12 @@ namespace Aps.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        // GET: api/ApsAssemblyProcesses
+        /// <summary>
+        /// 查询装配工序
+        /// </summary>
+        /// <returns></returns>
+        [ProducesResponseType(typeof(IEnumerable<AssemblyProcessDto>), 200)]
+        [ProducesResponseType(500)]
         [HttpGet(Name = nameof(GetApsAssemblyProcesses))]
         public async Task<ActionResult<IEnumerable<AssemblyProcessDto>>> GetApsAssemblyProcesses()
         {
@@ -41,9 +46,16 @@ namespace Aps.Controllers
             return Ok(assemblyProcessDtos);
         }
 
-        // GET: api/ApsAssemblyProcesses/5
+        /// <summary>
+        /// 查询装配工序通过ID
+        /// </summary>
+        /// <param name="id">装配工序ID</param>
+        /// <returns></returns>
+        [ProducesResponseType(typeof(AssemblyProcessDto), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         [HttpGet("{id}", Name = nameof(GetApsAssemblyProcess))]
-        public async Task<ActionResult<ApsAssemblyProcess>> GetApsAssemblyProcess([FromRoute] string id)
+        public async Task<ActionResult<AssemblyProcessDto>> GetApsAssemblyProcess([FromRoute] string id)
         {
             var apsAssemblyProcess = await _assemblyProcessRepository.GetApsAssemblyProcessAsync(id);
 

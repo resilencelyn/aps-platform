@@ -4,6 +4,11 @@
         <name>Aps</name>
     </assembly>
     <members>
+        <member name="M:Aps.Controllers.ProductsController.GetProduct">
+            <summary>
+            查询所以商品
+            </summary>
+        </member>
         <member name="M:Aps.Controllers.ProductsController.GetProduct(System.String)">
             <summary>
             通过ID查询商品
@@ -30,16 +35,79 @@
             <summary>
             删除商品
             </summary>
-            <remarks>Awesomeness!</remarks>
+            <remarks>删除商品的同时也会删除商品的装配工序</remarks>
             <param name="id">删除商品的ID</param>
             <response code="204">删除成功</response>
             <response code="404">未能找到所删除的商品</response>
         </member>
         <member name="M:Aps.Controllers.ProductsController.GetSemiProductRequisiteFromProduct(System.String)">
             <summary>
-            查询商品装配所需的半成品
+            查询商品所需总半成品
             </summary>
             <param name="productId">所查询的商品ID</param>
+        </member>
+        <member name="M:Aps.Controllers.ProductsController.GetSemiProductRequisiteFromProduct(System.String,System.String)">
+            <summary>
+            查询商品所需半成品
+            </summary>
+            <param name="productId">商品ID</param>
+            <param name="semiProductId">半成品ID</param>
+        </member>
+        <member name="M:Aps.Controllers.ProductsController.AddSemiProductRequisiteForProduct(System.String,Aps.Shared.Model.ProductSemiProductAddDto)">
+            <summary>
+            添加商品所需半成品
+            </summary>
+            <param name="productId">商品ID</param>
+            <param name="model">半成品</param>
+        </member>
+        <member name="M:Aps.Controllers.ProductsController.UpdateSemiProductRequisiteForProduct(System.String,System.String,Aps.Shared.Model.ProductSemiProductUpdateDto)">
+            <summary>
+            更新商品所需半成品
+            </summary>
+            <param name="productId">商品ID</param>
+            <param name="semiProductId">半成品ID</param>
+            <param name="model">更新的半成品</param>
+        </member>
+        <member name="M:Aps.Controllers.ProductsController.DeleteSemiProductRequisiteForProduct(System.String,System.String)">
+            <summary>
+            删除商品所需半成品
+            </summary>
+            <param name="productId"></param>
+            <param name="semiProductId"></param>
+        </member>
+        <member name="M:Aps.Controllers.ResourcesController.GetResources">
+            <summary>
+            查询所有资源
+            </summary>
+        </member>
+        <member name="M:Aps.Controllers.ResourcesController.GetApsResource(System.String)">
+            <summary>
+            查询资源通过ID
+            </summary>
+            <param name="id">资源ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:Aps.Controllers.ResourcesController.UpdateResource(System.String,Aps.Shared.Entity.ApsResource)">
+            <summary>
+            更新资源
+            </summary>
+            <param name="id">资源ID</param>
+            <param name="apsResource">更新的资源</param>
+            <returns></returns>
+        </member>
+        <member name="M:Aps.Controllers.ResourcesController.CreateResource(Aps.Shared.Model.ResourceAddDto)">
+            <summary>
+            添加资源
+            </summary>
+            <param name="model">添加的资源</param>
+            <returns></returns>
+        </member>
+        <member name="M:Aps.Controllers.ResourcesController.DeleteResource(System.String)">
+            <summary>
+            删除资源
+            </summary>
+            <param name="id">资源ID</param>
+            <returns></returns>
         </member>
         <member name="T:Aps.Infrastructure.Repositories.IRepository`2">
             <summary>

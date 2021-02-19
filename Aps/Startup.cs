@@ -13,6 +13,8 @@ using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.OpenApi.Interfaces;
 using Newtonsoft.Json.Converters;
 
@@ -53,11 +55,11 @@ namespace Aps
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "Aps", 
+                    Title = "Aps",
                     Version = "v1",
                     Description = "排产平台API",
                     Contact = new OpenApiContact
-                    { 
+                    {
                         Name = "张全",
                         Email = "zhangbig@outlook.com"
                     },
@@ -69,8 +71,13 @@ namespace Aps
 
                 var filePath = Path.Combine(System.AppContext.BaseDirectory, "Aps.xml");
                 c.IncludeXmlComments(filePath);
-                
             });
+
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.KnownProxies.Add(IPAddress.Parse("101.126.248.118"));
+            });
+
             services.AddSwaggerGenNewtonsoftSupport();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -92,13 +99,31 @@ namespace Aps
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Aps.Net v1"));
-            }
+                app.UseSwagger(c =>
+                {
+                    c.PreSerializeFilters.Add((swagger, httpReq) =>
+                    {
+                        //根据访问地址，设置swagger服务路径
+                        swagger.Servers = new List<OpenApiServer>
+                        {
+                            new OpenApiServer
+                            {
+                                Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/{httpReq.Headers["X-Forwarded-Prefix"]}"
+                            }
+                        };
+                    });
+                });
 
+                app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Aps.Net v1"); });
+            }
+            
             app.UseHttpsRedirection();
 
             app.UseCors("Open");
