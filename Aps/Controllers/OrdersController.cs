@@ -51,11 +51,9 @@ namespace Aps.Controllers
 
             return Ok(_mapper.Map<ApsOrder, OrderDto>(apsOrder));
         }
-
-        // PUT: api/ApsOrders/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutApsOrder(string id, OrderUpdateDto model)
+        public async Task<IActionResult> UpdateOrder(string id, OrderUpdateDto model)
         {
             if (id != model.Id)
             {
@@ -66,6 +64,14 @@ namespace Aps.Controllers
 
             try
             {
+                ApsProduct product = order.Product;
+                var productFromDb = await _productRepository.FirstOrDefaultAsync(x => x.Id == product.Id);
+                if (productFromDb == null)
+                {
+                    return NotFound(nameof(productFromDb));
+                }
+
+                order.Product = productFromDb;
                 await _repository.UpdateAsync(order);
             }
             catch (DbUpdateConcurrencyException)
@@ -83,7 +89,7 @@ namespace Aps.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<OrderDto>> PostOrder(OrderAddDto model)
+        public async Task<ActionResult<OrderDto>> CreateOrder(OrderAddDto model)
         {
             ApsOrder orderInserted;
             var order = _mapper.Map<OrderAddDto, ApsOrder>(model);

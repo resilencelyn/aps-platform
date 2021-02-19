@@ -12,7 +12,10 @@ namespace Aps.Profiles
             CreateMap<ApsProductSemiProduct, ProductSemiProductDto>();
 
             CreateMap<ProductAddDto, ApsProduct>();
+            CreateMap<ProductUpdateDto, ApsProduct>();
+
             CreateMap<ProductSemiProductAddDto, ApsProductSemiProduct>();
+            CreateMap<ProductSemiProductUpdateDto, ApsProductSemiProduct>();
         }
     }
 }

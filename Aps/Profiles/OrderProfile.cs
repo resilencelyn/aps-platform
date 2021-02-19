@@ -9,9 +9,15 @@ namespace Aps.Profiles
         public OrderProfile()
         {
             CreateMap<ApsOrder, OrderDto>();
-            CreateMap<OrderAddDto, ApsOrder>();
 
-            CreateMap<OrderUpdateDto, ApsOrder>();
+
+            CreateMap<OrderAddDto, ApsOrder>()
+                .ForMember(dest => dest.Product,
+                    opt => opt.MapFrom(src => new ApsProduct {Id = src.ProductId}));
+
+            CreateMap<OrderUpdateDto, ApsOrder>()
+                .ForMember(dest => dest.Product,
+                    opt => opt.MapFrom(src => new ApsProduct {Id = src.ProductId}));
         }
     }
 }
