@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Aps.Controllers
 {
@@ -27,14 +28,24 @@ namespace Aps.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        // GET: api/ApsResources
+        /// <summary>
+        /// 查询所有资源
+        /// </summary>
+        [ProducesResponseType(typeof(IEnumerable<ResourceDto>), 200)]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ResourceDto>>> GetResources()
         {
             return Ok(_mapper.Map<List<ApsResource>, IEnumerable<ResourceDto>>(await _repository.GetAllListAsync()));
         }
 
-        // GET: api/ApsResources/5
+        /// <summary>
+        /// 查询资源通过ID
+        /// </summary>
+        /// <param name="id">资源ID</param>
+        /// <returns></returns>
+        [ProducesResponseType(typeof(ResourceDto), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         [HttpGet("{id}")]
         public async Task<ActionResult<ResourceDto>> GetApsResource(string id)
         {
@@ -48,9 +59,16 @@ namespace Aps.Controllers
             return _mapper.Map<ApsResource, ResourceDto>(apsResource);
         }
 
-
+        /// <summary>
+        /// 更新资源
+        /// </summary>
+        /// <param name="id">资源ID</param>
+        /// <param name="apsResource">更新的资源</param>
+        /// <returns></returns>
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutApsResource(string id, ApsResource apsResource)
+        public async Task<IActionResult> UpdateResource(string id, ApsResource apsResource)
         {
             if (id != apsResource.Id)
             {
@@ -78,9 +96,15 @@ namespace Aps.Controllers
             return NoContent();
         }
 
-
+        /// <summary>
+        /// 添加资源
+        /// </summary>
+        /// <param name="model">添加的资源</param>
+        /// <returns></returns>
+        [ProducesResponseType(typeof(ResourceDto), 201)]
+        [ProducesResponseType(409)]
         [HttpPost]
-        public async Task<ActionResult<ResourceDto>> CreateResource(ResourceAddDto model)
+        public async Task<ActionResult<ResourceDto>> CreateResource([BindRequired] ResourceAddDto model)
         {
             var resource = _mapper.Map<ResourceAddDto, ApsResource>(model);
             foreach (var resourceClassWithResource in resource.ResourceAttributes)
@@ -98,6 +122,7 @@ namespace Aps.Controllers
                 {
                     return Conflict();
                 }
+
                 throw;
             }
 
@@ -105,7 +130,13 @@ namespace Aps.Controllers
             return CreatedAtAction("GetApsResource", new {id = returnDto.Id}, returnDto);
         }
 
-        // DELETE: api/ApsResources/5
+        /// <summary>
+        /// 删除资源
+        /// </summary>
+        /// <param name="id">资源ID</param>
+        /// <returns></returns>
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteResource(string id)
         {

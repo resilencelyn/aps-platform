@@ -11,6 +11,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.OpenApi.Interfaces;
 using Newtonsoft.Json.Converters;
 
 namespace Aps
@@ -27,11 +30,12 @@ namespace Aps
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers().AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                options.SerializerSettings.Converters.Add(new StringEnumConverter());
-            });
+            services.AddMvcCore().AddApiExplorer()
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                });
 
             services.AddDbContextPool<ApsContext>(options =>
             {
@@ -44,7 +48,31 @@ namespace Aps
                 options.AddPolicy("Open", builder => builder.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());
             });
 
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "Aps", Version = "v1"}); });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Aps", 
+                    Version = "v1",
+                    Description = "排产平台API",
+                    Contact = new OpenApiContact
+                    { 
+                        Name = "张全",
+                        Email = "zhangbig@outlook.com"
+                    },
+                    // Extensions = new Dictionary<string, IOpenApiExtension>
+                    // {
+                    //     {"xx", new }
+                    // }
+                });
+
+                var filePath = Path.Combine(System.AppContext.BaseDirectory, "Aps.xml");
+                c.IncludeXmlComments(filePath);
+                
+            });
+            services.AddSwaggerGenNewtonsoftSupport();
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddTransient<IAssemblyProcessRepository, AssemblyProcessRepository>();
@@ -79,7 +107,7 @@ namespace Aps
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            // app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }

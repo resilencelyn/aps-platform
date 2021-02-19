@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Aps.Controllers
 {
@@ -31,14 +32,26 @@ namespace Aps.Controllers
                                             throw new ArgumentNullException(nameof(productSemiProductRepository));
         }
 
-        // GET: api/ApsProducts
+        /// <summary>
+        /// 查询所以商品
+        /// </summary>
+        [ProducesResponseType(typeof(ProductDto), 200)]
+        [ProducesResponseType(500)]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetProduct()
         {
             return Ok(_mapper.Map<List<ApsProduct>, IEnumerable<ProductDto>>(await _repository.GetAllListAsync()));
         }
 
-        // GET: api/ApsProducts/5
+        /// <summary>
+        /// 通过ID查询商品
+        /// </summary>
+        /// <param name="id">商品ID</param>
+        /// <reponse code="200">查询成功</reponse>
+        /// <reponse code="404">查询失败，商品不存在</reponse>
+        [ProducesResponseType(typeof(ProductDto), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDto>> GetProduct(string id)
         {
@@ -53,9 +66,18 @@ namespace Aps.Controllers
             return _mapper.Map<ApsProduct, ProductDto>(apsProduct);
         }
 
-
+        /// <summary>
+        /// 修改商品的基本属性
+        /// </summary>
+        /// <param name="id" 例如="product_5">商品ID</param>
+        /// <param name="model">更新后的商品</param>
+        /// <response code="204">更新成功</response>
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         [HttpPut("{id}", Name = nameof(UpdateProduct))]
-        public async Task<IActionResult> UpdateProduct(string id, ProductUpdateDto model)
+        public async Task<IActionResult> UpdateProduct([BindRequired] string id, ProductUpdateDto model)
         {
             ApsProduct product = _mapper.Map<ProductUpdateDto, ApsProduct>(model);
 
@@ -81,8 +103,11 @@ namespace Aps.Controllers
             return NoContent();
         }
 
-
-        [HttpPost]
+        /// <summary>
+        /// 添加商品
+        /// </summary>
+        /// <param name="model">所添加的商品</param>
+        [HttpPost(Name = nameof(CreateProduct))]
         public async Task<ActionResult<ProductDto>> CreateProduct(ProductAddDto model)
         {
             var apsProduct = _mapper.Map<ProductAddDto, ApsProduct>(model);
@@ -105,8 +130,16 @@ namespace Aps.Controllers
                 _mapper.Map<ApsProduct, ProductDto>(productInserted));
         }
 
-        // DELETE: api/ApsProducts/5
-        [HttpDelete("{id}")]
+        /// <summary>
+        /// 删除商品
+        /// </summary>
+        /// <remarks>删除商品的同时也会删除商品的装配工序</remarks>
+        /// <param name="id">删除商品的ID</param>
+        /// <response code="204">删除成功</response>
+        /// <response code="404">未能找到所删除的商品</response>
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [HttpDelete("{id}", Name = nameof(DeleteProduct))]
         public async Task<IActionResult> DeleteProduct(string id)
         {
             var apsProduct = await _context.ApsProducts.FindAsync(id);
@@ -120,7 +153,12 @@ namespace Aps.Controllers
             return NoContent();
         }
 
-
+        /// <summary>
+        /// 查询商品所需总半成品
+        /// </summary>
+        /// <param name="productId">所查询的商品ID</param>
+        [ProducesResponseType(typeof(IEnumerable<ProductSemiProductDto>), 200)]
+        [ProducesResponseType(500)]
         [HttpGet("{productId}/SemiProductRequisite/")]
         public async Task<ActionResult<IEnumerable<ProductSemiProductDto>>> GetSemiProductRequisiteFromProduct(
             string productId)
@@ -134,7 +172,17 @@ namespace Aps.Controllers
             return Ok(returnDto);
         }
 
-        [HttpGet("{productId}/SemiProductRequisite/{semiProductId}", Name = nameof(GetSemiProductRequisiteFromProduct))]
+
+        /// <summary>
+        /// 查询商品所需半成品
+        /// </summary>
+        /// <param name="productId">商品ID</param>
+        /// <param name="semiProductId">半成品ID</param>
+        [ProducesResponseType(typeof(ProductSemiProductDto), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        [HttpGet("{productId}/SemiProductRequisite/{semiProductId}",
+            Name = nameof(GetSemiProductRequisiteFromProduct))]
         public async Task<ActionResult<ProductSemiProductDto>> GetSemiProductRequisiteFromProduct(
             string productId, string semiProductId)
         {
@@ -147,9 +195,18 @@ namespace Aps.Controllers
             return Ok(returnDto);
         }
 
+        /// <summary>
+        /// 添加商品所需半成品
+        /// </summary>
+        /// <param name="productId">商品ID</param>
+        /// <param name="model">半成品</param>
+        [ProducesResponseType(typeof(ProductSemiProductDto), 201)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(409)]
+        [ProducesResponseType(500)]
         [HttpPost("{productId}/SemiProductRequisite/")]
         public async Task<ActionResult<ProductSemiProductDto>> AddSemiProductRequisiteForProduct(
-            string productId, ProductSemiProductAddDto model)
+            [FromRoute, BindRequired] string productId, [FromBody, BindRequired] ProductSemiProductAddDto model)
         {
             var productSemiProduct = _mapper.Map<ProductSemiProductAddDto, ApsProductSemiProduct>(model);
 
@@ -172,6 +229,15 @@ namespace Aps.Controllers
                 new {productId = product.Id, semiProductId = inserted.ApsSemiProductId}, returnDto);
         }
 
+        /// <summary>
+        /// 更新商品所需半成品
+        /// </summary>
+        /// <param name="productId">商品ID</param>
+        /// <param name="semiProductId">半成品ID</param>
+        /// <param name="model">更新的半成品</param>
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         [HttpPut("{productId}/SemiProductRequisite/{semiProductId}")]
         public async Task<IActionResult> UpdateSemiProductRequisiteForProduct(
             string productId, string semiProductId, ProductSemiProductUpdateDto model)
@@ -190,6 +256,13 @@ namespace Aps.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// 删除商品所需半成品
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <param name="semiProductId"></param>
+        [ProducesResponseType(201)]
+        [ProducesResponseType(404)]
         [HttpDelete("{productId}/SemiProductRequisite/{semiProductId}")]
         public async Task<IActionResult> DeleteSemiProductRequisiteForProduct(string productId, string semiProductId)
         {
