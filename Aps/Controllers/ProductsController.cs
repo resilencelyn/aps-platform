@@ -33,7 +33,7 @@ namespace Aps.Controllers
         }
 
         /// <summary>
-        /// 查询所以商品
+        /// 查询所有商品
         /// </summary>
         [ProducesResponseType(typeof(ProductDto), 200)]
         [ProducesResponseType(500)]

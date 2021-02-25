@@ -20,12 +20,16 @@ namespace Aps.Controllers
         private readonly ApsContext _context;
         private readonly IRepository<ApsResource, string> _repository;
         private readonly IMapper _mapper;
+        private readonly IRepository<ResourceClassWithResource, int> _resourceCategoryRepository;
 
-        public ResourcesController(ApsContext context, IRepository<ApsResource, string> repository, IMapper mapper)
+        public ResourcesController(ApsContext context, IRepository<ApsResource, string> repository, IMapper mapper,
+            IRepository<ResourceClassWithResource, int> resourceCategoryRepository)
         {
             _context = context;
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _resourceCategoryRepository = resourceCategoryRepository ??
+                                          throw new ArgumentNullException(nameof(resourceCategoryRepository));
         }
 
         /// <summary>
@@ -87,10 +91,8 @@ namespace Aps.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
@@ -151,6 +153,95 @@ namespace Aps.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("{resourceId}/category/", Name = nameof(GetResourceCategory))]
+        public async Task<ActionResult<IEnumerable<ResourceClassWithResourceDto>>> GetResourceCategory(
+            string resourceId)
+        {
+            var resource = await _repository.FirstOrDefaultAsync(x => x.Id == resourceId);
+
+            var returnDto =
+                _mapper.Map<List<ResourceClassWithResource>, IEnumerable<ResourceClassWithResourceDto>>(
+                    resource.ResourceAttributes);
+
+            return Ok(returnDto);
+        }
+
+        [HttpGet("{resourceId}/category/{categoryId}", Name = nameof(GetResourceCategoryById))]
+        public async Task<ActionResult<ResourceClassWithResourceDto>> GetResourceCategoryById(
+            string resourceId, int categoryId)
+        {
+            var resourceCategory = await _resourceCategoryRepository.FirstOrDefaultAsync(x =>
+                x.ApsResourceId == resourceId && x.ResourceClassId == categoryId);
+
+            if (resourceCategory == null)
+            {
+                return NotFound();
+            }
+
+            var returnDto = _mapper.Map<ResourceClassWithResource, ResourceClassWithResourceDto>(resourceCategory);
+            return Ok(returnDto);
+        }
+
+        [HttpPost("{resourceId}/category/", Name = nameof(AddResourceCategory))]
+        public async Task<ActionResult<ResourceClassWithResourceDto>> AddResourceCategory(string resourceId,
+            [FromBody] ResourceClassWithResourceAddOrUpdateDto model)
+        {
+            var resourceCategory =
+                _mapper.Map<ResourceClassWithResourceAddOrUpdateDto, ResourceClassWithResource>(model);
+            resourceCategory.ApsResourceId = resourceId;
+
+            var resourceCategoryInserted = await _resourceCategoryRepository.InsertAsync(resourceCategory);
+
+            ResourceClassWithResourceDto returnDto =
+                _mapper.Map<ResourceClassWithResource, ResourceClassWithResourceDto>(resourceCategoryInserted);
+
+            return CreatedAtRoute(nameof(GetResourceCategoryById),
+                new {resourceId, categoryId = returnDto.ResourceClassId}, returnDto);
+        }
+
+        /// <summary>
+        /// 修改资源类别
+        /// </summary>
+        /// <param name="resourceId">资源ID</param>
+        /// <param name="categoryId">资源类别ID</param>
+        /// <param name="model">资源类别</param>
+        /// <returns></returns>
+        [ProducesResponseType(204)]
+        [ProducesResponseType(500)]
+        [HttpPut("{resourceId}/category/{categoryId}", Name = nameof(UpdateResourceCategory))]
+        public async Task<IActionResult> UpdateResourceCategory(string resourceId, int categoryId,
+            ResourceClassWithResourceAddOrUpdateDto model)
+        {
+            if (categoryId != model.ResourceClassId)
+            {
+                return BadRequest();
+            }
+
+            var resourceCategory =
+                _mapper.Map<ResourceClassWithResourceAddOrUpdateDto, ResourceClassWithResource>(model);
+
+            resourceCategory.ApsResourceId = resourceId;
+            await _resourceCategoryRepository.UpdateAsync(resourceCategory);
+
+            // var returnDto = _mapper.Map<ResourceClassWithResource, ResourceClassWithResourceDto>(resourceCategory);
+            return NoContent();
+        }
+
+        [HttpDelete("{resourceId}/category/{categoryId}", Name = nameof(DeleteResourceCategory))]
+        public async Task<IActionResult> DeleteResourceCategory(string resourceId, int categoryId)
+        {
+            var resourceCategory = await _resourceCategoryRepository.FirstOrDefaultAsync(x =>
+                x.ApsResourceId == resourceId && x.ResourceClassId == categoryId);
+            if (resourceCategory == null)
+            {
+                return NotFound();
+            }
+
+            await _resourceCategoryRepository.DeleteAsync(resourceCategory);
+            return NoContent();
+        }
+
 
         private bool ApsResourceExists(string id)
         {

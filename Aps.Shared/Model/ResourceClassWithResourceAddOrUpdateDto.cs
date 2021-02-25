@@ -1,6 +1,6 @@
 ﻿namespace Aps.Shared.Model
 {
-    public class ResourceClassWithResourceAddDto
+    public class ResourceClassWithResourceAddOrUpdateDto
     {
         public int ResourceClassId { get; set; }
 

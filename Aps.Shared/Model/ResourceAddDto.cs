@@ -9,7 +9,7 @@ namespace Aps.Shared.Model
         public ResourceType Type { get; set; }
 
         public int? Amount { get; set; }
-        public List<ResourceClassWithResourceAddDto> ResourceAttributes { get; set; }
+        public List<ResourceClassWithResourceAddOrUpdateDto> ResourceAttributes { get; set; }
         public Workspace Workspace { get; set; }
     }
 }

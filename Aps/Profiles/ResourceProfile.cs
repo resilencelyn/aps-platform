@@ -16,7 +16,7 @@ namespace Aps.Profiles
 
 
             CreateMap<ResourceAddDto, ApsResource>();
-            CreateMap<ResourceClassWithResourceAddDto, ResourceClassWithResource>();
+            CreateMap<ResourceClassWithResourceAddOrUpdateDto, ResourceClassWithResource>();
         }
     }
 }
