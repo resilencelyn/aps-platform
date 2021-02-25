@@ -67,7 +67,12 @@ namespace Aps.Controllers
             return Ok(_mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(apsAssemblyProcess));
         }
 
-
+        /// <summary>
+        /// 修改装配过程的基本属性
+        /// </summary>
+        /// <param name="id">装配过程ID</param>
+        /// <param name="apsAssemblyProcess">更新后的装配过程</param>
+        /// <response code="204">更新成功</response>
         [HttpPut("{id}", Name = nameof(PutApsAssemblyProcess))]
         public async Task<IActionResult> PutApsAssemblyProcess([FromRoute] string id,
             [FromBody] ApsAssemblyProcess apsAssemblyProcess)
@@ -98,7 +103,11 @@ namespace Aps.Controllers
             return NoContent();
         }
 
-
+        /// <summary>
+        /// 添加装配过程
+        /// </summary>
+        /// <param name="model">所添加的装配过程</param>
+        /// <returns></returns>
         [HttpPost(Name = nameof(PostApsAssemblyProcess))]
         public async Task<ActionResult<AssemblyProcessDto>> PostApsAssemblyProcess(
             [FromBody] AssemblyProcessAddDto model)
@@ -125,6 +134,12 @@ namespace Aps.Controllers
         }
 
         // DELETE: api/ApsAssemblyProcesses/5
+        /// <summary>
+        /// 删除装配过程
+        /// </summary>
+        /// <param name="id">删除的装配过程ID</param>
+        /// <response code="204">删除成功</response>
+        /// <response code="404">未能找到所删除的商品</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApsAssemblyProcess(string id)
         {

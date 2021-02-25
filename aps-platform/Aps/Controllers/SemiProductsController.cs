@@ -33,6 +33,9 @@ namespace Aps.Controllers
         }
 
         // GET: api/ApsSemiProducts
+        /// <summary>
+        /// 查询所有半成品
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SemiProductDto>>> GetApsSemiProducts()
         {
@@ -42,6 +45,12 @@ namespace Aps.Controllers
         }
 
         // GET: api/ApsSemiProducts/5
+        /// <summary>
+        /// 通过ID查询半成品
+        /// </summary>
+        /// <param name="id">半成品ID</param>
+        /// <reponse code="200">查询成功</reponse>
+        /// <reponse code="404">查询失败，半成品不存在</reponse>
         [HttpGet("{id}")]
         public async Task<ActionResult<SemiProductDto>> GetApsSemiProduct(string id)
         {
@@ -55,7 +64,12 @@ namespace Aps.Controllers
             return _mapper.Map<ApsSemiProduct, SemiProductDto>(apsSemiProduct);
         }
 
-
+        /// <summary>
+        /// 修改半成品的基本属性
+        /// </summary>
+        /// <param name="id">半成品ID</param>
+        /// <param name="model">更新后的半成品</param>
+        /// <response code="204">更新成功</response>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApsSemiProduct(string id, ApsSemiProduct apsSemiProduct)
         {
@@ -83,7 +97,10 @@ namespace Aps.Controllers
             return NoContent();
         }
 
-
+        /// <summary>
+        /// 添加半成品
+        /// </summary>
+        /// <param name="model">所添加的半成品</param>
         [HttpPost]
         public async Task<ActionResult<SemiProductDto>> CreateSemiProduct(SemiProductAddDto model)
         {
@@ -117,6 +134,12 @@ namespace Aps.Controllers
         }
 
         // DELETE: api/ApsSemiProducts/5
+        /// <summary>
+        /// 删除半成品
+        /// </summary>
+        /// <param name="id">删除半成品的ID</param>
+        /// <response code="204">删除成功</response>
+        /// <response code="404">未能找到所删除的半成品</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApsSemiProduct(string id)
         {

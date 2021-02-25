@@ -31,6 +31,9 @@ namespace Aps.Controllers
         }
 
         // GET: api/ApsOrders
+        /// <summary>
+        /// 查询所有订单
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders()
         {
@@ -39,6 +42,12 @@ namespace Aps.Controllers
         }
 
         // GET: api/ApsOrders/5
+        /// <summary>
+        /// 通过ID查询订单
+        /// </summary>
+        /// <param name="id">订单ID</param>
+        /// <reponse code="200">查询成功</reponse>
+        /// <reponse code="404">查询失败，订单不存在</reponse>
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDto>> GetOrder(string id)
         {
@@ -51,7 +60,13 @@ namespace Aps.Controllers
 
             return Ok(_mapper.Map<ApsOrder, OrderDto>(apsOrder));
         }
-        
+
+        /// <summary>
+        /// 修改订单的基本属性
+        /// </summary>
+        /// <param name="id" 例如="product_5">订单ID</param>
+        /// <param name="model">更新后的订单</param>
+        /// <response code="204">更新成功</response>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOrder(string id, OrderUpdateDto model)
         {
@@ -87,7 +102,10 @@ namespace Aps.Controllers
             return NoContent();
         }
 
-
+        /// <summary>
+        /// 添加订单
+        /// </summary>
+        /// <param name="model">所添加的订单</param>
         [HttpPost]
         public async Task<ActionResult<OrderDto>> CreateOrder(OrderAddDto model)
         {
@@ -122,6 +140,12 @@ namespace Aps.Controllers
         }
 
         // DELETE: api/ApsOrders/5
+        /// <summary>
+        /// 删除订单
+        /// </summary>
+        /// <param name="id">删除订单的ID</param>
+        /// <response code="204">删除成功</response>
+        /// <response code="404">未能找到所删除的订单</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(string id)
         {

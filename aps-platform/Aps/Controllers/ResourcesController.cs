@@ -154,6 +154,9 @@ namespace Aps.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// 查询所有资源类别
+        /// </summary>
         [HttpGet("{resourceId}/category/", Name = nameof(GetResourceCategory))]
         public async Task<ActionResult<IEnumerable<ResourceClassWithResourceDto>>> GetResourceCategory(
             string resourceId)
@@ -166,7 +169,12 @@ namespace Aps.Controllers
 
             return Ok(returnDto);
         }
-
+        /// <summary>
+        /// 通过ID查询资源类别
+        /// </summary>
+        /// <param name="id">资源类别ID</param>
+        /// <reponse code="200">查询成功</reponse>
+        /// <reponse code="404">查询失败，资源类别不存在</reponse>
         [HttpGet("{resourceId}/category/{categoryId}", Name = nameof(GetResourceCategoryById))]
         public async Task<ActionResult<ResourceClassWithResourceDto>> GetResourceCategoryById(
             string resourceId, int categoryId)
@@ -182,7 +190,12 @@ namespace Aps.Controllers
             var returnDto = _mapper.Map<ResourceClassWithResource, ResourceClassWithResourceDto>(resourceCategory);
             return Ok(returnDto);
         }
-
+        /// <summary>
+        /// 修改资源类别的基本属性
+        /// </summary>
+        /// <param name="id">资源类别ID</param>
+        /// <param name="model">更新后的资源类别</param>
+        /// <response code="204">更新成功</response>
         [HttpPost("{resourceId}/category/", Name = nameof(AddResourceCategory))]
         public async Task<ActionResult<ResourceClassWithResourceDto>> AddResourceCategory(string resourceId,
             [FromBody] ResourceClassWithResourceAddOrUpdateDto model)
@@ -227,7 +240,12 @@ namespace Aps.Controllers
             // var returnDto = _mapper.Map<ResourceClassWithResource, ResourceClassWithResourceDto>(resourceCategory);
             return NoContent();
         }
-
+        /// <summary>
+        /// 删除资源类别
+        /// </summary>
+        /// <param name="id">删除资源类别的ID</param>
+        /// <response code="204">删除成功</response>
+        /// <response code="404">未能找到所删除的资源类别</response>
         [HttpDelete("{resourceId}/category/{categoryId}", Name = nameof(DeleteResourceCategory))]
         public async Task<IActionResult> DeleteResourceCategory(string resourceId, int categoryId)
         {

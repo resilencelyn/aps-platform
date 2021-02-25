@@ -30,6 +30,9 @@ namespace Aps.Controllers
         }
 
         // GET: api/ManufactureProcesses
+        /// <summary>
+        /// 查询所有装配工艺
+        /// </summary>
         [HttpGet(Name = nameof(GetManufactureProcesses))]
         public async Task<ActionResult<List<ManufactureProcessDto>>> GetManufactureProcesses()
         {
@@ -38,6 +41,12 @@ namespace Aps.Controllers
         }
 
         // GET: api/ManufactureProcesses/5
+        /// <summary>
+        /// 通过ID查询装配工艺
+        /// </summary>
+        /// <param name="id">装配工艺ID</param>
+        /// <reponse code="200">查询成功</reponse>
+        /// <reponse code="404">查询失败，装配工艺不存在</reponse>
         [HttpGet("{id}", Name = nameof(GetManufactureProcess))]
         public async Task<ActionResult<ManufactureProcessDto>> GetManufactureProcess(string id)
         {
@@ -52,7 +61,12 @@ namespace Aps.Controllers
             return Ok(_mapper.Map<ApsManufactureProcess, ManufactureProcessDto>(apsManufactureProcess));
         }
 
-
+        /// <summary>
+        /// 修改装配工艺的基本属性
+        /// </summary>
+        /// <param name="id">装配工艺ID</param>
+        /// <param name="model">更新后的装配工艺</param>
+        /// <response code="204">更新成功</response>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApsManufactureProcess(string id,
             ApsManufactureProcess apsManufactureProcess)
@@ -81,7 +95,10 @@ namespace Aps.Controllers
             return NoContent();
         }
 
-
+        /// <summary>
+        /// 添加装配工艺
+        /// </summary>
+        /// <param name="model">所添加的装配工艺</param>
         [HttpPost(Name = nameof(PostApsManufactureProcess))]
         public async Task<ActionResult<ManufactureProcessDto>> PostApsManufactureProcess(
             ManufactureProcessAddDto model)
@@ -107,7 +124,12 @@ namespace Aps.Controllers
             return CreatedAtAction(nameof(GetManufactureProcess), new {id = returnDto.Id}, returnDto);
         }
 
-
+        /// <summary>
+        /// 删除装配工艺
+        /// </summary>
+        /// <param name="id">删除装配工艺的ID</param>
+        /// <response code="204">删除成功</response>
+        /// <response code="404">未能找到所删除的装配工艺</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApsManufactureProcess(string id)
         {

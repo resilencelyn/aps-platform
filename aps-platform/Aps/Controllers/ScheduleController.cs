@@ -21,7 +21,9 @@ namespace Aps.Controllers
             _context = context;
             _scheduleTool = scheduleTool;
         }
-
+        /// <summary>
+        /// 查询所有排程
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<List<ApsManufactureJob>>> Schedule()
         {
