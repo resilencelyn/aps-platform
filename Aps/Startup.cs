@@ -13,9 +13,7 @@ using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.OpenApi.Interfaces;
 using Newtonsoft.Json.Converters;
 
 namespace Aps
@@ -73,10 +71,10 @@ namespace Aps
                 c.IncludeXmlComments(filePath);
             });
 
-            services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.KnownProxies.Add(IPAddress.Parse("101.126.248.118"));
-            });
+            // services.Configure<ForwardedHeadersOptions>(options =>
+            // {
+            //     options.KnownProxies.Add(IPAddress.Parse("101.126.248.118"));
+            // });
 
             services.AddSwaggerGenNewtonsoftSupport();
 
@@ -108,23 +106,23 @@ namespace Aps
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger(c =>
                 {
-                    c.PreSerializeFilters.Add((swagger, httpReq) =>
-                    {
-                        //根据访问地址，设置swagger服务路径
-                        swagger.Servers = new List<OpenApiServer>
-                        {
-                            new OpenApiServer
-                            {
-                                Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/{httpReq.Headers["X-Forwarded-Prefix"]}"
-                            }
-                        };
-                    });
+                    // c.PreSerializeFilters.Add((swagger, httpReq) =>
+                    // {
+                    //     //根据访问地址，设置swagger服务路径
+                    //     swagger.Servers = new List<OpenApiServer>
+                    //     {
+                    //         new OpenApiServer
+                    //         {
+                    //             Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/{httpReq.Headers["X-Forwarded-Prefix"]}"
+                    //         }
+                    //     };
+                    // });
                 });
 
                 app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Aps.Net v1"); });
             }
             
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
 
             app.UseCors("Open");
 

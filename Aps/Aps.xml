@@ -4,9 +4,22 @@
         <name>Aps</name>
     </assembly>
     <members>
+        <member name="M:Aps.Controllers.AssemblyProcessesController.GetApsAssemblyProcesses">
+            <summary>
+            查询装配工序
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Aps.Controllers.AssemblyProcessesController.GetApsAssemblyProcess(System.String)">
+            <summary>
+            查询装配工序通过ID
+            </summary>
+            <param name="id">装配工序ID</param>
+            <returns></returns>
+        </member>
         <member name="M:Aps.Controllers.ProductsController.GetProduct">
             <summary>
-            查询所以商品
+            查询所有商品
             </summary>
         </member>
         <member name="M:Aps.Controllers.ProductsController.GetProduct(System.String)">
@@ -107,6 +120,15 @@
             删除资源
             </summary>
             <param name="id">资源ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:Aps.Controllers.ResourcesController.UpdateResourceCategory(System.String,System.Int32,Aps.Shared.Model.ResourceClassWithResourceAddOrUpdateDto)">
+            <summary>
+            修改资源类别
+            </summary>
+            <param name="resourceId">资源ID</param>
+            <param name="categoryId">资源类别ID</param>
+            <param name="model">资源类别</param>
             <returns></returns>
         </member>
         <member name="T:Aps.Infrastructure.Repositories.IRepository`2">
