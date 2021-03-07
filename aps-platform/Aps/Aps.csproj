@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DocumentationFile>D:\大学\2021服务外包\repos\aps-platform\Aps\Aps.xml</DocumentationFile>
+    <DocumentationFile>D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\Aps.xml</DocumentationFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
