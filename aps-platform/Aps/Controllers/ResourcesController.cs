@@ -172,7 +172,8 @@ namespace Aps.Controllers
         /// <summary>
         /// 通过ID查询资源类别
         /// </summary>
-        /// <param name="id">资源类别ID</param>
+        /// <param name="resourceId">资源ID</param>
+        /// <param name="categoryId">类别ID</param>
         /// <reponse code="200">查询成功</reponse>
         /// <reponse code="404">查询失败，资源类别不存在</reponse>
         [HttpGet("{resourceId}/category/{categoryId}", Name = nameof(GetResourceCategoryById))]
@@ -193,7 +194,7 @@ namespace Aps.Controllers
         /// <summary>
         /// 修改资源类别的基本属性
         /// </summary>
-        /// <param name="id">资源类别ID</param>
+        /// <param name="resourceId">资源类别ID</param>
         /// <param name="model">更新后的资源类别</param>
         /// <response code="204">更新成功</response>
         [HttpPost("{resourceId}/category/", Name = nameof(AddResourceCategory))]
@@ -241,9 +242,10 @@ namespace Aps.Controllers
             return NoContent();
         }
         /// <summary>
-        /// 删除资源类别
+        /// 删除资源的类别
         /// </summary>
-        /// <param name="id">删除资源类别的ID</param>
+        /// <param name="resourceId">删除资源类别的资源ID</param>
+        /// <param name="categoryId">类别的ID</param>
         /// <response code="204">删除成功</response>
         /// <response code="404">未能找到所删除的资源类别</response>
         [HttpDelete("{resourceId}/category/{categoryId}", Name = nameof(DeleteResourceCategory))]

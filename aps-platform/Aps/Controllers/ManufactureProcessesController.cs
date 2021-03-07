@@ -31,7 +31,7 @@ namespace Aps.Controllers
 
         // GET: api/ManufactureProcesses
         /// <summary>
-        /// 查询所有装配工艺
+        /// 查询所有加工工艺
         /// </summary>
         [HttpGet(Name = nameof(GetManufactureProcesses))]
         public async Task<ActionResult<List<ManufactureProcessDto>>> GetManufactureProcesses()
@@ -42,11 +42,11 @@ namespace Aps.Controllers
 
         // GET: api/ManufactureProcesses/5
         /// <summary>
-        /// 通过ID查询装配工艺
+        /// 通过ID查询加工工艺
         /// </summary>
-        /// <param name="id">装配工艺ID</param>
+        /// <param name="id">加工工艺ID</param>
         /// <reponse code="200">查询成功</reponse>
-        /// <reponse code="404">查询失败，装配工艺不存在</reponse>
+        /// <reponse code="404">查询失败，加工工艺不存在</reponse>
         [HttpGet("{id}", Name = nameof(GetManufactureProcess))]
         public async Task<ActionResult<ManufactureProcessDto>> GetManufactureProcess(string id)
         {
@@ -62,10 +62,10 @@ namespace Aps.Controllers
         }
 
         /// <summary>
-        /// 修改装配工艺的基本属性
+        /// 修改加工工艺的基本属性
         /// </summary>
-        /// <param name="id">装配工艺ID</param>
-        /// <param name="model">更新后的装配工艺</param>
+        /// <param name="id">加工工艺ID</param>
+        /// <param name="apsManufactureProcess">更新后的加工工艺</param>
         /// <response code="204">更新成功</response>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApsManufactureProcess(string id,
@@ -96,9 +96,9 @@ namespace Aps.Controllers
         }
 
         /// <summary>
-        /// 添加装配工艺
+        /// 添加加工工艺
         /// </summary>
-        /// <param name="model">所添加的装配工艺</param>
+        /// <param name="model">所添加的加工工艺</param>
         [HttpPost(Name = nameof(PostApsManufactureProcess))]
         public async Task<ActionResult<ManufactureProcessDto>> PostApsManufactureProcess(
             ManufactureProcessAddDto model)
@@ -119,17 +119,18 @@ namespace Aps.Controllers
 
                 throw;
             }
+
             var returnDto = _mapper.Map<ApsManufactureProcess, ManufactureProcessDto>(apsManufactureProcess);
 
             return CreatedAtAction(nameof(GetManufactureProcess), new {id = returnDto.Id}, returnDto);
         }
 
         /// <summary>
-        /// 删除装配工艺
+        /// 删除加工工艺
         /// </summary>
-        /// <param name="id">删除装配工艺的ID</param>
+        /// <param name="id">删除加工工艺的ID</param>
         /// <response code="204">删除成功</response>
-        /// <response code="404">未能找到所删除的装配工艺</response>
+        /// <response code="404">未能找到所删除的加工工艺</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApsManufactureProcess(string id)
         {

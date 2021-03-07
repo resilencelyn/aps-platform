@@ -20,16 +20,25 @@ namespace Aps.Controllers
         private readonly ApsContext _context;
         private readonly IRepository<ApsProduct, string> _repository;
         private readonly IMapper _mapper;
-        private readonly IRepository<ApsProductSemiProduct, string> _productSemiProductRepository;
+        private readonly IRepository<ApsProductSemiProduct, string> _semiProductRepository;
+        private readonly IRepository<ApsAssemblyProcess, string> _assembleProcessRepository;
+        private readonly IRepository<ApsAssemblyProcessSemiProduct, string> _processSemiProductRepository;
 
-        public ProductsController(ApsContext context, IRepository<ApsProduct, string> repository, IMapper mapper,
-            IRepository<ApsProductSemiProduct, string> productSemiProductRepository)
+        public ProductsController(ApsContext context,
+            IRepository<ApsProduct, string> repository,
+            IMapper mapper,
+            IRepository<ApsProductSemiProduct, string> semiProductRepository,
+            IRepository<ApsAssemblyProcess, string> assembleProcessRepository,
+            IRepository<ApsAssemblyProcessSemiProduct, string> processSemiProductRepository)
         {
             _context = context;
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _productSemiProductRepository = productSemiProductRepository ??
-                                            throw new ArgumentNullException(nameof(productSemiProductRepository));
+            _semiProductRepository = semiProductRepository ??
+                                     throw new ArgumentNullException(nameof(semiProductRepository));
+            _assembleProcessRepository = assembleProcessRepository ??
+                                         throw new ArgumentNullException(nameof(assembleProcessRepository));
+            _processSemiProductRepository = processSemiProductRepository;
         }
 
         /// <summary>
@@ -222,7 +231,13 @@ namespace Aps.Controllers
             }
 
             productSemiProduct.ApsProductId = productId;
-            var inserted = await _productSemiProductRepository.InsertAsync(productSemiProduct);
+            var inserted = await _semiProductRepository.InsertAsync(productSemiProduct);
+            await _processSemiProductRepository.InsertAsync(new ApsAssemblyProcessSemiProduct
+            {
+                Amount = productSemiProduct.Amount,
+                ApsAssemblyProcessId = product.ApsAssemblyProcessId,
+                ApsSemiProductId = productSemiProduct.ApsSemiProductId
+            });
 
             var returnDto = _mapper.Map<ApsProductSemiProduct, ProductSemiProductDto>(inserted);
             return CreatedAtRoute(nameof(GetSemiProductRequisiteFromProduct),
@@ -243,6 +258,7 @@ namespace Aps.Controllers
             string productId, string semiProductId, ProductSemiProductUpdateDto model)
         {
             var productSemiProduct = _mapper.Map<ProductSemiProductUpdateDto, ApsProductSemiProduct>(model);
+            var product = await _repository.FirstOrDefaultAsync(x => x.Id == productId);
 
             if (model.ApsSemiProductId != semiProductId)
             {
@@ -251,7 +267,13 @@ namespace Aps.Controllers
 
             productSemiProduct.ApsProductId = productId;
 
-            await _productSemiProductRepository.UpdateAsync(productSemiProduct);
+            await _semiProductRepository.UpdateAsync(productSemiProduct);
+            await _processSemiProductRepository.UpdateAsync(new ApsAssemblyProcessSemiProduct
+            {
+                Amount = productSemiProduct.Amount,
+                ApsAssemblyProcessId = product.ApsAssemblyProcessId,
+                ApsSemiProductId = productSemiProduct.ApsSemiProductId
+            });
 
             return NoContent();
         }
@@ -266,16 +288,36 @@ namespace Aps.Controllers
         [HttpDelete("{productId}/SemiProductRequisite/{semiProductId}")]
         public async Task<IActionResult> DeleteSemiProductRequisiteForProduct(string productId, string semiProductId)
         {
-            var semiProductRequisite = await _productSemiProductRepository.FirstOrDefaultAsync(x =>
+            var product = await _repository.FirstOrDefaultAsync(x => x.Id == productId);
+
+            var semiProductRequisite = await _semiProductRepository.FirstOrDefaultAsync(x =>
                 x.ApsProductId == productId && x.ApsSemiProductId == semiProductId);
+
+            var processSemiProductRequisite = await _processSemiProductRepository.FirstOrDefaultAsync(x =>
+                x.ApsAssemblyProcessId == product.ApsAssemblyProcessId && x.ApsSemiProductId == semiProductId
+            );
             if (semiProductRequisite == null)
             {
                 return NotFound();
             }
 
-            await _productSemiProductRepository.DeleteAsync(semiProductRequisite);
-
+            await _semiProductRepository.DeleteAsync(semiProductRequisite);
+            await _processSemiProductRepository.DeleteAsync(processSemiProductRequisite);
             return NoContent();
+        }
+
+        /// <summary>
+        /// 查询商品装配工序
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        [HttpGet("{productId}/AssemblyProcess")]
+        public async Task<ActionResult<AssemblyProcessDto>> GetProductAssemblyProcesses(string productId)
+        {
+            var product = await _repository.FirstOrDefaultAsync(x => x.Id == productId);
+            var productAssemblyProcess = product.ApsAssemblyProcess;
+
+            return _mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(productAssemblyProcess);
         }
 
         private bool ApsProductExists(string id)
