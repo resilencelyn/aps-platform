@@ -11,7 +11,7 @@ namespace Aps.Profiles
         {
             CreateMap<ApsSemiProduct, SemiProductDto>();
 
-            CreateMap<SemiProductAddDto, ApsSemiProduct>();
+            CreateMap<SemiProductAddOrUpdateDto, ApsSemiProduct>();
         }
     }
 }

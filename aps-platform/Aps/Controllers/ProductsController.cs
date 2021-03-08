@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Aps.Services;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Aps.Controllers
@@ -23,13 +24,15 @@ namespace Aps.Controllers
         private readonly IRepository<ApsProductSemiProduct, string> _semiProductRepository;
         private readonly IRepository<ApsAssemblyProcess, string> _assembleProcessRepository;
         private readonly IRepository<ApsAssemblyProcessSemiProduct, string> _processSemiProductRepository;
+        private readonly IAssemblyProcessRepository _assemblyProcessRepository;
 
         public ProductsController(ApsContext context,
             IRepository<ApsProduct, string> repository,
             IMapper mapper,
             IRepository<ApsProductSemiProduct, string> semiProductRepository,
             IRepository<ApsAssemblyProcess, string> assembleProcessRepository,
-            IRepository<ApsAssemblyProcessSemiProduct, string> processSemiProductRepository)
+            IRepository<ApsAssemblyProcessSemiProduct, string> processSemiProductRepository,
+            IAssemblyProcessRepository assemblyProcessRepository)
         {
             _context = context;
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
@@ -39,6 +42,7 @@ namespace Aps.Controllers
             _assembleProcessRepository = assembleProcessRepository ??
                                          throw new ArgumentNullException(nameof(assembleProcessRepository));
             _processSemiProductRepository = processSemiProductRepository;
+            _assemblyProcessRepository = assemblyProcessRepository;
         }
 
         /// <summary>
@@ -61,7 +65,7 @@ namespace Aps.Controllers
         [ProducesResponseType(typeof(ProductDto), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        [HttpGet("{id}")]
+        [HttpGet("{productId}")]
         public async Task<ActionResult<ProductDto>> GetProduct(string id)
         {
             var apsProduct = await _repository.FirstOrDefaultAsync(x =>
@@ -85,7 +89,7 @@ namespace Aps.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        [HttpPut("{id}", Name = nameof(UpdateProduct))]
+        [HttpPut("{productId}", Name = nameof(UpdateProduct))]
         public async Task<IActionResult> UpdateProduct([BindRequired] string id, ProductUpdateDto model)
         {
             ApsProduct product = _mapper.Map<ProductUpdateDto, ApsProduct>(model);
@@ -117,6 +121,8 @@ namespace Aps.Controllers
         /// </summary>
         /// <param name="model">所添加的商品</param>
         [HttpPost(Name = nameof(CreateProduct))]
+        [ProducesResponseType(typeof(ProductDto), 201)]
+        [ProducesResponseType(500)]
         public async Task<ActionResult<ProductDto>> CreateProduct(ProductAddDto model)
         {
             var apsProduct = _mapper.Map<ProductAddDto, ApsProduct>(model);
@@ -148,7 +154,7 @@ namespace Aps.Controllers
         /// <response code="404">未能找到所删除的商品</response>
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        [HttpDelete("{id}", Name = nameof(DeleteProduct))]
+        [HttpDelete("{productId}", Name = nameof(DeleteProduct))]
         public async Task<IActionResult> DeleteProduct(string id)
         {
             var apsProduct = await _context.ApsProducts.FindAsync(id);
@@ -225,6 +231,11 @@ namespace Aps.Controllers
                 return NotFound(nameof(product));
             }
 
+            if (product.ApsAssemblyProcess == null)
+            {
+                return BadRequest();
+            }
+
             if (product.AssembleBySemiProducts.Any(x => x.ApsSemiProductId == productSemiProduct.ApsSemiProductId))
             {
                 return Conflict();
@@ -260,6 +271,16 @@ namespace Aps.Controllers
             var productSemiProduct = _mapper.Map<ProductSemiProductUpdateDto, ApsProductSemiProduct>(model);
             var product = await _repository.FirstOrDefaultAsync(x => x.Id == productId);
 
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            if (product.ApsAssemblyProcess == null)
+            {
+                return null;
+            }
+
             if (model.ApsSemiProductId != semiProductId)
             {
                 return BadRequest();
@@ -274,6 +295,8 @@ namespace Aps.Controllers
                 ApsAssemblyProcessId = product.ApsAssemblyProcessId,
                 ApsSemiProductId = productSemiProduct.ApsSemiProductId
             });
+
+
 
             return NoContent();
         }
@@ -311,18 +334,121 @@ namespace Aps.Controllers
         /// </summary>
         /// <param name="productId"></param>
         /// <returns></returns>
-        [HttpGet("{productId}/AssemblyProcess")]
+        [HttpGet("{productId}/process", Name = nameof(GetProductAssemblyProcesses))]
+        [ProducesResponseType(typeof(AssemblyProcessDto), 200)]
+        [ProducesResponseType(404)]
         public async Task<ActionResult<AssemblyProcessDto>> GetProductAssemblyProcesses(string productId)
         {
             var product = await _repository.FirstOrDefaultAsync(x => x.Id == productId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
             var productAssemblyProcess = product.ApsAssemblyProcess;
 
             return _mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(productAssemblyProcess);
         }
 
+        /// <summary>
+        /// 修改装配过程的基本属性
+        /// </summary>
+        /// <param name="productId">装配过程ID</param>
+        /// <param name="apsAssemblyProcess">更新后的装配过程</param>
+        /// <response code="204">更新成功</response>
+        [HttpPut("{productId}/process/", Name = nameof(UpdateAssemblyProcess))]
+        public async Task<IActionResult> UpdateAssemblyProcess([FromRoute] string productId,
+            [FromBody] AssemblyProcessUpdateDto apsAssemblyProcess)
+        {
+            var product = await _repository.FirstOrDefaultAsync(x => x.Id == productId);
+            if (product.ApsAssemblyProcessId != apsAssemblyProcess.Id)
+            {
+                return BadRequest();
+            }
+
+            var assemblyProcess = _mapper.Map<AssemblyProcessUpdateDto, ApsAssemblyProcess>(apsAssemblyProcess);
+
+            _assemblyProcessRepository.UpdateAssemblyProcess(assemblyProcess);
+
+            try
+            {
+                await _assemblyProcessRepository.SaveAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ApsAssemblyProcessExists(assemblyProcess.Id))
+                {
+                    return NotFound();
+                }
+
+                throw;
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// 添加装配过程
+        /// </summary>
+        /// <param name="productId">商品ID</param>
+        /// <param name="model">所添加的装配过程</param>
+        /// <returns></returns>
+        [HttpPost("{productId}/process/", Name = nameof(PostApsAssemblyProcess))]
+        public async Task<ActionResult<AssemblyProcessDto>> PostApsAssemblyProcess([FromRoute] string productId,
+            [FromBody] AssemblyProcessAddDto model)
+        {
+            var assemblyProcess = _mapper.Map<AssemblyProcessAddDto, ApsAssemblyProcess>(model);
+            assemblyProcess.OutputFinishedProductId = productId;
+            try
+            {
+                await _assemblyProcessRepository.AddAssemblyProcess(assemblyProcess);
+                await _assemblyProcessRepository.SaveAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (ApsAssemblyProcessExists(model.Id))
+                {
+                    return Conflict();
+                }
+
+                throw;
+            }
+
+            var returnDto = _mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(assemblyProcess);
+            return CreatedAtRoute(nameof(GetProductAssemblyProcesses),
+                new {productId = returnDto.OutputFinishedProductId}, returnDto);
+        }
+
+        // DELETE: api/ApsAssemblyProcesses/5
+        /// <summary>
+        /// 删除装配过程
+        /// </summary>
+        /// <param name="productId">删除的装配过程ID</param>
+        /// <response code="204">删除成功</response>
+        /// <response code="404">未能找到所删除的商品装配工序</response>
+        [HttpDelete("{productId}/process/")]
+        public async Task<IActionResult> DeleteApsAssemblyProcess(string productId)
+        {
+            var product = await _repository.FirstOrDefaultAsync(x => x.Id == productId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            _assemblyProcessRepository.DeleteAssemblyProcess(product.ApsAssemblyProcess);
+            await _assemblyProcessRepository.SaveAsync();
+
+            return NoContent();
+        }
+
         private bool ApsProductExists(string id)
         {
             return _context.ApsProducts.Any(e => e.Id == id);
+        }
+
+        private bool ApsAssemblyProcessExists(string id)
+        {
+            return _context.ApsAssemblyProcesses.Any(e => e.Id == id);
         }
     }
 }

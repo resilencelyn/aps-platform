@@ -19,14 +19,17 @@ namespace Aps.Controllers
         private readonly ApsContext _context;
         private readonly IRepository<ApsManufactureProcess, string> _repository;
         private readonly IMapper _mapper;
+        private readonly IRepository<ApsProcessResource, string> _resourceRepository;
 
         public ManufactureProcessesController(ApsContext context,
             IRepository<ApsManufactureProcess, string> repository,
-            IMapper mapper)
+            IMapper mapper,
+            IRepository<ApsProcessResource, string> resourceRepository)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _resourceRepository = resourceRepository ?? throw new ArgumentNullException(nameof(resourceRepository));
         }
 
         // GET: api/ManufactureProcesses
@@ -141,6 +144,111 @@ namespace Aps.Controllers
             }
 
             await _repository.DeleteAsync(apsManufactureProcess);
+            return NoContent();
+        }
+
+
+        /// <summary>
+        /// 查询加工工序的资源需求
+        /// </summary>
+        /// <param name="manufactureProcessId">工序ID</param>
+        /// <returns></returns>
+        [HttpGet("{manufactureProcessId}/resource/")]
+        public async Task<IEnumerable<ProcessResourceDto>> GetResourcesFromManufactureProcess(string manufactureProcessId)
+        {
+            var process = await _repository.FirstOrDefaultAsync(x => x.Id == manufactureProcessId);
+
+            var resources = process.ApsResources;
+            var returnDto = _mapper.Map<List<ApsProcessResource>, IEnumerable<ProcessResourceDto>>(resources);
+
+            return returnDto;
+        }
+
+
+        /// <summary>
+        /// 查询加工工序的资源需求
+        /// </summary>
+        /// <param name="manufactureProcessId">工序ID</param>
+        /// <param name="resourceId">资源类别ID</param>
+        /// <returns></returns>
+        [HttpGet("{manufactureProcessId}/resource/{resourceId}", Name = nameof(GetResourceFromManufactureProcess))]
+        public async Task<ActionResult<ProcessResourceDto>> GetResourceFromManufactureProcess(string manufactureProcessId, int resourceId)
+        {
+            var processResource = await _resourceRepository.FirstOrDefaultAsync(x =>
+                x.ProcessId == manufactureProcessId && x.ResourceClassId == resourceId);
+
+            if (processResource == null)
+            {
+                return NotFound();
+            }
+
+            var returnDto = _mapper.Map<ApsProcessResource, ProcessResourceDto>(processResource);
+            return Ok(returnDto);
+        }
+
+        /// <summary>
+        /// 添加工序的资源需求
+        /// </summary>
+        /// <param name="manufactureProcessId">工序ID</param>
+        /// <param name="model">添加的资源需求</param>
+        /// <returns></returns>
+        [HttpPost("{manufactureProcessId}/resource/")]
+        public async Task<ActionResult<ProcessResourceDto>> AddResourceResourceRequisiteForManufactureProcess(string manufactureProcessId,
+            [FromBody] ProcessResourceAddOrUpdateDto model)
+        {
+            var processResource = _mapper.Map<ProcessResourceAddOrUpdateDto, ApsProcessResource>(model);
+            if (processResource.ProcessId != manufactureProcessId)
+            {
+                return BadRequest();
+            }
+
+            var resourceInserted = await _resourceRepository.InsertAsync(processResource);
+
+            var returnDto = _mapper.Map<ApsProcessResource, ProcessResourceDto>(resourceInserted);
+            return CreatedAtRoute(nameof(GetResourceFromManufactureProcess),
+                new { processId = manufactureProcessId, resourceId = returnDto.ResourceClassId}, returnDto);
+        }
+
+        /// <summary>
+        /// 修改工序的某个资源需求
+        /// </summary>
+        /// <param name="manufactureProcessId">工序ID</param>
+        /// <param name="resourceId">资源类别ID</param>
+        /// <param name="model">所更新的资源需求</param>
+        /// <returns></returns>
+        [HttpPut("{manufactureProcessId}/resource/{resourceId}")]
+        public async Task<IActionResult> UpdateResourceRequisiteForManufactureProcess(string manufactureProcessId, int resourceId,
+            [FromBody] ProcessResourceAddOrUpdateDto model)
+        {
+            var processResource = _mapper.Map<ProcessResourceAddOrUpdateDto, ApsProcessResource>(model);
+            if (processResource.ResourceClassId != resourceId || processResource.ProcessId != manufactureProcessId)
+            {
+                return BadRequest();
+            }
+
+            await _resourceRepository.UpdateAsync(processResource);
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// 删除工序的资源需求
+        /// </summary>
+        /// <param name="manufactureProcessId">工序ID</param>
+        /// <param name="resourceId">资源类别ID</param>
+        /// <returns></returns>
+        [HttpDelete("{manufactureProcessId}/resource/{resourceId}")]
+        public async Task<IActionResult> DeleteResourceRequisiteForManufactureProcess(string manufactureProcessId, int resourceId)
+        {
+            var processResource = await _resourceRepository.FirstOrDefaultAsync(x =>
+                x.ProcessId == manufactureProcessId && x.ResourceClassId == resourceId);
+
+            if (processResource == null)
+            {
+                return NotFound();
+            }
+
+            await _resourceRepository.DeleteAsync(processResource);
             return NoContent();
         }
 

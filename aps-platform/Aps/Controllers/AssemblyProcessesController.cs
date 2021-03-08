@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Aps.Infrastructure.Repositories;
 
 namespace Aps.Controllers
 {
@@ -18,16 +19,19 @@ namespace Aps.Controllers
     {
         private readonly ApsContext _context;
         private readonly IAssemblyProcessRepository _assemblyProcessRepository;
+        private readonly IRepository<ApsProcessResource, string> _resourceRepository;
         private readonly IMapper _mapper;
 
         public AssemblyProcessesController(
             ApsContext context,
             IAssemblyProcessRepository assemblyProcessRepository,
+            IRepository<ApsProcessResource, string> resourceRepository,
             IMapper mapper)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _assemblyProcessRepository = assemblyProcessRepository ??
                                          throw new ArgumentNullException(nameof(assemblyProcessRepository));
+            _resourceRepository = resourceRepository ?? throw new ArgumentNullException(nameof(resourceRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -67,91 +71,109 @@ namespace Aps.Controllers
             return Ok(_mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(apsAssemblyProcess));
         }
 
+        
+
         /// <summary>
-        /// 修改装配过程的基本属性
+        /// 查询加工工序的资源需求
         /// </summary>
-        /// <param name="id">装配过程ID</param>
-        /// <param name="apsAssemblyProcess">更新后的装配过程</param>
-        /// <response code="204">更新成功</response>
-        [HttpPut("{id}", Name = nameof(PutApsAssemblyProcess))]
-        public async Task<IActionResult> PutApsAssemblyProcess([FromRoute] string id,
-            [FromBody] ApsAssemblyProcess apsAssemblyProcess)
+        /// <param name="processId">工序ID</param>
+        /// <returns></returns>
+        [HttpGet("{processId}/resource/")]
+        public async Task<IEnumerable<ProcessResourceDto>> GetResourcesFromProcess(string processId)
         {
-            if (id != apsAssemblyProcess.Id)
+            var process = await _assemblyProcessRepository.GetApsAssemblyProcessAsync(processId);
+
+            var resources = process.ApsResources;
+            var returnDto = _mapper.Map<List<ApsProcessResource>, IEnumerable<ProcessResourceDto>>(resources);
+
+            return returnDto;
+        }
+
+
+        /// <summary>
+        /// 查询工序的资源需求
+        /// </summary>
+        /// <param name="processId">工序ID</param>
+        /// <param name="resourceId">资源类别ID</param>
+        /// <returns></returns>
+        [HttpGet("{processId}/resource/{resourceId}", Name = nameof(GetResourceFromProcess))]
+        public async Task<ActionResult<ProcessResourceDto>> GetResourceFromProcess(string processId, int resourceId)
+        {
+            var processResource = await _resourceRepository.FirstOrDefaultAsync(x =>
+                x.ProcessId == processId && x.ResourceClassId == resourceId);
+
+            if (processResource == null)
+            {
+                return NotFound();
+            }
+
+            var returnDto = _mapper.Map<ApsProcessResource, ProcessResourceDto>(processResource);
+            return Ok(returnDto);
+        }
+
+        /// <summary>
+        /// 添加工序的资源需求
+        /// </summary>
+        /// <param name="processId">工序ID</param>
+        /// <param name="model">添加的资源需求</param>
+        /// <returns></returns>
+        [HttpPost("{processId}/resource/")]
+        public async Task<ActionResult<ProcessResourceDto>> AddResourceResourceRequisiteForProcess(string processId,
+            [FromBody] ProcessResourceAddOrUpdateDto model)
+        {
+            var processResource = _mapper.Map<ProcessResourceAddOrUpdateDto, ApsProcessResource>(model);
+            if (processResource.ProcessId != processId)
             {
                 return BadRequest();
             }
 
-            _assemblyProcessRepository.UpdateAssemblyProcess(apsAssemblyProcess);
+            var resourceInserted = await _resourceRepository.InsertAsync(processResource);
 
-            try
+            var returnDto = _mapper.Map<ApsProcessResource, ProcessResourceDto>(resourceInserted);
+            return CreatedAtRoute(nameof(GetResourceFromProcess),
+                new {processId = processId, resourceId = returnDto.ResourceClassId}, returnDto);
+        }
+
+        /// <summary>
+        /// 修改工序的某个资源需求
+        /// </summary>
+        /// <param name="processId">工序ID</param>
+        /// <param name="resourceId">资源类别ID</param>
+        /// <param name="model">所更新的资源需求</param>
+        /// <returns></returns>
+        [HttpPut("{processId}/resource/{resourceId}")]
+        public async Task<IActionResult> UpdateResourceRequisiteForProcess(string processId, int resourceId,
+            [FromBody] ProcessResourceAddOrUpdateDto model)
+        {
+            var processResource = _mapper.Map<ProcessResourceAddOrUpdateDto, ApsProcessResource>(model);
+            if (processResource.ResourceClassId != resourceId || processResource.ProcessId != processId)
             {
-                await _assemblyProcessRepository.SaveAsync();
+                return BadRequest();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ApsAssemblyProcessExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
+            await _resourceRepository.UpdateAsync(processResource);
 
             return NoContent();
         }
 
         /// <summary>
-        /// 添加装配过程
+        /// 删除工序的资源需求
         /// </summary>
-        /// <param name="model">所添加的装配过程</param>
+        /// <param name="processId">工序ID</param>
+        /// <param name="resourceId">资源类别ID</param>
         /// <returns></returns>
-        [HttpPost(Name = nameof(PostApsAssemblyProcess))]
-        public async Task<ActionResult<AssemblyProcessDto>> PostApsAssemblyProcess(
-            [FromBody] AssemblyProcessAddDto model)
+        [HttpDelete("{processId}/resource/{resourceId}")]
+        public async Task<IActionResult> DeleteResourceRequisiteForProcess(string processId, int resourceId)
         {
-            var assemblyProcess = _mapper.Map<AssemblyProcessAddDto, ApsAssemblyProcess>(model);
+            var processResource = await _resourceRepository.FirstOrDefaultAsync(x =>
+                x.ProcessId == processId && x.ResourceClassId == resourceId);
 
-            try
-            {
-                await _assemblyProcessRepository.AddAssemblyProcess(assemblyProcess);
-                await _assemblyProcessRepository.SaveAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ApsAssemblyProcessExists(model.Id))
-                {
-                    return Conflict();
-                }
-
-                throw;
-            }
-
-            var returnDto = _mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(assemblyProcess);
-            return CreatedAtRoute(nameof(GetApsAssemblyProcess), new {id = returnDto.Id}, returnDto);
-        }
-
-        // DELETE: api/ApsAssemblyProcesses/5
-        /// <summary>
-        /// 删除装配过程
-        /// </summary>
-        /// <param name="id">删除的装配过程ID</param>
-        /// <response code="204">删除成功</response>
-        /// <response code="404">未能找到所删除的商品</response>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteApsAssemblyProcess(string id)
-        {
-            var assemblyProcess = await _assemblyProcessRepository.GetApsAssemblyProcessAsync(id);
-            if (assemblyProcess == null)
+            if (processResource == null)
             {
                 return NotFound();
             }
 
-            _assemblyProcessRepository.DeleteAssemblyProcess(assemblyProcess);
-            await _assemblyProcessRepository.SaveAsync();
-
+            await _resourceRepository.DeleteAsync(processResource);
             return NoContent();
         }
 

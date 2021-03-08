@@ -92,6 +92,8 @@ namespace Aps
             services.AddTransient<IRepository<ApsSemiProduct, string>, SemiProductRepository>();
 
             services.AddTransient<IRepository<ApsResource, string>, ResourceRepository>();
+
+            services.AddTransient<IRepository<ApsProcessResource, string>, ProcessResourceRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -121,7 +123,7 @@ namespace Aps
 
                 app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Aps.Net v1"); });
             }
-            
+
             // app.UseHttpsRedirection();
 
             app.UseCors("Open");

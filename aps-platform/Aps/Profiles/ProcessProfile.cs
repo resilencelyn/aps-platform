@@ -34,9 +34,9 @@ namespace Aps.Profiles
             CreateMap<AssemblyProcessAddDto, ApsAssemblyProcess>();
             CreateMap<ManufactureProcessAddDto, ApsManufactureProcess>();
 
-            CreateMap<ProcessResourceAddDto, ApsProcessResource>();
+            CreateMap<ProcessResourceAddOrUpdateDto, ApsProcessResource>();
 
-            CreateMap<ProcessResourceAddDto, ApsProcessResource>();
+            CreateMap<ProcessResourceAddOrUpdateDto, ApsProcessResource>();
             CreateMap<AssemblyProcessSemiProductAddDto, ApsAssemblyProcessSemiProduct>();
 
             #endregion
