@@ -14,31 +14,8 @@
             <summary>
             查询装配工序通过ID
             </summary>
-            <param name="productId">装配工序ID</param>
+            <param name="id">装配工序ID</param>
             <returns></returns>
-        </member>
-        <member name="M:Aps.Controllers.AssemblyProcessesController.PutApsAssemblyProcess(System.String,Aps.Shared.Entity.ApsAssemblyProcess)">
-            <summary>
-            修改装配过程的基本属性
-            </summary>
-            <param name="productId">装配过程ID</param>
-            <param name="apsAssemblyProcess">更新后的装配过程</param>
-            <response code="204">更新成功</response>
-        </member>
-        <member name="M:Aps.Controllers.AssemblyProcessesController.PostApsAssemblyProcess(Aps.Shared.Model.AssemblyProcessAddDto)">
-            <summary>
-            添加装配过程
-            </summary>
-            <param name="model">所添加的装配过程</param>
-            <returns></returns>
-        </member>
-        <member name="M:Aps.Controllers.AssemblyProcessesController.DeleteApsAssemblyProcess(System.String)">
-            <summary>
-            删除装配过程
-            </summary>
-            <param name="productId">删除的装配过程ID</param>
-            <response code="204">删除成功</response>
-            <response code="404">未能找到所删除的商品</response>
         </member>
         <member name="M:Aps.Controllers.AssemblyProcessesController.GetResourcesFromProcess(System.String)">
             <summary>
@@ -89,7 +66,7 @@
             <summary>
             通过ID查询加工工艺
             </summary>
-            <param name="productId">加工工艺ID</param>
+            <param name="id">加工工艺ID</param>
             <reponse code="200">查询成功</reponse>
             <reponse code="404">查询失败，加工工艺不存在</reponse>
         </member>
@@ -97,7 +74,7 @@
             <summary>
             修改加工工艺的基本属性
             </summary>
-            <param name="productId">加工工艺ID</param>
+            <param name="id">加工工艺ID</param>
             <param name="apsManufactureProcess">更新后的加工工艺</param>
             <response code="204">更新成功</response>
         </member>
@@ -111,7 +88,7 @@
             <summary>
             删除加工工艺
             </summary>
-            <param name="productId">删除加工工艺的ID</param>
+            <param name="id">删除加工工艺的ID</param>
             <response code="204">删除成功</response>
             <response code="404">未能找到所删除的加工工艺</response>
         </member>
@@ -164,7 +141,7 @@
             <summary>
             通过ID查询订单
             </summary>
-            <param name="productId">订单ID</param>
+            <param name="id">订单ID</param>
             <reponse code="200">查询成功</reponse>
             <reponse code="404">查询失败，订单不存在</reponse>
         </member>
@@ -172,7 +149,7 @@
             <summary>
             修改订单的基本属性
             </summary>
-            <param name="productId" 例如="product_5">订单ID</param>
+            <param name="id" 例如="product_5">订单ID</param>
             <param name="model">更新后的订单</param>
             <response code="204">更新成功</response>
         </member>
@@ -186,7 +163,7 @@
             <summary>
             删除订单
             </summary>
-            <param name="productId">删除订单的ID</param>
+            <param name="id">删除订单的ID</param>
             <response code="204">删除成功</response>
             <response code="404">未能找到所删除的订单</response>
         </member>
@@ -199,7 +176,7 @@
             <summary>
             通过ID查询商品
             </summary>
-            <param name="productId">商品ID</param>
+            <param name="id">商品ID</param>
             <reponse code="200">查询成功</reponse>
             <reponse code="404">查询失败，商品不存在</reponse>
         </member>
@@ -207,7 +184,7 @@
             <summary>
             修改商品的基本属性
             </summary>
-            <param name="productId" 例如="product_5">商品ID</param>
+            <param name="id" 例如="product_5">商品ID</param>
             <param name="model">更新后的商品</param>
             <response code="204">更新成功</response>
         </member>
@@ -222,7 +199,7 @@
             删除商品
             </summary>
             <remarks>删除商品的同时也会删除商品的装配工序</remarks>
-            <param name="productId">删除商品的ID</param>
+            <param name="id">删除商品的ID</param>
             <response code="204">删除成功</response>
             <response code="404">未能找到所删除的商品</response>
         </member>
@@ -268,6 +245,30 @@
             <param name="productId"></param>
             <returns></returns>
         </member>
+        <member name="M:Aps.Controllers.ProductsController.UpdateAssemblyProcess(System.String,Aps.Shared.Model.AssemblyProcessUpdateDto)">
+            <summary>
+            修改装配过程的基本属性
+            </summary>
+            <param name="productId">装配过程ID</param>
+            <param name="apsAssemblyProcess">更新后的装配过程</param>
+            <response code="204">更新成功</response>
+        </member>
+        <member name="M:Aps.Controllers.ProductsController.PostApsAssemblyProcess(System.String,Aps.Shared.Model.AssemblyProcessAddDto)">
+            <summary>
+            添加装配过程
+            </summary>
+            <param name="productId">商品ID</param>
+            <param name="model">所添加的装配过程</param>
+            <returns></returns>
+        </member>
+        <member name="M:Aps.Controllers.ProductsController.DeleteApsAssemblyProcess(System.String)">
+            <summary>
+            删除装配过程
+            </summary>
+            <param name="productId">删除的装配过程ID</param>
+            <response code="204">删除成功</response>
+            <response code="404">未能找到所删除的商品装配工序</response>
+        </member>
         <member name="M:Aps.Controllers.ResourcesController.GetResources">
             <summary>
             查询所有资源
@@ -277,14 +278,14 @@
             <summary>
             查询资源通过ID
             </summary>
-            <param name="productId">资源ID</param>
+            <param name="id">资源ID</param>
             <returns></returns>
         </member>
         <member name="M:Aps.Controllers.ResourcesController.UpdateResource(System.String,Aps.Shared.Entity.ApsResource)">
             <summary>
             更新资源
             </summary>
-            <param name="productId">资源ID</param>
+            <param name="id">资源ID</param>
             <param name="apsResource">更新的资源</param>
             <returns></returns>
         </member>
@@ -299,7 +300,7 @@
             <summary>
             删除资源
             </summary>
-            <param name="productId">资源ID</param>
+            <param name="id">资源ID</param>
             <returns></returns>
         </member>
         <member name="M:Aps.Controllers.ResourcesController.GetResourceCategory(System.String)">
@@ -356,7 +357,7 @@
             <summary>
             通过ID查询半成品
             </summary>
-            <param name="productId">半成品ID</param>
+            <param name="id">半成品ID</param>
             <reponse code="200">查询成功</reponse>
             <reponse code="404">查询失败，半成品不存在</reponse>
         </member>
@@ -364,7 +365,7 @@
             <summary>
             修改半成品的基本属性
             </summary>
-            <param name="productId">半成品ID</param>
+            <param name="id">半成品ID</param>
             <param name="model">更新后的半成品</param>
             <response code="204">更新成功</response>
         </member>
@@ -378,7 +379,7 @@
             <summary>
             删除半成品
             </summary>
-            <param name="productId">删除半成品的ID</param>
+            <param name="id">删除半成品的ID</param>
             <response code="204">删除成功</response>
             <response code="404">未能找到所删除的半成品</response>
         </member>
