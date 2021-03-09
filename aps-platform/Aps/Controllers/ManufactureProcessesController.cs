@@ -149,12 +149,36 @@ namespace Aps.Controllers
 
 
         /// <summary>
+        /// 批量删除工艺
+        /// </summary>
+        /// <param name="ids">所删除的多个商品ID</param>
+        /// <returns></returns>
+        [HttpPost("Delete/")]
+        public async Task<IActionResult> DeleteManyManufactureProcesses([FromBody] IEnumerable<string> ids)
+        {
+            foreach (var id in ids)
+            {
+                var process = await _repository.FirstOrDefaultAsync(x => x.Id == id);
+                if (process == null)
+                {
+                    return NotFound();
+                }
+
+                await _repository.DeleteAsync(process);
+            }
+
+            return NoContent();
+        }
+
+
+        /// <summary>
         /// 查询加工工序的资源需求
         /// </summary>
         /// <param name="manufactureProcessId">工序ID</param>
         /// <returns></returns>
         [HttpGet("{manufactureProcessId}/resource/")]
-        public async Task<IEnumerable<ProcessResourceDto>> GetResourcesFromManufactureProcess(string manufactureProcessId)
+        public async Task<IEnumerable<ProcessResourceDto>> GetResourcesFromManufactureProcess(
+            string manufactureProcessId)
         {
             var process = await _repository.FirstOrDefaultAsync(x => x.Id == manufactureProcessId);
 
@@ -172,7 +196,8 @@ namespace Aps.Controllers
         /// <param name="resourceId">资源类别ID</param>
         /// <returns></returns>
         [HttpGet("{manufactureProcessId}/resource/{resourceId}", Name = nameof(GetResourceFromManufactureProcess))]
-        public async Task<ActionResult<ProcessResourceDto>> GetResourceFromManufactureProcess(string manufactureProcessId, int resourceId)
+        public async Task<ActionResult<ProcessResourceDto>> GetResourceFromManufactureProcess(
+            string manufactureProcessId, int resourceId)
         {
             var processResource = await _resourceRepository.FirstOrDefaultAsync(x =>
                 x.ProcessId == manufactureProcessId && x.ResourceClassId == resourceId);
@@ -193,7 +218,8 @@ namespace Aps.Controllers
         /// <param name="model">添加的资源需求</param>
         /// <returns></returns>
         [HttpPost("{manufactureProcessId}/resource/")]
-        public async Task<ActionResult<ProcessResourceDto>> AddResourceResourceRequisiteForManufactureProcess(string manufactureProcessId,
+        public async Task<ActionResult<ProcessResourceDto>> AddResourceResourceRequisiteForManufactureProcess(
+            string manufactureProcessId,
             [FromBody] ProcessResourceAddOrUpdateDto model)
         {
             var processResource = _mapper.Map<ProcessResourceAddOrUpdateDto, ApsProcessResource>(model);
@@ -206,7 +232,7 @@ namespace Aps.Controllers
 
             var returnDto = _mapper.Map<ApsProcessResource, ProcessResourceDto>(resourceInserted);
             return CreatedAtRoute(nameof(GetResourceFromManufactureProcess),
-                new { processId = manufactureProcessId, resourceId = returnDto.ResourceClassId}, returnDto);
+                new {processId = manufactureProcessId, resourceId = returnDto.ResourceClassId}, returnDto);
         }
 
         /// <summary>
@@ -217,7 +243,8 @@ namespace Aps.Controllers
         /// <param name="model">所更新的资源需求</param>
         /// <returns></returns>
         [HttpPut("{manufactureProcessId}/resource/{resourceId}")]
-        public async Task<IActionResult> UpdateResourceRequisiteForManufactureProcess(string manufactureProcessId, int resourceId,
+        public async Task<IActionResult> UpdateResourceRequisiteForManufactureProcess(string manufactureProcessId,
+            int resourceId,
             [FromBody] ProcessResourceAddOrUpdateDto model)
         {
             var processResource = _mapper.Map<ProcessResourceAddOrUpdateDto, ApsProcessResource>(model);
@@ -238,7 +265,8 @@ namespace Aps.Controllers
         /// <param name="resourceId">资源类别ID</param>
         /// <returns></returns>
         [HttpDelete("{manufactureProcessId}/resource/{resourceId}")]
-        public async Task<IActionResult> DeleteResourceRequisiteForManufactureProcess(string manufactureProcessId, int resourceId)
+        public async Task<IActionResult> DeleteResourceRequisiteForManufactureProcess(string manufactureProcessId,
+            int resourceId)
         {
             var processResource = await _resourceRepository.FirstOrDefaultAsync(x =>
                 x.ProcessId == manufactureProcessId && x.ResourceClassId == resourceId);

@@ -129,7 +129,6 @@ namespace Aps.Services
                     if (ManufactureProcessRequisite.ContainsKey(p))
                     {
                         ManufactureProcessRequisite[p] = ManufactureProcessRequisite[p] + x.Value;
-                        continue;
                     }
                     else
                     {

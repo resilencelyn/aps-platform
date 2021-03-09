@@ -296,8 +296,6 @@ namespace Aps.Controllers
                 ApsSemiProductId = productSemiProduct.ApsSemiProductId
             });
 
-
-
             return NoContent();
         }
 

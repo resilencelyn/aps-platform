@@ -160,6 +160,30 @@ namespace Aps.Controllers
             return NoContent();
         }
 
+
+        /// <summary>
+        /// 批量删除订单
+        /// </summary>
+        /// <param name="ids">删除订单的ID</param>
+        /// <response code="204">删除成功</response>
+        /// <response code="404">未能找到所删除的订单</response>
+        [HttpPost("delete")]
+        public async Task<IActionResult> DeleteManyOrder([FromBody] IEnumerable<string> ids)
+        {
+            foreach (var id in ids)
+            {
+                var apsOrder = await _context.ApsOrders.FindAsync(id);
+                if (apsOrder == null)
+                {
+                    return NotFound();
+                }
+
+                await _repository.DeleteAsync(apsOrder);
+            }
+
+            return NoContent();
+        }
+
         private bool ApsOrderExists(string id)
         {
             return _context.ApsOrders.Any(e => e.Id == id);
