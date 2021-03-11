@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Http;
 
 namespace Aps.Controllers
 {
@@ -21,25 +22,47 @@ namespace Aps.Controllers
         private readonly IRepository<ApsResource, string> _repository;
         private readonly IMapper _mapper;
         private readonly IRepository<ResourceClassWithResource, int> _resourceCategoryRepository;
+        private readonly IRepository<ResourceClass, int> _resourceClassRepository;
 
-        public ResourcesController(ApsContext context, IRepository<ApsResource, string> repository, IMapper mapper,
-            IRepository<ResourceClassWithResource, int> resourceCategoryRepository)
+        public ResourcesController(ApsContext context,
+            IRepository<ApsResource, string> repository, IMapper mapper,
+            IRepository<ResourceClassWithResource, int> resourceCategoryRepository,
+            IRepository<ResourceClass, int> resourceClassRepository)
         {
             _context = context;
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _resourceCategoryRepository = resourceCategoryRepository ??
                                           throw new ArgumentNullException(nameof(resourceCategoryRepository));
+            _resourceClassRepository = resourceClassRepository;
         }
 
         /// <summary>
         /// 查询所有资源
         /// </summary>
+        /// <param name="resourceClass">资源类别</param>
         [ProducesResponseType(typeof(IEnumerable<ResourceDto>), 200)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ResourceDto>>> GetResources()
+        public async Task<ActionResult<IEnumerable<ResourceDto>>> GetResources(string resourceClass)
         {
-            return Ok(_mapper.Map<List<ApsResource>, IEnumerable<ResourceDto>>(await _repository.GetAllListAsync()));
+            var source = _repository.GetAll();
+
+
+            // Enum.TryParse(resourceClass, out Workspace resourceClassEnum);
+            if (resourceClass != null)
+            {
+                var resourceClassId =
+                    (await _resourceClassRepository.FirstOrDefaultAsync(x => x.ResourceClassName == resourceClass)).Id;
+
+                source =
+                    source.Where(x =>
+                        x.ResourceAttributes.Any(
+                            resourceClassWithResource => resourceClassWithResource.ResourceClassId == resourceClassId));
+            }
+
+
+            var resources = await source.ToListAsync();
+            return Ok(_mapper.Map<IEnumerable<ApsResource>, IEnumerable<ResourceDto>>(resources));
         }
 
         /// <summary>
@@ -72,6 +95,8 @@ namespace Aps.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> UpdateResource(string id, ApsResource apsResource)
         {
             if (id != apsResource.Id)
@@ -169,6 +194,7 @@ namespace Aps.Controllers
 
             return Ok(returnDto);
         }
+
         /// <summary>
         /// 通过ID查询资源类别
         /// </summary>
@@ -177,6 +203,9 @@ namespace Aps.Controllers
         /// <reponse code="200">查询成功</reponse>
         /// <reponse code="404">查询失败，资源类别不存在</reponse>
         [HttpGet("{resourceId}/category/{categoryId}", Name = nameof(GetResourceCategoryById))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ResourceClassWithResourceDto>> GetResourceCategoryById(
             string resourceId, int categoryId)
         {
@@ -191,6 +220,7 @@ namespace Aps.Controllers
             var returnDto = _mapper.Map<ResourceClassWithResource, ResourceClassWithResourceDto>(resourceCategory);
             return Ok(returnDto);
         }
+
         /// <summary>
         /// 修改资源类别的基本属性
         /// </summary>
@@ -198,6 +228,8 @@ namespace Aps.Controllers
         /// <param name="model">更新后的资源类别</param>
         /// <response code="204">更新成功</response>
         [HttpPost("{resourceId}/category/", Name = nameof(AddResourceCategory))]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ResourceClassWithResourceDto>> AddResourceCategory(string resourceId,
             [FromBody] ResourceClassWithResourceAddOrUpdateDto model)
         {
@@ -224,6 +256,8 @@ namespace Aps.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         [HttpPut("{resourceId}/category/{categoryId}", Name = nameof(UpdateResourceCategory))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> UpdateResourceCategory(string resourceId, int categoryId,
             ResourceClassWithResourceAddOrUpdateDto model)
         {
@@ -241,6 +275,7 @@ namespace Aps.Controllers
             // var returnDto = _mapper.Map<ResourceClassWithResource, ResourceClassWithResourceDto>(resourceCategory);
             return NoContent();
         }
+
         /// <summary>
         /// 删除资源的类别
         /// </summary>
@@ -249,6 +284,9 @@ namespace Aps.Controllers
         /// <response code="204">删除成功</response>
         /// <response code="404">未能找到所删除的资源类别</response>
         [HttpDelete("{resourceId}/category/{categoryId}", Name = nameof(DeleteResourceCategory))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteResourceCategory(string resourceId, int categoryId)
         {
             var resourceCategory = await _resourceCategoryRepository.FirstOrDefaultAsync(x =>

@@ -7,7 +7,7 @@ namespace Aps.Shared.Entity
     public class ApsJob
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public ApsOrder ApsOrder { get; set; }
         public ApsProduct ApsProduct { get; set; }
         public ProductInstance ProductInstance { get; set; }

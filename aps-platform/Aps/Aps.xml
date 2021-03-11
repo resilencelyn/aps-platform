@@ -92,6 +92,13 @@
             <response code="204">删除成功</response>
             <response code="404">未能找到所删除的加工工艺</response>
         </member>
+        <member name="M:Aps.Controllers.ManufactureProcessesController.DeleteManyManufactureProcesses(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            批量删除工艺
+            </summary>
+            <param name="ids">所删除的多个商品ID</param>
+            <returns></returns>
+        </member>
         <member name="M:Aps.Controllers.ManufactureProcessesController.GetResourcesFromManufactureProcess(System.String)">
             <summary>
             查询加工工序的资源需求
@@ -164,6 +171,14 @@
             删除订单
             </summary>
             <param name="id">删除订单的ID</param>
+            <response code="204">删除成功</response>
+            <response code="404">未能找到所删除的订单</response>
+        </member>
+        <member name="M:Aps.Controllers.OrdersController.DeleteManyOrder(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            批量删除订单
+            </summary>
+            <param name="ids">删除订单的ID</param>
             <response code="204">删除成功</response>
             <response code="404">未能找到所删除的订单</response>
         </member>
@@ -269,10 +284,11 @@
             <response code="204">删除成功</response>
             <response code="404">未能找到所删除的商品装配工序</response>
         </member>
-        <member name="M:Aps.Controllers.ResourcesController.GetResources">
+        <member name="M:Aps.Controllers.ResourcesController.GetResources(System.String)">
             <summary>
             查询所有资源
             </summary>
+            <param name="resourceClass">资源类别</param>
         </member>
         <member name="M:Aps.Controllers.ResourcesController.GetApsResource(System.String)">
             <summary>

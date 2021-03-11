@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Aps.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace Aps.Controllers
 {
@@ -52,6 +53,9 @@ namespace Aps.Controllers
         /// <reponse code="200">查询成功</reponse>
         /// <reponse code="404">查询失败，半成品不存在</reponse>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<SemiProductDto>> GetApsSemiProduct(string id)
         {
             var apsSemiProduct = await _context.ApsSemiProducts.FindAsync(id);
@@ -71,6 +75,10 @@ namespace Aps.Controllers
         /// <param name="model">更新后的半成品</param>
         /// <response code="204">更新成功</response>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> PutApsSemiProduct(string id, SemiProductAddOrUpdateDto model)
         {
             if (id != model.Id)
@@ -103,6 +111,10 @@ namespace Aps.Controllers
         /// </summary>
         /// <param name="model">所添加的半成品</param>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<SemiProductDto>> CreateSemiProduct(SemiProductAddOrUpdateDto model)
         {
             var semiProduct = _mapper.Map<SemiProductAddOrUpdateDto, ApsSemiProduct>(model);
@@ -142,6 +154,9 @@ namespace Aps.Controllers
         /// <response code="204">删除成功</response>
         /// <response code="404">未能找到所删除的半成品</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteApsSemiProduct(string id)
         {
             var apsSemiProduct = await _context.ApsSemiProducts.FindAsync(id);
@@ -182,6 +197,9 @@ namespace Aps.Controllers
         /// <param name="processId"></param>
         /// <returns></returns>
         [HttpGet("{semiProductId}/process/{processId}", Name = nameof(GetProcessFromSemiProduct))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ManufactureProcessDto>> GetProcessFromSemiProduct(string semiProductId,
             string processId)
         {

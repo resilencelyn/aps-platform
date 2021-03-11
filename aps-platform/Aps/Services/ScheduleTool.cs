@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Aps.Shared.Model;
+using AutoMapper;
 
 namespace Aps.Services
 {
@@ -42,8 +44,9 @@ namespace Aps.Services
 
     public class ScheduleTool : IScheduleTool
     {
-        private const int Ub = 1000;
+        private const int Ub = 1000000;
         private readonly ApsContext _context;
+        private readonly IMapper _mapper;
         public CpModel Model { get; private set; }
         public CpSolver Solver { get; private set; }
         public IEnumerable<ApsOrder> OrdersList { get; set; }
@@ -72,9 +75,10 @@ namespace Aps.Services
             new Dictionary<(ApsOrder apsOrder, ProductInstance productInstance), List<SemiProductInstance>>();
 
 
-        public ScheduleTool(ApsContext context)
+        public ScheduleTool(ApsContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
             Model = new CpModel();
             Solver = new CpSolver();
         }
@@ -178,6 +182,7 @@ namespace Aps.Services
                                         (order, productInstance, semiProductInstance, manufactureProcess)
                                         , new ScheduleManufactureJob
                                         {
+                                            Id = Guid.NewGuid(),
                                             ApsOrder = order,
                                             ApsProduct = orderProduct,
                                             ProductInstance = productInstance,
@@ -199,6 +204,7 @@ namespace Aps.Services
                                         (order, productInstance, semiProductInstance, manufactureProcess)
                                         , new ScheduleManufactureJob
                                         {
+                                            Id = Guid.NewGuid(),
                                             ApsOrder = order,
                                             ApsProduct = orderProduct,
                                             ProductInstance = productInstance,
@@ -241,7 +247,7 @@ namespace Aps.Services
 
                 int remainder = requisite;
                 int producted = 0;
-                var productedOnce = remainder >= batch ? batch : remainder;
+
                 var jobsInBatch = jobGroupByProcess[manufactureProcess];
 
                 var job = jobsInBatch.First();
@@ -253,6 +259,8 @@ namespace Aps.Services
 
                 for (int i = 0; i < jobProductTimes; i++)
                 {
+                    var productedOnce = remainder >= batch ? batch : remainder;
+
                     var jobDuration = job.Duration;
 
                     string suffix = $"Order:{job.ApsOrder.Id}_" +
@@ -411,15 +419,13 @@ namespace Aps.Services
             {
                 if (apsManufactureProcess.PrevPartId != null)
                 {
-                    ApsManufactureProcess process =
-                        ManufactureProcesses.First(x => x.Id == apsManufactureProcess.PrevPartId);
-                    Model.Add(ScheduleManufactureJobs
-                            [(apsOrder, productInstance, semiProductInstance, process)]
-                        .Vars.EndVar < job.Vars.StartVar);
+                    ApsManufactureProcess preProcess =
+                        ManufactureProcesses.FirstOrDefault(x => x.Id == apsManufactureProcess.PrevPartId);
+
+                    var preJob = ScheduleManufactureJobs[(apsOrder, productInstance, semiProductInstance, preProcess)];
+                    Model.Add(preJob.Vars.EndVar < job.Vars.StartVar);
                 }
             }
-
-            // Model.AddNoOverlap(ScheduleManufactureJobs.Select(x => x.Value.Vars.Interval));
         }
 
         public void SetObjective()
@@ -430,8 +436,10 @@ namespace Aps.Services
             Model.Minimize(objective);
         }
 
-        public async Task<IEnumerable<ScheduleManufactureJob>> Solve()
+        public async Task<IEnumerable<JobDto>> Solve()
         {
+            // Solver.StringParameters = "max_time_in_seconds:120.0";
+
             CpSolverStatus cpSolverStatus = await Task.Run(() => Solver.Solve(Model));
             Console.WriteLine(cpSolverStatus);
             var cpModelProto = new CpModelProto();
@@ -469,7 +477,8 @@ namespace Aps.Services
                     : endValue);
             }
 
-            return ScheduleManufactureJobs.Select(x => x.Value);
+            return _mapper.Map<IEnumerable<ScheduleManufactureJob>, IEnumerable<JobDto>>(
+                ScheduleManufactureJobs.Select(x => x.Value));
         }
     }
 }

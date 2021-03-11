@@ -29,7 +29,7 @@ namespace Aps.Controllers
         {
             var orders = await _context.ApsOrders
                 .AsNoTracking()
-                .Take(1)
+                .Take(2)
                 .Include(x => x.Product)
                 .ThenInclude(x => x.ApsAssemblyProcess)
                 .ThenInclude(x => x.ApsResources)
@@ -40,6 +40,12 @@ namespace Aps.Controllers
                 .ThenInclude(x => x.ApsManufactureProcesses)
                 .ThenInclude(x => x.ApsResources)
                 .ThenInclude(x => x.ResourceClass)
+
+                .Include(x => x.Product)
+                .ThenInclude(x => x.AssembleBySemiProducts)
+                .ThenInclude(x => x.ApsSemiProduct)
+                .ThenInclude(x => x.ApsManufactureProcesses)
+                .ThenInclude(x => x.PrevPart)
                 .AsSplitQuery()
                 .ToListAsync();
             _scheduleTool.SetPrerequisite(orders);
@@ -49,12 +55,7 @@ namespace Aps.Controllers
             await _scheduleTool.AssignResource();
             _scheduleTool.SetPreJobConstraint();
             _scheduleTool.SetObjective();
-            var scheduleManufactureJobs = (await _scheduleTool.Solve()).Select(
-                x => new
-                {
-                    x.Start,
-                    x.End,
-                }).ToList();
+            var scheduleManufactureJobs = await _scheduleTool.Solve();
 
             return Ok(scheduleManufactureJobs);
         }

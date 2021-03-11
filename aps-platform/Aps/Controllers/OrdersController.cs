@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Aps.Controllers
 {
@@ -49,6 +50,9 @@ namespace Aps.Controllers
         /// <reponse code="200">查询成功</reponse>
         /// <reponse code="404">查询失败，订单不存在</reponse>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<OrderDto>> GetOrder(string id)
         {
             var apsOrder = await _repository.FirstOrDefaultAsync(x => x.Id == id);
@@ -68,6 +72,10 @@ namespace Aps.Controllers
         /// <param name="model">更新后的订单</param>
         /// <response code="204">更新成功</response>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> UpdateOrder(string id, OrderUpdateDto model)
         {
             if (id != model.Id)
@@ -107,6 +115,9 @@ namespace Aps.Controllers
         /// </summary>
         /// <param name="model">所添加的订单</param>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<OrderDto>> CreateOrder(OrderAddDto model)
         {
             ApsOrder orderInserted;
@@ -147,6 +158,9 @@ namespace Aps.Controllers
         /// <response code="204">删除成功</response>
         /// <response code="404">未能找到所删除的订单</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteOrder(string id)
         {
             var apsOrder = await _context.ApsOrders.FindAsync(id);
@@ -168,6 +182,9 @@ namespace Aps.Controllers
         /// <response code="204">删除成功</response>
         /// <response code="404">未能找到所删除的订单</response>
         [HttpPost("delete")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteManyOrder([FromBody] IEnumerable<string> ids)
         {
             foreach (var id in ids)

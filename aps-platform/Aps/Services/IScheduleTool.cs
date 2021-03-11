@@ -2,6 +2,7 @@
 using Google.OrTools.Sat;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Aps.Shared.Model;
 
 namespace Aps.Services
 {
@@ -25,6 +26,6 @@ namespace Aps.Services
         Task AssignResource();
         void SetPreJobConstraint();
         void SetObjective();
-        Task<IEnumerable<ScheduleManufactureJob>> Solve();
+        Task<IEnumerable<JobDto>> Solve();
     }
 }

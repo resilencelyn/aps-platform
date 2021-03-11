@@ -81,7 +81,7 @@ namespace Aps
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddTransient<IAssemblyProcessRepository, AssemblyProcessRepository>();
-            services.AddScoped<IScheduleTool, ScheduleTool>();
+            services.AddTransient<IScheduleTool, ScheduleTool>();
 
             services.AddTransient(typeof(IRepository<,>), typeof(RepositoryBase<,>));
             services.AddTransient<IRepository<ApsManufactureProcess, string>, ManufactureProcessRepository>();

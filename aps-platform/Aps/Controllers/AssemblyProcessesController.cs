@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Aps.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Http;
 
 namespace Aps.Controllers
 {
@@ -97,6 +98,9 @@ namespace Aps.Controllers
         /// <param name="resourceId">资源类别ID</param>
         /// <returns></returns>
         [HttpGet("{processId}/resource/{resourceId}", Name = nameof(GetResourceFromProcess))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ProcessResourceDto>> GetResourceFromProcess(string processId, int resourceId)
         {
             var processResource = await _resourceRepository.FirstOrDefaultAsync(x =>
@@ -118,6 +122,9 @@ namespace Aps.Controllers
         /// <param name="model">添加的资源需求</param>
         /// <returns></returns>
         [HttpPost("{processId}/resource/")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ProcessResourceDto>> AddResourceResourceRequisiteForProcess(string processId,
             [FromBody] ProcessResourceAddOrUpdateDto model)
         {
@@ -142,6 +149,9 @@ namespace Aps.Controllers
         /// <param name="model">所更新的资源需求</param>
         /// <returns></returns>
         [HttpPut("{processId}/resource/{resourceId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> UpdateResourceRequisiteForProcess(string processId, int resourceId,
             [FromBody] ProcessResourceAddOrUpdateDto model)
         {
@@ -163,6 +173,9 @@ namespace Aps.Controllers
         /// <param name="resourceId">资源类别ID</param>
         /// <returns></returns>
         [HttpDelete("{processId}/resource/{resourceId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteResourceRequisiteForProcess(string processId, int resourceId)
         {
             var processResource = await _resourceRepository.FirstOrDefaultAsync(x =>

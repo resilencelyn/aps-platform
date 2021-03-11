@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Aps.Controllers
 {
@@ -51,6 +52,9 @@ namespace Aps.Controllers
         /// <reponse code="200">查询成功</reponse>
         /// <reponse code="404">查询失败，加工工艺不存在</reponse>
         [HttpGet("{id}", Name = nameof(GetManufactureProcess))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ManufactureProcessDto>> GetManufactureProcess(string id)
         {
             var apsManufactureProcess = await _repository.FirstOrDefaultAsync(x =>
@@ -71,6 +75,10 @@ namespace Aps.Controllers
         /// <param name="apsManufactureProcess">更新后的加工工艺</param>
         /// <response code="204">更新成功</response>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> PutApsManufactureProcess(string id,
             ApsManufactureProcess apsManufactureProcess)
         {
@@ -103,6 +111,9 @@ namespace Aps.Controllers
         /// </summary>
         /// <param name="model">所添加的加工工艺</param>
         [HttpPost(Name = nameof(PostApsManufactureProcess))]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ManufactureProcessDto>> PostApsManufactureProcess(
             ManufactureProcessAddDto model)
         {
@@ -135,6 +146,9 @@ namespace Aps.Controllers
         /// <response code="204">删除成功</response>
         /// <response code="404">未能找到所删除的加工工艺</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteApsManufactureProcess(string id)
         {
             var apsManufactureProcess = await _repository.FirstOrDefaultAsync(x => x.Id == id);
@@ -154,6 +168,9 @@ namespace Aps.Controllers
         /// <param name="ids">所删除的多个商品ID</param>
         /// <returns></returns>
         [HttpPost("Delete/")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteManyManufactureProcesses([FromBody] IEnumerable<string> ids)
         {
             foreach (var id in ids)
@@ -196,6 +213,9 @@ namespace Aps.Controllers
         /// <param name="resourceId">资源类别ID</param>
         /// <returns></returns>
         [HttpGet("{manufactureProcessId}/resource/{resourceId}", Name = nameof(GetResourceFromManufactureProcess))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ProcessResourceDto>> GetResourceFromManufactureProcess(
             string manufactureProcessId, int resourceId)
         {
@@ -218,6 +238,9 @@ namespace Aps.Controllers
         /// <param name="model">添加的资源需求</param>
         /// <returns></returns>
         [HttpPost("{manufactureProcessId}/resource/")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ProcessResourceDto>> AddResourceResourceRequisiteForManufactureProcess(
             string manufactureProcessId,
             [FromBody] ProcessResourceAddOrUpdateDto model)
@@ -243,6 +266,9 @@ namespace Aps.Controllers
         /// <param name="model">所更新的资源需求</param>
         /// <returns></returns>
         [HttpPut("{manufactureProcessId}/resource/{resourceId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> UpdateResourceRequisiteForManufactureProcess(string manufactureProcessId,
             int resourceId,
             [FromBody] ProcessResourceAddOrUpdateDto model)
@@ -265,6 +291,9 @@ namespace Aps.Controllers
         /// <param name="resourceId">资源类别ID</param>
         /// <returns></returns>
         [HttpDelete("{manufactureProcessId}/resource/{resourceId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteResourceRequisiteForManufactureProcess(string manufactureProcessId,
             int resourceId)
         {

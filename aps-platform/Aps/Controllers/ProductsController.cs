@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Aps.Services;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Http;
 
 namespace Aps.Controllers
 {
@@ -65,11 +66,11 @@ namespace Aps.Controllers
         [ProducesResponseType(typeof(ProductDto), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        [HttpGet("{productId}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<ProductDto>> GetProduct(string id)
         {
             var apsProduct = await _repository.FirstOrDefaultAsync(x =>
-                string.Equals(x.Id, id, StringComparison.InvariantCultureIgnoreCase));
+                x.Id == id);
 
             if (apsProduct == null)
             {
@@ -89,7 +90,7 @@ namespace Aps.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        [HttpPut("{productId}", Name = nameof(UpdateProduct))]
+        [HttpPut("{id}", Name = nameof(UpdateProduct))]
         public async Task<IActionResult> UpdateProduct([BindRequired] string id, ProductUpdateDto model)
         {
             ApsProduct product = _mapper.Map<ProductUpdateDto, ApsProduct>(model);
@@ -123,6 +124,8 @@ namespace Aps.Controllers
         [HttpPost(Name = nameof(CreateProduct))]
         [ProducesResponseType(typeof(ProductDto), 201)]
         [ProducesResponseType(500)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ProductDto>> CreateProduct(ProductAddDto model)
         {
             var apsProduct = _mapper.Map<ProductAddDto, ApsProduct>(model);
@@ -154,7 +157,7 @@ namespace Aps.Controllers
         /// <response code="404">未能找到所删除的商品</response>
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        [HttpDelete("{productId}", Name = nameof(DeleteProduct))]
+        [HttpDelete("{id}", Name = nameof(DeleteProduct))]
         public async Task<IActionResult> DeleteProduct(string id)
         {
             var apsProduct = await _context.ApsProducts.FindAsync(id);
@@ -220,6 +223,8 @@ namespace Aps.Controllers
         [ProducesResponseType(409)]
         [ProducesResponseType(500)]
         [HttpPost("{productId}/SemiProductRequisite/")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<ProductSemiProductDto>> AddSemiProductRequisiteForProduct(
             [FromRoute, BindRequired] string productId, [FromBody, BindRequired] ProductSemiProductAddDto model)
         {
@@ -264,6 +269,7 @@ namespace Aps.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpPut("{productId}/SemiProductRequisite/{semiProductId}")]
         public async Task<IActionResult> UpdateSemiProductRequisiteForProduct(
             string productId, string semiProductId, ProductSemiProductUpdateDto model)
@@ -307,6 +313,8 @@ namespace Aps.Controllers
         [ProducesResponseType(201)]
         [ProducesResponseType(404)]
         [HttpDelete("{productId}/SemiProductRequisite/{semiProductId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteSemiProductRequisiteForProduct(string productId, string semiProductId)
         {
             var product = await _repository.FirstOrDefaultAsync(x => x.Id == productId);
@@ -355,6 +363,10 @@ namespace Aps.Controllers
         /// <param name="apsAssemblyProcess">更新后的装配过程</param>
         /// <response code="204">更新成功</response>
         [HttpPut("{productId}/process/", Name = nameof(UpdateAssemblyProcess))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> UpdateAssemblyProcess([FromRoute] string productId,
             [FromBody] AssemblyProcessUpdateDto apsAssemblyProcess)
         {
@@ -392,6 +404,9 @@ namespace Aps.Controllers
         /// <param name="model">所添加的装配过程</param>
         /// <returns></returns>
         [HttpPost("{productId}/process/", Name = nameof(PostApsAssemblyProcess))]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<AssemblyProcessDto>> PostApsAssemblyProcess([FromRoute] string productId,
             [FromBody] AssemblyProcessAddDto model)
         {
@@ -425,6 +440,9 @@ namespace Aps.Controllers
         /// <response code="204">删除成功</response>
         /// <response code="404">未能找到所删除的商品装配工序</response>
         [HttpDelete("{productId}/process/")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteApsAssemblyProcess(string productId)
         {
             var product = await _repository.FirstOrDefaultAsync(x => x.Id == productId);
