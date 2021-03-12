@@ -1,17 +1,17 @@
 ﻿using Aps.Infrastructure;
 using Aps.Infrastructure.Repositories;
+using Aps.Services;
 using Aps.Shared.Entity;
 using Aps.Shared.Model;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Aps.Services;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Http;
 
 namespace Aps.Controllers
 {
@@ -144,7 +144,7 @@ namespace Aps.Controllers
                 throw;
             }
 
-            return CreatedAtAction(nameof(GetProduct), new {id = productInserted.Id},
+            return CreatedAtAction(nameof(GetProduct), new { id = productInserted.Id },
                 _mapper.Map<ApsProduct, ProductDto>(productInserted));
         }
 
@@ -257,7 +257,7 @@ namespace Aps.Controllers
 
             var returnDto = _mapper.Map<ApsProductSemiProduct, ProductSemiProductDto>(inserted);
             return CreatedAtRoute(nameof(GetSemiProductRequisiteFromProduct),
-                new {productId = product.Id, semiProductId = inserted.ApsSemiProductId}, returnDto);
+                new { productId = product.Id, semiProductId = inserted.ApsSemiProductId }, returnDto);
         }
 
         /// <summary>
@@ -429,7 +429,7 @@ namespace Aps.Controllers
 
             var returnDto = _mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(assemblyProcess);
             return CreatedAtRoute(nameof(GetProductAssemblyProcesses),
-                new {productId = returnDto.OutputFinishedProductId}, returnDto);
+                new { productId = returnDto.OutputFinishedProductId }, returnDto);
         }
 
         // DELETE: api/ApsAssemblyProcesses/5

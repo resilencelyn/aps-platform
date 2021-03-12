@@ -3,14 +3,14 @@ using Aps.Infrastructure.Repositories;
 using Aps.Shared.Entity;
 using Aps.Shared.Model;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Http;
 
 namespace Aps.Controllers
 {
@@ -154,7 +154,7 @@ namespace Aps.Controllers
             }
 
             var returnDto = _mapper.Map<ApsResource, ResourceDto>(resource);
-            return CreatedAtAction("GetApsResource", new {id = returnDto.Id}, returnDto);
+            return CreatedAtAction("GetApsResource", new { id = returnDto.Id }, returnDto);
         }
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace Aps.Controllers
                 _mapper.Map<ResourceClassWithResource, ResourceClassWithResourceDto>(resourceCategoryInserted);
 
             return CreatedAtRoute(nameof(GetResourceCategoryById),
-                new {resourceId, categoryId = returnDto.ResourceClassId}, returnDto);
+                new { resourceId, categoryId = returnDto.ResourceClassId }, returnDto);
         }
 
         /// <summary>

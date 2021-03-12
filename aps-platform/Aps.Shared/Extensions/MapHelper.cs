@@ -1,4 +1,4 @@
-﻿namespace Aps.Extensions
+﻿namespace Aps.Shared.Extensions
 {
     public class MapHelper
     {

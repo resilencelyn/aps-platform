@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Aps.Shared.Model
+﻿namespace Aps.Shared.Model
 {
     public class ProductUpdateDto
     {

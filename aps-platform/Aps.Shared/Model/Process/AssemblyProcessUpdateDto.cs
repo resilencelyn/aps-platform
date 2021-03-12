@@ -1,6 +1,6 @@
 ﻿namespace Aps.Shared.Model
 {
-    public class AssemblyProcessUpdateDto: AssemblyProcessDto
+    public class AssemblyProcessUpdateDto : AssemblyProcessDto
     {
     }
 }

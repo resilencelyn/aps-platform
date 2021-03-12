@@ -24,7 +24,7 @@ namespace Aps.Services
                 .Include(x => x.InputSemiFinishedProducts)
                 .Include(x => x.OutputFinishedProduct)
                 .Include(x => x.ApsResources)
-                .ThenInclude(x=> x.ResourceClass)
+                .ThenInclude(x => x.ResourceClass)
                 .AsSplitQuery()
                 .ToListAsync();
         }

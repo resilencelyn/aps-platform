@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace Aps.Extensions
+namespace Aps.Shared.Extensions
 {
     public static class EnumHelper<T>
     {

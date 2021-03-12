@@ -3,7 +3,6 @@ using Aps.Infrastructure.Repositories;
 using Aps.Shared.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Aps.Services
 {

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Aps.Shared.Model;
 
-namespace Aps.Services
+namespace Aps.Shared.Model
 {
     public class SemiProductAddOrUpdateDto
     {

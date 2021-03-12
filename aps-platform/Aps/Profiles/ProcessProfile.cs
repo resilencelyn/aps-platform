@@ -1,4 +1,5 @@
 ﻿using Aps.Shared.Entity;
+using Aps.Shared.Extensions;
 using Aps.Shared.Model;
 using AutoMapper;
 

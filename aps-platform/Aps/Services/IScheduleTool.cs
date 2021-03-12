@@ -1,8 +1,8 @@
 ﻿using Aps.Shared.Entity;
+using Aps.Shared.Model;
 using Google.OrTools.Sat;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Aps.Shared.Model;
 
 namespace Aps.Services
 {

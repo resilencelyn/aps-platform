@@ -3,14 +3,13 @@ using Aps.Infrastructure.Repositories;
 using Aps.Shared.Entity;
 using Aps.Shared.Model;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Aps.Services;
-using Microsoft.AspNetCore.Http;
 
 namespace Aps.Controllers
 {
@@ -143,7 +142,7 @@ namespace Aps.Controllers
 
             var returnDto = _mapper.Map<ApsSemiProduct, SemiProductDto>(semiProduct);
 
-            return CreatedAtAction("GetApsSemiProduct", new {id = returnDto.Id}, returnDto);
+            return CreatedAtAction("GetApsSemiProduct", new { id = returnDto.Id }, returnDto);
         }
 
 
@@ -245,7 +244,7 @@ namespace Aps.Controllers
             var returnDto = _mapper.Map<ApsManufactureProcess, ManufactureProcessDto>(processInserted);
 
             return CreatedAtAction(nameof(GetProcessFromSemiProduct),
-                new {semiProductId, processId = returnDto.Id}, returnDto);
+                new { semiProductId, processId = returnDto.Id }, returnDto);
         }
 
         /// <summary>

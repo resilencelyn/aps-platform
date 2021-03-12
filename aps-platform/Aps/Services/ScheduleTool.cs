@@ -1,13 +1,14 @@
 ﻿using Aps.Infrastructure;
 using Aps.Shared.Entity;
+using Aps.Shared.Extensions;
+using Aps.Shared.Model;
+using AutoMapper;
 using Google.OrTools.Sat;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Aps.Shared.Model;
-using AutoMapper;
 
 namespace Aps.Services
 {
@@ -62,7 +63,8 @@ namespace Aps.Services
 
 
         public Dictionary<(ApsOrder, ProductInstance, SemiProductInstance, ApsManufactureProcess),
-            ScheduleManufactureJob> ScheduleManufactureJobs { get; private set; }
+            ScheduleManufactureJob> ScheduleManufactureJobs
+        { get; private set; }
             = new Dictionary<(ApsOrder, ProductInstance, SemiProductInstance, ApsManufactureProcess),
                 ScheduleManufactureJob>();
 
@@ -71,7 +73,8 @@ namespace Aps.Services
             new Dictionary<ApsOrder, List<ProductInstance>>();
 
         public Dictionary<(ApsOrder order, ProductInstance productInstance), List<SemiProductInstance>>
-            SemiProductInstances { get; private set; } =
+            SemiProductInstances
+        { get; private set; } =
             new Dictionary<(ApsOrder apsOrder, ProductInstance productInstance), List<SemiProductInstance>>();
 
 
@@ -197,7 +200,7 @@ namespace Aps.Services
                                     IntVar startVar = Model.NewIntVar(0, Ub, "start" + suffix);
                                     IntVar endVar = Model.NewIntVar(0, Ub, "end" + suffix);
                                     IntervalVar interval =
-                                        Model.NewIntervalVar(startVar, (int) duration.TotalMinutes, endVar,
+                                        Model.NewIntervalVar(startVar, (int)duration.TotalMinutes, endVar,
                                             "interval" + suffix);
 
                                     ScheduleManufactureJobs.Add(
@@ -273,7 +276,7 @@ namespace Aps.Services
                     IntVar startVar = Model.NewIntVar(0, Ub, "start" + suffix);
                     IntVar endVar = Model.NewIntVar(0, Ub, "end" + suffix);
                     IntervalVar interval =
-                        Model.NewIntervalVar(startVar, (int) jobDuration.TotalMinutes, endVar,
+                        Model.NewIntervalVar(startVar, (int)jobDuration.TotalMinutes, endVar,
                             "interval" + suffix);
 
 
@@ -354,7 +357,7 @@ namespace Aps.Services
                         }
                         else
                         {
-                            processResourcesVarFromClass.Add(resourceClassId, new List<IntVar> {performed});
+                            processResourcesVarFromClass.Add(resourceClassId, new List<IntVar> { performed });
                         }
                     }
 
@@ -385,7 +388,7 @@ namespace Aps.Services
             for (int i = 0; i < jobCount; i++)
             {
                 resourceJobs[i].Vars.Deconstruct(out IntVar startVar, out IntVar endVar, out IntervalVar intervalVar);
-                var duration = (int) resourceJobs[i].Duration.TotalMinutes;
+                var duration = (int)resourceJobs[i].Duration.TotalMinutes;
 
                 for (int j = 0; j < resourcesCount; j++)
                 {
@@ -438,11 +441,10 @@ namespace Aps.Services
 
         public async Task<IEnumerable<JobDto>> Solve()
         {
-            // Solver.StringParameters = "max_time_in_seconds:120.0";
+            Solver.StringParameters = "max_time_in_seconds:30.0";
 
             CpSolverStatus cpSolverStatus = await Task.Run(() => Solver.Solve(Model));
             Console.WriteLine(cpSolverStatus);
-            var cpModelProto = new CpModelProto();
             switch (cpSolverStatus)
             {
                 case CpSolverStatus.Unknown:

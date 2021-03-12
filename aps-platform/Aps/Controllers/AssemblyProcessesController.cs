@@ -1,16 +1,15 @@
 ﻿using Aps.Infrastructure;
+using Aps.Infrastructure.Repositories;
 using Aps.Services;
 using Aps.Shared.Entity;
 using Aps.Shared.Model;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Aps.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Http;
 
 namespace Aps.Controllers
 {
@@ -72,7 +71,7 @@ namespace Aps.Controllers
             return Ok(_mapper.Map<ApsAssemblyProcess, AssemblyProcessDto>(apsAssemblyProcess));
         }
 
-        
+
 
         /// <summary>
         /// 查询加工工序的资源需求
@@ -138,7 +137,7 @@ namespace Aps.Controllers
 
             var returnDto = _mapper.Map<ApsProcessResource, ProcessResourceDto>(resourceInserted);
             return CreatedAtRoute(nameof(GetResourceFromProcess),
-                new {processId = processId, resourceId = returnDto.ResourceClassId}, returnDto);
+                new { processId = processId, resourceId = returnDto.ResourceClassId }, returnDto);
         }
 
         /// <summary>

@@ -1,31 +1,12 @@
-﻿using System;
+﻿using Aps.Shared.Extensions;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Aps.Shared.Entity
 {
     // [JsonConverter(typeof(StringEnumConverter))]
-    public enum ProductionMode
-    {
-        [EnumMember(Value = "批处理")] Bp = 1,
-        [EnumMember(Value = "流处理")] Sp = 2,
-    }
-
-    public enum ResourceType
-    {
-        [EnumMember(Value = nameof(人员))] 人员 = 1,
-        [EnumMember(Value = nameof(设备))] 设备 = 2,
-        [EnumMember(Value = nameof(机床))] 机床 = 3,
-    }
-
-    public enum Workspace
-    {
-        [EnumMember(Value = nameof(加工))] 加工 = 1,
-        [EnumMember(Value = nameof(装配))] 装配 = 2,
-    }
 
     public abstract class ApsProcess
     {

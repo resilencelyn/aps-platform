@@ -1,7 +1,7 @@
-﻿using AutoMapper;
-using System;
-using Aps.Shared.Entity;
+﻿using Aps.Shared.Entity;
 using Aps.Shared.Model;
+using AutoMapper;
+using System;
 
 namespace Aps.Profiles
 {
@@ -20,7 +20,7 @@ namespace Aps.Profiles
                 .IncludeMembers(e => e.ApsOrder)
                 .IncludeMembers(e => e.ApsProduct)
                 .IncludeMembers(e => e.ProductInstance);
-            
+
             CreateMap<TimeSpan, int>().ConvertUsing(e => (int)e.TotalMinutes);
             CreateMap<int, TimeSpan>().ConvertUsing(e => TimeSpan.FromMinutes(e));
         }

@@ -1,4 +1,4 @@
-﻿using Aps.Shared.Entity;
+﻿using Aps.Shared.Extensions;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 

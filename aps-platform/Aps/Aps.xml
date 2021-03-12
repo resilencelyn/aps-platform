@@ -377,7 +377,7 @@
             <reponse code="200">查询成功</reponse>
             <reponse code="404">查询失败，半成品不存在</reponse>
         </member>
-        <member name="M:Aps.Controllers.SemiProductsController.PutApsSemiProduct(System.String,Aps.Services.SemiProductAddOrUpdateDto)">
+        <member name="M:Aps.Controllers.SemiProductsController.PutApsSemiProduct(System.String,Aps.Shared.Model.SemiProductAddOrUpdateDto)">
             <summary>
             修改半成品的基本属性
             </summary>
@@ -385,7 +385,7 @@
             <param name="model">更新后的半成品</param>
             <response code="204">更新成功</response>
         </member>
-        <member name="M:Aps.Controllers.SemiProductsController.CreateSemiProduct(Aps.Services.SemiProductAddOrUpdateDto)">
+        <member name="M:Aps.Controllers.SemiProductsController.CreateSemiProduct(Aps.Shared.Model.SemiProductAddOrUpdateDto)">
             <summary>
             添加半成品
             </summary>

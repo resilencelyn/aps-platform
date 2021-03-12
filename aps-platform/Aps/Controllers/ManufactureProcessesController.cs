@@ -3,13 +3,13 @@ using Aps.Infrastructure.Repositories;
 using Aps.Shared.Entity;
 using Aps.Shared.Model;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace Aps.Controllers
 {
@@ -136,7 +136,7 @@ namespace Aps.Controllers
 
             var returnDto = _mapper.Map<ApsManufactureProcess, ManufactureProcessDto>(apsManufactureProcess);
 
-            return CreatedAtAction(nameof(GetManufactureProcess), new {id = returnDto.Id}, returnDto);
+            return CreatedAtAction(nameof(GetManufactureProcess), new { id = returnDto.Id }, returnDto);
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace Aps.Controllers
 
             var returnDto = _mapper.Map<ApsProcessResource, ProcessResourceDto>(resourceInserted);
             return CreatedAtRoute(nameof(GetResourceFromManufactureProcess),
-                new {processId = manufactureProcessId, resourceId = returnDto.ResourceClassId}, returnDto);
+                new { processId = manufactureProcessId, resourceId = returnDto.ResourceClassId }, returnDto);
         }
 
         /// <summary>
