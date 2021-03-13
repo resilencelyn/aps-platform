@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Aps.Shared.Model;
 
 namespace Aps.Controllers
 {
@@ -25,10 +26,10 @@ namespace Aps.Controllers
         /// 查询所有排程
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<List<ApsManufactureJob>>> Schedule()
+        public async Task<ActionResult<List<JobDto>>> Schedule()
         {
             var orders = await _context.ApsOrders
-                .AsNoTracking()
+                // .AsNoTracking()
                 .Take(2)
                 .Include(x => x.Product)
                 .ThenInclude(x => x.ApsAssemblyProcess)

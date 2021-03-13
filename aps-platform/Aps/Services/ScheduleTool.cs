@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Aps.Infrastructure.Repositories;
 
 namespace Aps.Services
 {
@@ -48,6 +49,9 @@ namespace Aps.Services
         private const int Ub = 1000000;
         private readonly ApsContext _context;
         private readonly IMapper _mapper;
+        private readonly IRepository<ApsManufactureJob, Guid> _manufactureJobRepository;
+        public List<ScheduleManufactureJob> Jobs;
+        public List<ApsResource> Resources;
         public CpModel Model { get; private set; }
         public CpSolver Solver { get; private set; }
         public IEnumerable<ApsOrder> OrdersList { get; set; }
@@ -63,8 +67,7 @@ namespace Aps.Services
 
 
         public Dictionary<(ApsOrder, ProductInstance, SemiProductInstance, ApsManufactureProcess),
-            ScheduleManufactureJob> ScheduleManufactureJobs
-        { get; private set; }
+            ScheduleManufactureJob> ScheduleManufactureJobs { get; private set; }
             = new Dictionary<(ApsOrder, ProductInstance, SemiProductInstance, ApsManufactureProcess),
                 ScheduleManufactureJob>();
 
@@ -73,15 +76,17 @@ namespace Aps.Services
             new Dictionary<ApsOrder, List<ProductInstance>>();
 
         public Dictionary<(ApsOrder order, ProductInstance productInstance), List<SemiProductInstance>>
-            SemiProductInstances
-        { get; private set; } =
+            SemiProductInstances { get; private set; } =
             new Dictionary<(ApsOrder apsOrder, ProductInstance productInstance), List<SemiProductInstance>>();
 
+        public IntVar[,] ResourcePerformed { get; set; }
 
-        public ScheduleTool(ApsContext context, IMapper mapper)
+        public ScheduleTool(ApsContext context, IMapper mapper,
+            IRepository<ApsManufactureJob, Guid> manufactureJobRepository)
         {
             _context = context;
             _mapper = mapper;
+            _manufactureJobRepository = manufactureJobRepository;
             Model = new CpModel();
             Solver = new CpSolver();
         }
@@ -193,6 +198,7 @@ namespace Aps.Services
                                             SemiProductInstance = semiProductInstance,
                                             ApsManufactureProcess = manufactureProcess,
                                             Duration = manufactureProcess.ProductionTime,
+                                            Workspace = Workspace.装配
                                         });
                                 }
                                 else
@@ -200,7 +206,7 @@ namespace Aps.Services
                                     IntVar startVar = Model.NewIntVar(0, Ub, "start" + suffix);
                                     IntVar endVar = Model.NewIntVar(0, Ub, "end" + suffix);
                                     IntervalVar interval =
-                                        Model.NewIntervalVar(startVar, (int)duration.TotalMinutes, endVar,
+                                        Model.NewIntervalVar(startVar, (int) duration.TotalMinutes, endVar,
                                             "interval" + suffix);
 
                                     ScheduleManufactureJobs.Add(
@@ -215,7 +221,8 @@ namespace Aps.Services
                                             SemiProductInstance = semiProductInstance,
                                             ApsManufactureProcess = manufactureProcess,
                                             Duration = manufactureProcess.ProductionTime,
-                                            Vars = new JobVar(startVar, endVar, interval)
+                                            Vars = new JobVar(startVar, endVar, interval),
+                                            Workspace = Workspace.装配,
                                         });
                                 }
                             }
@@ -276,7 +283,7 @@ namespace Aps.Services
                     IntVar startVar = Model.NewIntVar(0, Ub, "start" + suffix);
                     IntVar endVar = Model.NewIntVar(0, Ub, "end" + suffix);
                     IntervalVar interval =
-                        Model.NewIntervalVar(startVar, (int)jobDuration.TotalMinutes, endVar,
+                        Model.NewIntervalVar(startVar, (int) jobDuration.TotalMinutes, endVar,
                             "interval" + suffix);
 
 
@@ -304,17 +311,17 @@ namespace Aps.Services
                 .Where(x => x.Key.Item4.ProductionMode == ProductionMode.Sp)
                 .Select(x => x.Value);
 
-            var resourceJobs = new List<ScheduleManufactureJob>(resourceJobsFromSp);
-            resourceJobs.AddRange(resourceJobsFromBp);
+            Jobs = new List<ScheduleManufactureJob>(resourceJobsFromSp);
+            Jobs.AddRange(resourceJobsFromBp);
 
-            var resources = await _context.ApsResources
-                .AsNoTracking()
+            Resources = await _context.ApsResources
                 .Include(x => x.ResourceAttributes)
                 .ThenInclude(x => x.ResourceClass)
+                .Where(x => x.Type != ResourceType.人员)
                 .ToListAsync();
 
-            var jobCount = resourceJobs.Count;
-            var resourcesCount = resources.Count;
+            var jobCount = Jobs.Count;
+            var resourcesCount = Resources.Count;
 
             var resourceJobMatrix = new Dictionary<int, IntVar>[jobCount, resourcesCount];
 
@@ -323,11 +330,11 @@ namespace Aps.Services
                 for (int j = 0; j < resourcesCount; j++)
                 {
                     resourceJobMatrix[i, j] = new Dictionary<int, IntVar>();
-                    var resource = resources[j];
+                    var resource = Resources[j];
                     foreach (var resourceAttribute in resource.ResourceAttributes)
                     {
                         var intVar = Model.NewIntVar(0, 1,
-                            $"Job:{resourceJobs[i].ApsManufactureProcess.PrevPart}_," +
+                            $"Job:{Jobs[i].ApsManufactureProcess.PrevPart}_," +
                             $"Resource:{resource.Id}_," +
                             $"Class:{resourceAttribute.ResourceClass.ResourceClassName}");
                         resourceJobMatrix[i, j].Add(resourceAttribute.ResourceClass.Id, intVar);
@@ -338,7 +345,7 @@ namespace Aps.Services
 
             for (int i = 0; i < jobCount; i++)
             {
-                var job = resourceJobs[i];
+                var job = Jobs[i];
                 var processResourcesNeed = job.ApsManufactureProcess.ApsResources;
 
 
@@ -357,7 +364,7 @@ namespace Aps.Services
                         }
                         else
                         {
-                            processResourcesVarFromClass.Add(resourceClassId, new List<IntVar> { performed });
+                            processResourcesVarFromClass.Add(resourceClassId, new List<IntVar> {performed});
                         }
                     }
 
@@ -383,23 +390,25 @@ namespace Aps.Services
             }
 
 
-            JobVar[,] resourceIntervals = new JobVar[jobCount, resourcesCount];
+            IntervalVar[,] resourceIntervals = new IntervalVar[jobCount, resourcesCount];
+
+            ResourcePerformed = new IntVar[jobCount, resourcesCount];
 
             for (int i = 0; i < jobCount; i++)
             {
-                resourceJobs[i].Vars.Deconstruct(out IntVar startVar, out IntVar endVar, out IntervalVar intervalVar);
-                var duration = (int)resourceJobs[i].Duration.TotalMinutes;
+                Jobs[i].Vars.Deconstruct(out IntVar startVar, out IntVar endVar, out IntervalVar intervalVar);
+                var duration = (int) Jobs[i].Duration.TotalMinutes;
 
                 for (int j = 0; j < resourcesCount; j++)
                 {
                     var resourceIsPerformed = Model.NewIntVar(0, 1, $"Performed:[{i}, {j}]");
 
                     Model.Add(resourceIsPerformed == LinearExpr.Sum(resourceJobMatrix[i, j].Select(x => x.Value)));
-
+                    ResourcePerformed[i, j] = resourceIsPerformed;
                     var optionalIntervalVar = Model.NewOptionalIntervalVar(startVar, duration, endVar,
                         resourceIsPerformed, $"Resource:{i}, Job:{j}");
 
-                    resourceIntervals[i, j] = new JobVar(startVar, endVar, optionalIntervalVar);
+                    resourceIntervals[i, j] = optionalIntervalVar;
                 }
             }
 
@@ -408,7 +417,7 @@ namespace Aps.Services
                 var resourceInterval = new List<IntervalVar>();
                 for (int j = 0; j < jobCount; j++)
                 {
-                    resourceInterval.Add(resourceIntervals[j, i].Interval);
+                    resourceInterval.Add(resourceIntervals[j, i]);
                 }
 
                 Model.AddNoOverlap(resourceInterval);
@@ -441,7 +450,8 @@ namespace Aps.Services
 
         public async Task<IEnumerable<JobDto>> Solve()
         {
-            Solver.StringParameters = "max_time_in_seconds:30.0";
+            // Solver.StringParameters = "max_time_in_seconds:30.0";
+            Solver.StringParameters = " num_search_workers:6";
 
             CpSolverStatus cpSolverStatus = await Task.Run(() => Solver.Solve(Model));
             Console.WriteLine(cpSolverStatus);
@@ -462,6 +472,8 @@ namespace Aps.Services
             var solutionDictionary = new Dictionary<IntVar, int>();
             var objectiveValueString = $"Optimal Schedule Length: {Solver.ObjectiveValue}";
 
+            Console.WriteLine(objectiveValueString);
+
             var now = DateTime.Now;
             foreach (var ((apsOrder, productInstance, semiProductInstance, apsManufactureProcess), job) in
                 ScheduleManufactureJobs)
@@ -478,6 +490,45 @@ namespace Aps.Services
                     ? solutionDictionary[endVar]
                     : endValue);
             }
+
+
+            for (int i = 0; i < Jobs.Count; i++)
+            {
+                var job = Jobs[i];
+                for (int j = 0; j < Resources.Count; j++)
+                {
+                    var resource = Resources[j];
+
+                    if (Solver.Value(ResourcePerformed[i, j]) == 1)
+                    {
+                        job.ApsResource.Add(resource);
+                    }
+                }
+            }
+
+            foreach (var scheduleManufactureJob in ScheduleManufactureJobs.Values.ToList())
+            {
+                await _manufactureJobRepository.InsertAsync(scheduleManufactureJob);
+            }
+
+            // await _context.ApsManufactureJobs.AddRangeAsync(ScheduleManufactureJobs.Values.ToList());
+            
+
+            for (var i = 0; i < Resources.Count; i++)
+            {
+                var resource = Resources[i];
+                for (var j = 0; j < Jobs.Count; j++)
+                {
+                    var job = Jobs[j];
+
+                    if (Solver.Value(ResourcePerformed[j, i]) == 1)
+                    {
+                        resource.WorkJobs.Add(job);
+                    }
+                }
+            }
+            
+            await _context.SaveChangesAsync();
 
             return _mapper.Map<IEnumerable<ScheduleManufactureJob>, IEnumerable<JobDto>>(
                 ScheduleManufactureJobs.Select(x => x.Value));

@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Aps.Shared.Entity
 {
-
     public class ApsResource
     {
         [Key] public string Id { get; set; }
@@ -13,5 +12,7 @@ namespace Aps.Shared.Entity
         public int? Amount { get; set; }
         [Required] public List<ResourceClassWithResource> ResourceAttributes { get; set; }
         [Required] public Workspace Workspace { get; set; }
+
+        public ICollection<ApsJob> WorkJobs { get; set; } = new List<ApsJob>();
     }
 }

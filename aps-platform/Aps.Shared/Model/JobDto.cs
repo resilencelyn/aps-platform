@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Aps.Shared.Extensions;
 
 namespace Aps.Shared.Model
 {
@@ -13,5 +15,8 @@ namespace Aps.Shared.Model
         public DateTime? Start { get; set; }
         public DateTime? End { get; set; }
         public int Duration { get; set; }
+
+        public Workspace Workspace { get; set; }
+        public ICollection<ResourceDto> ApsResource { get; set; } = new List<ResourceDto>();
     }
 }

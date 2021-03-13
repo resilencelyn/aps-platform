@@ -1,0 +1,6 @@
+D:\大学\2021服务外包\repos\aps-platform\publish\Aps.Shared.dll
+D:\大学\2021服务外包\repos\aps-platform\publish\Aps.Shared.deps.json
+D:\大学\2021服务外包\repos\aps-platform\publish\Aps.Shared.pdb
+D:\大学\2021服务外包\repos\aps-platform\publish\Newtonsoft.Json.dll
+D:\大学\2021服务外包\repos\aps-platform\publish\System.ComponentModel.Annotations.dll
+D:\大学\2021服务外包\repos\aps-platform\publish\System.Runtime.Serialization.Primitives.dll

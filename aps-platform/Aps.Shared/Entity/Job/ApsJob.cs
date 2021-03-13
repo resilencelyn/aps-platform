@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Aps.Shared.Extensions;
 
 namespace Aps.Shared.Entity
 {
@@ -16,6 +17,7 @@ namespace Aps.Shared.Entity
         public DateTime? End { get; set; }
         public TimeSpan Duration { get; set; }
 
+        public Workspace Workspace { get; set; }
         public List<ApsResource> ApsResource { get; set; } = new List<ApsResource>();
     }
 }

@@ -1,0 +1,9 @@
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps.Shared\bin\Release\netstandard2.1\Aps.Shared.deps.json
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps.Shared\bin\Release\netstandard2.1\Aps.Shared.dll
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps.Shared\bin\Release\netstandard2.1\Aps.Shared.pdb
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps.Shared\obj\Release\netstandard2.1\Aps.Shared.csprojAssemblyReference.cache
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps.Shared\obj\Release\netstandard2.1\Aps.Shared.AssemblyInfoInputs.cache
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps.Shared\obj\Release\netstandard2.1\Aps.Shared.AssemblyInfo.cs
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps.Shared\obj\Release\netstandard2.1\Aps.Shared.csproj.CoreCompileInputs.cache
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps.Shared\obj\Release\netstandard2.1\Aps.Shared.dll
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps.Shared\obj\Release\netstandard2.1\Aps.Shared.pdb
