@@ -34,7 +34,7 @@ namespace Aps.Shared.Extensions
 
             try
             {
-                result = (T)Enum.Parse(typeof(T), value, true);
+                result = (T)System.Enum.Parse(typeof(T), value, true);
             }
             catch (Exception)
             {

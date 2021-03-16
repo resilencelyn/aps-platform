@@ -188,6 +188,10 @@
               "target": "Package",
               "version": "[5.0.1, )"
             },
+            "ValueUtils": {
+              "target": "Package",
+              "version": "[1.4.0, )"
+            },
             "xunit": {
               "target": "Package",
               "version": "[2.4.1, )"

@@ -1,5 +1,6 @@
 ﻿using Aps.Shared.Extensions;
 using System.Collections.Generic;
+using Aps.Shared.Enum;
 
 namespace Aps.Shared.Model
 {

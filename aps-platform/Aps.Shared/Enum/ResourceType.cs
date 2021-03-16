@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Aps.Shared.Extensions
+namespace Aps.Shared.Enum
 {
     public enum ResourceType
     {

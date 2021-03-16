@@ -1,6 +1,7 @@
 ﻿using Aps.Shared.Extensions;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Aps.Shared.Enum;
 
 namespace Aps.Shared.Entity
 {

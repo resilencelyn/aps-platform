@@ -50,12 +50,12 @@ namespace Aps.Infrastructure.Repositories
             return GetAll().Where(predicate).ToList();
         }
 
-        public async Task<List<TEntity>> GetAllListAsync(Expression<Func<TEntity, bool>> predicate)
+        public virtual async Task<List<TEntity>> GetAllListAsync(Expression<Func<TEntity, bool>> predicate)
         {
             return await GetAll().Where(predicate).ToListAsync();
         }
 
-        public TEntity Single(Expression<Func<TEntity, bool>> predicate)
+        public virtual TEntity Single(Expression<Func<TEntity, bool>> predicate)
         {
             return GetAll().Single(predicate);
         }
@@ -65,12 +65,12 @@ namespace Aps.Infrastructure.Repositories
             return await GetAll().SingleAsync(predicate);
         }
 
-        public TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate)
+        public virtual TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate)
         {
             return GetAll().FirstOrDefault(predicate);
         }
 
-        public async Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+        public virtual async Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
         {
             return await GetAll().FirstOrDefaultAsync(predicate);
         }

@@ -2,6 +2,7 @@
 using Aps.Shared.Model;
 using AutoMapper;
 using System;
+using Aps.Shared.Extensions;
 
 namespace Aps.Profiles
 {
@@ -9,7 +10,7 @@ namespace Aps.Profiles
     {
         public JobProfile()
         {
-
+            CreateMap<RecordState, string>().ConvertUsing(e => e.ToString());
             CreateMap<Guid, string>().ConvertUsing(e => e.ToString());
 
             CreateMap<ApsJob, JobDto>();
@@ -21,7 +22,10 @@ namespace Aps.Profiles
                 .IncludeMembers(e => e.ApsProduct)
                 .IncludeMembers(e => e.ProductInstance);
 
-            CreateMap<TimeSpan, int>().ConvertUsing(e => (int)e.TotalMinutes);
+            CreateMap<ScheduleRecord, ScheduleRecordDto>();
+
+
+            CreateMap<TimeSpan, int>().ConvertUsing(e => (int) e.TotalMinutes);
             CreateMap<int, TimeSpan>().ConvertUsing(e => TimeSpan.FromMinutes(e));
         }
     }

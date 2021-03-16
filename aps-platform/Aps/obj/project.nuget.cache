@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "jxv78FvQgxU85vwsnB5HV8YsIPbtuAeqa4VLlUTEGCqvt6tEwYR3ONKsm8B2HPEi/hlnomOoAR7E8+dEh90RfQ==",
+  "dgSpecHash": "gpmDElWYMWw3DTF10JDjHBxCIaJEavkFzeWr/RWVCQ30iigYxxUWxkoQKsDzBZdL9hpNZaG5j3SfXZAJ/9XoYw==",
   "success": true,
   "projectFilePath": "D:\\大学\\2021服务外包\\repos\\aps-platform\\aps-platform\\Aps\\Aps.csproj",
   "expectedPackageFiles": [
@@ -122,6 +122,7 @@
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.threading.timer\\4.3.0\\system.threading.timer.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.xml.readerwriter\\4.3.0\\system.xml.readerwriter.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.xml.xdocument\\4.3.0\\system.xml.xdocument.4.3.0.nupkg.sha512",
+    "C:\\Users\\zhangbig\\.nuget\\packages\\valueutils\\1.4.0\\valueutils.1.4.0.nupkg.sha512",
     "C:\\Users\\zhangbig\\.nuget\\packages\\xunit\\2.4.1\\xunit.2.4.1.nupkg.sha512",
     "C:\\Users\\zhangbig\\.nuget\\packages\\xunit.abstractions\\2.0.3\\xunit.abstractions.2.0.3.nupkg.sha512",
     "C:\\Users\\zhangbig\\.nuget\\packages\\xunit.analyzers\\0.10.0\\xunit.analyzers.0.10.0.nupkg.sha512",

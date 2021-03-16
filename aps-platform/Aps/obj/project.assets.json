@@ -1713,6 +1713,19 @@
           "lib/netstandard1.3/System.Xml.XDocument.dll": {}
         }
       },
+      "ValueUtils/1.4.0": {
+        "type": "package",
+        "dependencies": {
+          "NETStandard.Library": "1.6.1",
+          "System.Runtime": "4.3.0"
+        },
+        "compile": {
+          "lib/netstandard1.5/ValueUtils.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.5/ValueUtils.dll": {}
+        }
+      },
       "xunit/2.4.1": {
         "type": "package",
         "dependencies": {
@@ -6101,6 +6114,20 @@
         "system.xml.xdocument.nuspec"
       ]
     },
+    "ValueUtils/1.4.0": {
+      "sha512": "88Ca2PJWr1hbM5+6Ff/xTur4RMcBwayk8WVcHszK5vpBOKNwoyPijl1g7Lx5JqZsWILr2D0shKiBVRK6WARTCw==",
+      "type": "package",
+      "path": "valueutils/1.4.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net452/ValueUtils.dll",
+        "lib/net47/ValueUtils.dll",
+        "lib/netstandard1.5/ValueUtils.dll",
+        "valueutils.1.4.0.nupkg.sha512",
+        "valueutils.nuspec"
+      ]
+    },
     "xunit/2.4.1": {
       "sha512": "XNR3Yz9QTtec16O0aKcO6+baVNpXmOnPUxDkCY97J+8krUYxPvXT1szYYEUdKk4sB8GOI2YbAjRIOm8ZnXRfzQ==",
       "type": "package",
@@ -6262,6 +6289,7 @@
       "Swashbuckle.AspNetCore.SwaggerUI >= 6.1.0",
       "System.Runtime.Serialization.Primitives >= 4.3.0",
       "System.Text.Json >= 5.0.1",
+      "ValueUtils >= 1.4.0",
       "xunit >= 2.4.1",
       "xunit.runner.visualstudio >= 2.4.3"
     ]
@@ -6382,6 +6410,10 @@
           "System.Text.Json": {
             "target": "Package",
             "version": "[5.0.1, )"
+          },
+          "ValueUtils": {
+            "target": "Package",
+            "version": "[1.4.0, )"
           },
           "xunit": {
             "target": "Package",

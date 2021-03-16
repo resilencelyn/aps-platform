@@ -35,6 +35,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.1.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Text.Json" Version="5.0.1" />
+    <PackageReference Include="ValueUtils" Version="1.4.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <PrivateAssets>all</PrivateAssets>

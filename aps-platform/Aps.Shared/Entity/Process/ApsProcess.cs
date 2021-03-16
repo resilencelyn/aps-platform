@@ -6,7 +6,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Aps.Shared.Entity
 {
-    // [JsonConverter(typeof(StringEnumConverter))]
 
     public abstract class ApsProcess
     {

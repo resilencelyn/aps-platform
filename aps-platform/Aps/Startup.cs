@@ -14,6 +14,7 @@ using Newtonsoft.Json.Converters;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System;
 using System.IO;
+using Aps.Threading;
 
 namespace Aps
 {
@@ -81,7 +82,7 @@ namespace Aps
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddTransient<IAssemblyProcessRepository, AssemblyProcessRepository>();
-            services.AddScoped<IScheduleTool, ScheduleTool>();
+            services.AddTransient<IScheduleTool, ScheduleTool>();
 
             services.AddTransient(typeof(IRepository<,>), typeof(RepositoryBase<,>));
             services.AddTransient<IRepository<ApsManufactureProcess, string>, ManufactureProcessRepository>();
@@ -94,6 +95,13 @@ namespace Aps
             services.AddTransient<IRepository<ApsResource, string>, ResourceRepository>();
 
             services.AddTransient<IRepository<ApsProcessResource, string>, ProcessResourceRepository>();
+
+
+            // services.AddHostedService<ScheduleHostService>();
+            // services.AddSingleton<IHostedService, ScheduleHostService>();
+
+            services.AddTransient<IScheduleClass, ScheduleClass>();
+            services.AddTransient<IRepository<ScheduleRecord, Guid>, ScheduleRecordRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
