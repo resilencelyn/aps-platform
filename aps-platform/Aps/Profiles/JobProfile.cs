@@ -13,7 +13,11 @@ namespace Aps.Profiles
             CreateMap<RecordState, string>().ConvertUsing(e => e.ToString());
             CreateMap<Guid, string>().ConvertUsing(e => e.ToString());
 
-            CreateMap<ApsJob, JobDto>();
+            CreateMap<ApsJob, JobDto>()
+                .Include<ApsManufactureJob, JobDto>();
+
+            CreateMap<ApsManufactureJob, JobDto>();
+
             CreateMap<ProductInstance, JobDto>();
             CreateMap<ApsProduct, JobDto>();
 

@@ -8,10 +8,10 @@ namespace Aps.Shared.Entity
     {
         public Guid Id { get; set; }
 
-        public ICollection<ApsOrder> Orders { get; set; }
+        public IEnumerable<ApsOrder> Orders { get; set; }
         public DateTime? ScheduleFinishTime { get; set; }
 
-        public ICollection<ApsJob> Jobs { get; set; } = new List<ApsJob>();
+        public List<ApsManufactureJob> Jobs { get; set; } = new List<ApsManufactureJob>();
         public RecordState RecordState { get; set; }
 
     }

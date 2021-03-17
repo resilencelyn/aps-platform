@@ -3,14 +3,16 @@ using System;
 using Aps.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Aps.Migrations
 {
     [DbContext(typeof(ApsContext))]
-    partial class ApsContextModelSnapshot : ModelSnapshot
+    [Migration("20210316111424_ModifiedJob")]
+    partial class ModifiedJob
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,6 +62,9 @@ namespace Aps.Migrations
                     b.Property<Guid?>("ProductInstanceId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid?>("ScheduleRecordId")
+                        .HasColumnType("char(36)");
+
                     b.Property<DateTime?>("Start")
                         .HasColumnType("datetime(6)");
 
@@ -73,6 +78,8 @@ namespace Aps.Migrations
                     b.HasIndex("ApsProductId");
 
                     b.HasIndex("ProductInstanceId");
+
+                    b.HasIndex("ScheduleRecordId");
 
                     b.ToTable("ApsJob");
 
@@ -339,12 +346,7 @@ namespace Aps.Migrations
                     b.Property<string>("ApsAssemblyProcessId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<Guid?>("ScheduleRecordId")
-                        .HasColumnType("char(36)");
-
                     b.HasIndex("ApsAssemblyProcessId");
-
-                    b.HasIndex("ScheduleRecordId");
 
                     b.HasDiscriminator().HasValue("ApsAssemblyJob");
                 });
@@ -359,24 +361,12 @@ namespace Aps.Migrations
                     b.Property<string>("ApsSemiProductId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
-                    b.Property<Guid>("BatchId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("PreJobId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid?>("ScheduleRecordId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("ApsManufactureJob_ScheduleRecordId");
-
                     b.Property<Guid?>("SemiProductInstanceId")
                         .HasColumnType("char(36)");
 
                     b.HasIndex("ApsManufactureProcessId");
 
                     b.HasIndex("ApsSemiProductId");
-
-                    b.HasIndex("ScheduleRecordId");
 
                     b.HasIndex("SemiProductInstanceId");
 
@@ -444,11 +434,18 @@ namespace Aps.Migrations
                         .HasForeignKey("ProductInstanceId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Aps.Shared.Entity.ScheduleRecord", "ScheduleRecord")
+                        .WithMany("Jobs")
+                        .HasForeignKey("ScheduleRecordId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("ApsOrder");
 
                     b.Navigation("ApsProduct");
 
                     b.Navigation("ProductInstance");
+
+                    b.Navigation("ScheduleRecord");
                 });
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsOrder", b =>
@@ -461,7 +458,7 @@ namespace Aps.Migrations
                     b.HasOne("Aps.Shared.Entity.ScheduleRecord", null)
                         .WithMany("Orders")
                         .HasForeignKey("ScheduleRecordId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Product");
                 });
@@ -589,14 +586,7 @@ namespace Aps.Migrations
                         .HasForeignKey("ApsAssemblyProcessId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Aps.Shared.Entity.ScheduleRecord", "ScheduleRecord")
-                        .WithMany()
-                        .HasForeignKey("ScheduleRecordId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("ApsAssemblyProcess");
-
-                    b.Navigation("ScheduleRecord");
                 });
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsManufactureJob", b =>
@@ -611,17 +601,6 @@ namespace Aps.Migrations
                         .HasForeignKey("ApsSemiProductId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Aps.Shared.Entity.ApsJob", "PreJob")
-                        .WithOne()
-                        .HasForeignKey("Aps.Shared.Entity.ApsManufactureJob", "Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Aps.Shared.Entity.ScheduleRecord", "ScheduleRecord")
-                        .WithMany("Jobs")
-                        .HasForeignKey("ScheduleRecordId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("Aps.Shared.Entity.SemiProductInstance", "SemiProductInstance")
                         .WithMany()
                         .HasForeignKey("SemiProductInstanceId")
@@ -630,10 +609,6 @@ namespace Aps.Migrations
                     b.Navigation("ApsManufactureProcess");
 
                     b.Navigation("ApsSemiProduct");
-
-                    b.Navigation("PreJob");
-
-                    b.Navigation("ScheduleRecord");
 
                     b.Navigation("SemiProductInstance");
                 });

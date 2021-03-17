@@ -18,5 +18,9 @@ namespace Aps.Shared.Model
 
         public Workspace Workspace { get; set; }
         public ICollection<ResourceDto> ApsResource { get; set; } = new List<ResourceDto>();
+
+        public Guid PreJobId { get; set; }
+
+        public Guid BatchId { get; set; }
     }
 }

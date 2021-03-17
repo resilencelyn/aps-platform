@@ -41,7 +41,7 @@ namespace Aps.Controllers
         {
             var orders = await _context.ApsOrders
                 // .AsNoTracking()
-                .Take(2)
+                .Take(1)
                 .Include(x => x.Product)
                 .ThenInclude(x => x.ApsAssemblyProcess)
                 .ThenInclude(x => x.ApsResources)
@@ -57,7 +57,7 @@ namespace Aps.Controllers
                 .ThenInclude(x => x.ApsSemiProduct)
                 .ThenInclude(x => x.ApsManufactureProcesses)
                 .ThenInclude(x => x.PrevPart)
-                .AsSplitQuery()
+                // .AsSplitQuery()
                 .ToListAsync();
             _scheduleTool.SetProductPrerequisite(orders);
             _scheduleTool.GenerateProcess();

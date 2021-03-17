@@ -8,6 +8,7 @@ using Aps.Services;
 using Aps.Shared.Entity;
 using Aps.Shared.Extensions;
 using Google.OrTools.Sat;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aps.Threading
@@ -27,7 +28,7 @@ namespace Aps.Threading
     public class ScheduleClass : IScheduleClass
     {
         private readonly CpSolver _solver = new CpSolver();
-        
+
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public ScheduleModel ScheduleModel { get; set; } = new ScheduleModel();
@@ -84,8 +85,18 @@ namespace Aps.Threading
                 job.End = now.AddMinutes(solutionDictionary.ContainsKey(endVar)
                     ? solutionDictionary[endVar]
                     : endValue);
+
+                job.ScheduleRecord = ScheduleModel.ScheduleRecord;
             }
 
+
+            
+
+            using var scope = _serviceScopeFactory.CreateScope();
+
+            var context = scope.ServiceProvider.GetRequiredService<ApsContext>();
+
+            
 
             for (int i = 0; i < ScheduleModel.Jobs.Count; i++)
             {
@@ -93,6 +104,7 @@ namespace Aps.Threading
                 for (int j = 0; j < ScheduleModel.Resources.Count; j++)
                 {
                     var resource = ScheduleModel.Resources[j];
+                    
 
                     if (_solver.Value(ScheduleModel.ResourcePerformed[i, j]) == 1)
                     {
@@ -101,51 +113,53 @@ namespace Aps.Threading
                 }
             }
 
-            // using var scope = _serviceProvider.CreateScope();
-
-            using var scope = _serviceScopeFactory.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ApsContext>();
-
-            // var manufactureJobRepository =
-            //     scope.ServiceProvider.GetRequiredService<IRepository<ApsManufactureJob, Guid>>();
-
-            // foreach (var scheduleManufactureJob in ScheduleModel.ScheduleManufactureJobs.Values.ToList())
-            // {
-            //     await manufactureJobRepository.UpdateAsync(scheduleManufactureJob);
-            // }
-            // context.UpdateRange(ScheduleModel.ScheduleManufactureJobs.Values.ToList());
-
-            // foreach (var scheduleManufactureJob in ScheduleModel.ScheduleManufactureJobs.Values.ToList())
-            // {
-            //     await _manufactureJobRepository.InsertAsync(scheduleManufactureJob);
-            // }
-            // var resourceRepository = scope.ServiceProvider.GetRequiredService<IRepository<ApsResource, string>>();
-
-            context.AttachRange(ScheduleModel.ScheduleManufactureJobs.Values.ToList());
-
-            for (var i = 0; i < ScheduleModel.Resources.Count; i++)
+            foreach (var scheduleManufactureJob in ScheduleModel.ScheduleManufactureJobs.Values)
             {
-                var resource = ScheduleModel.Resources[i];
-                context.Attach(resource);
-                for (var j = 0; j < ScheduleModel.Jobs.Count; j++)
-                {
-                    var job = ScheduleModel.Jobs[j];
+                var jobFilterBatch = ScheduleModel.Jobs.FirstOrDefault(x => x.Id == scheduleManufactureJob.Id);
 
-                    if (_solver.Value(ScheduleModel.ResourcePerformed[j, i]) == 1)
+                if (jobFilterBatch!=null)
+                {
+                    scheduleManufactureJob.ApsResource.AddRange(jobFilterBatch.ApsResource);
+                }
+                else
+                {
+                    var batchId = scheduleManufactureJob.BatchId;
+
+                    var jobInBatch = ScheduleModel.Jobs.FirstOrDefault(x => x.BatchId == batchId);
+                    if (jobInBatch == null)
                     {
-                        resource.WorkJobs.Add(job);
+                        throw new Exception();
+                    }
+                    else
+                    {
+                        scheduleManufactureJob.ApsResource.AddRange(jobInBatch.ApsResource);
                     }
                 }
             }
 
-            await context.SaveChangesAsync();
+            context.UpdateRange(ScheduleModel.ScheduleManufactureJobs.Values.ToList());
 
-            // await _resourceRepository.SaveAsync();
+            // for (var i = 0; i < ScheduleModel.Resources.Count; i++)
+            // {
+            //     var resource = ScheduleModel.Resources[i];
+            //     context.Attach(resource);
+            //     for (var j = 0; j < ScheduleModel.Jobs.Count; j++)
+            //     {
+            //         var job = ScheduleModel.Jobs[j];
+            //
+            //         if (_solver.Value(ScheduleModel.ResourcePerformed[j, i]) == 1)
+            //         {
+            //             resource.WorkJobs.Add(job);
+            //         }
+            //     }
+            // }
+
+            await context.SaveChangesAsync();
+            
 
             var scheduleRecordRepository =
                 scope.ServiceProvider.GetRequiredService<IRepository<ScheduleRecord, Guid>>();
             await scheduleRecordRepository.UpdateAsync(ScheduleModel.ScheduleRecord);
-            // await _scheduleRecordRepository.UpdateAsync(ScheduleModel.ScheduleRecord);
 
             await context.SaveChangesAsync();
         }

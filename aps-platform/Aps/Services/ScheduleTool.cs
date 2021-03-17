@@ -81,6 +81,7 @@ namespace Aps.Services
         private readonly ApsContext _context;
         private readonly IScheduleClass _scheduleClass;
         private readonly IRepository<ScheduleRecord, Guid> _scheduleRecordRepository;
+        private readonly IRepository<ApsJob, Guid> _jobRepository;
         private List<ScheduleManufactureJob> _jobs;
         private List<ApsResource> _resources;
 
@@ -114,12 +115,14 @@ namespace Aps.Services
 
         public ScheduleTool(ApsContext context,
             IScheduleClass scheduleClass,
-            IRepository<ScheduleRecord, Guid> scheduleRecordRepository)
+            IRepository<ScheduleRecord, Guid> scheduleRecordRepository,
+            IRepository<ApsJob, Guid> jobRepository)
         {
             _context = context;
             _scheduleClass = scheduleClass ?? throw new ArgumentNullException(nameof(scheduleClass));
             _scheduleRecordRepository = scheduleRecordRepository ??
                                         throw new ArgumentNullException(nameof(scheduleRecordRepository));
+            _jobRepository = jobRepository;
         }
 
         public void SetProductPrerequisite(List<ApsOrder> orders)
@@ -235,7 +238,7 @@ namespace Aps.Services
                                             SemiProductInstance = semiProductInstance,
                                             ApsManufactureProcess = manufactureProcess,
                                             Duration = manufactureProcess.ProductionTime,
-                                            Workspace = Workspace.装配
+                                            Workspace = Workspace.加工,
                                         });
                                 }
                                 else
@@ -259,7 +262,7 @@ namespace Aps.Services
                                             ApsManufactureProcess = manufactureProcess,
                                             Duration = manufactureProcess.ProductionTime,
                                             Vars = new JobVar(startVar, endVar, interval),
-                                            Workspace = Workspace.装配,
+                                            Workspace = Workspace.加工,
                                         });
                                 }
                             }
@@ -325,13 +328,14 @@ namespace Aps.Services
                         Model.NewIntervalVar(startVar, (int) jobDuration.TotalMinutes, endVar,
                             "interval" + suffix);
 
+                    var batchId = Guid.NewGuid();
 
                     var jobVar = new JobVar(startVar, endVar, interval);
 
                     for (int j = 0; j < productedOnce; j++)
                     {
                         jobsInBatch[producted].Vars = jobVar;
-
+                        jobsInBatch[producted].BatchId = batchId;
                         producted++;
                         remainder--;
                     }
@@ -354,9 +358,10 @@ namespace Aps.Services
             _jobs.AddRange(resourceJobsFromBp);
 
             _resources = await _context.ApsResources
+                // .AsNoTracking()
                 .Include(x => x.ResourceAttributes)
                 .ThenInclude(x => x.ResourceClass)
-                .Where(x => x.Type != ResourceType.人员)
+                .Where(x => x.Type != ResourceType.人员 && x.Workspace != Workspace.装配)
                 .ToListAsync();
 
             var jobCount = _jobs.Count;
@@ -462,6 +467,14 @@ namespace Aps.Services
 
                 Model.AddNoOverlap(resourceInterval);
             }
+            // foreach (var scheduleManufactureJob in ScheduleManufactureJobs.Values)
+            // {
+            //     var index = _jobs.IndexOf(scheduleManufactureJob);
+            //     if (index>=0)
+            //     {
+            //         
+            //     }
+            // }
         }
 
         public void SetPreJobConstraint()
@@ -471,13 +484,16 @@ namespace Aps.Services
             {
                 if (manufactureProcess.PrevPartId != null)
                 {
-                    ApsManufactureProcess preProcess =
+                    var preProcess =
                         ManufactureProcesses.FirstOrDefault(x => x.Id == manufactureProcess.PrevPartId);
 
                     var preJob =
-                        ScheduleManufactureJobs[
-                            new JobNavigation(order, productInstance, semiProductInstance, preProcess)];
+                        ScheduleManufactureJobs
+                            [new JobNavigation(order, productInstance, semiProductInstance, preProcess)];
                     Model.Add(preJob.Vars.EndVar < job.Vars.StartVar);
+
+                    job.PreJob = preJob;
+                    job.PreJobId = preJob.Id;
                 }
             }
         }
@@ -494,22 +510,26 @@ namespace Aps.Services
 
         public async Task<ScheduleRecord> Solve()
         {
+
             var scheduleRecord = new ScheduleRecord
             {
-                Jobs = _jobs.AsEnumerable() as ICollection<ApsJob>,
                 Id = Guid.NewGuid(),
-                Orders = OrdersList,
+                Orders = new List<ApsOrder>(OrdersList),
                 RecordState = RecordState.UnKnow,
                 ScheduleFinishTime = null,
+                Jobs = new List<ApsManufactureJob>(ScheduleManufactureJobs.Values),
             };
 
-            await _scheduleRecordRepository.InsertAsync(scheduleRecord);
+
+            var entityEntry = await _context.AddAsync(scheduleRecord);
+            await _context.SaveChangesAsync();
+
 
             var scheduleModel = new ScheduleModel
             {
                 ScheduleManufactureJobs = ScheduleManufactureJobs,
                 Jobs = _jobs,
-                ScheduleRecord = scheduleRecord,
+                ScheduleRecord = entityEntry.Entity,
                 Model = Model,
                 ResourcePerformed = ResourcePerformed,
                 Resources = _resources

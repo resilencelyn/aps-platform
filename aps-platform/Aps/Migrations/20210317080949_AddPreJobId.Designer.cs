@@ -3,14 +3,16 @@ using System;
 using Aps.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Aps.Migrations
 {
     [DbContext(typeof(ApsContext))]
-    partial class ApsContextModelSnapshot : ModelSnapshot
+    [Migration("20210317080949_AddPreJobId")]
+    partial class AddPreJobId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -376,6 +378,8 @@ namespace Aps.Migrations
 
                     b.HasIndex("ApsSemiProductId");
 
+                    b.HasIndex("PreJobId");
+
                     b.HasIndex("ScheduleRecordId");
 
                     b.HasIndex("SemiProductInstanceId");
@@ -461,7 +465,7 @@ namespace Aps.Migrations
                     b.HasOne("Aps.Shared.Entity.ScheduleRecord", null)
                         .WithMany("Orders")
                         .HasForeignKey("ScheduleRecordId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Product");
                 });
@@ -612,15 +616,15 @@ namespace Aps.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Aps.Shared.Entity.ApsJob", "PreJob")
-                        .WithOne()
-                        .HasForeignKey("Aps.Shared.Entity.ApsManufactureJob", "Id")
+                        .WithMany()
+                        .HasForeignKey("PreJobId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Aps.Shared.Entity.ScheduleRecord", "ScheduleRecord")
                         .WithMany("Jobs")
                         .HasForeignKey("ScheduleRecordId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Aps.Shared.Entity.SemiProductInstance", "SemiProductInstance")
                         .WithMany()

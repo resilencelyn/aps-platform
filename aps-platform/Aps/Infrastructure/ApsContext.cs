@@ -109,6 +109,25 @@ namespace Aps.Infrastructure
                 .WithOne(x => x.ResourceClass)
                 .HasForeignKey(x => x.ResourceClassId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ApsManufactureJob>()
+                .HasOne(x => x.PreJob)
+                .WithOne()
+                .HasForeignKey<ApsManufactureJob>(x => x.Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ApsOrder>()
+                .HasOne<ScheduleRecord>()
+                .WithMany(x => x.Orders)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<ScheduleRecord>()
+                .HasMany(x => x.Jobs)
+                .WithOne(x => x.ScheduleRecord)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+
         }
 
         public ApsContext(DbContextOptions<ApsContext> options) : base(options)
