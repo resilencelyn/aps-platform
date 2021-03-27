@@ -8,11 +8,11 @@ namespace Aps.Helper
 {
     public class InsertScheduleStrategy : IScheduleStrategy
     {
-        private readonly ScheduleTool _scheduleTool;
+        private readonly IScheduleTool _scheduleTool;
         private readonly List<ApsOrder> _orders;
         private readonly List<ApsResource> _resources;
 
-        public InsertScheduleStrategy(ScheduleTool scheduleTool, List<ApsOrder> orders, List<ApsResource> resources)
+        public InsertScheduleStrategy(IScheduleTool scheduleTool, List<ApsOrder> orders, List<ApsResource> resources)
         {
             _scheduleTool = scheduleTool ?? throw new ArgumentNullException(nameof(scheduleTool));
             _orders = orders ?? throw new ArgumentNullException(nameof(orders));

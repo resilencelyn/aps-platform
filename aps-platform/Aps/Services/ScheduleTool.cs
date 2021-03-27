@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Aps.Threading;
+using MoreLinq;
 using ValueUtils;
 
 namespace Aps.Services
@@ -390,11 +391,13 @@ namespace Aps.Services
 
         public void AssignResource(IEnumerable<ApsResource> resources)
         {
-            var resourceJobsFromBpDistinct = ScheduleManufactureJobs
-                .Where(x => x.Key.ManufactureProcess.ProductionMode == ProductionMode.Bp)
-                .GroupBy(x => x.Value.Vars,
-                    (interval, pairs) => pairs.First().Value).ToList();
+            // var resourceJobsFromBpDistinct = ScheduleManufactureJobs
+            //     .Where(x => x.Key.ManufactureProcess.ProductionMode == ProductionMode.Bp)
+            //     .GroupBy(x => x.Value.Vars,
+            //         (interval, pairs) => pairs.First().Value).ToList();
 
+            var resourceJobsFromBpDistinct = ScheduleManufactureJobs.Values
+                .DistinctBy(x => x.BatchId).ToList();
 
             _batchJobDictionary = new Dictionary<Guid, List<ApsManufactureJob>>();
 
@@ -497,22 +500,21 @@ namespace Aps.Services
 
 
             var resourceIntervals = new IntervalVar[jobCount, resourcesCount];
-
             ResourcePerformed = new IntVar[jobCount, resourcesCount];
 
             for (int i = 0; i < jobCount; i++)
             {
                 _jobs[i].Vars.Deconstruct(out var startVar, out var endVar, out _);
-
                 var duration = (int) _jobs[i].Duration.TotalMinutes;
 
                 for (int j = 0; j < resourcesCount; j++)
                 {
                     var resourceIsPerformed = Model.NewIntVar(0, 1, $"Performed:[{i}, {j}]");
 
-                    Model.Add(resourceIsPerformed == LinearExpr.Sum(resourceJobMatrix[i, j].Select(x => x.Value)));
+                    Model.Add(resourceIsPerformed == LinearExpr.Sum(
+                        resourceJobMatrix[i, j].Select(x => x.Value)));
+                    
                     ResourcePerformed[i, j] = resourceIsPerformed;
-
                     var optionalIntervalVar = Model.NewOptionalIntervalVar(startVar, duration, endVar,
                         resourceIsPerformed, $"Resource:{i}, Job:{j}");
 

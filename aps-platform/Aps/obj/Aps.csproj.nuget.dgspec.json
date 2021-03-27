@@ -196,6 +196,10 @@
               "target": "Package",
               "version": "[1.4.0, )"
             },
+            "morelinq": {
+              "target": "Package",
+              "version": "[3.3.2, )"
+            },
             "xunit": {
               "target": "Package",
               "version": "[2.4.1, )"

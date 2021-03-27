@@ -14,6 +14,7 @@ using Aps.Shared.Extensions;
 using Aps.Shared.Model;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Aps.Controllers
 {
@@ -37,11 +38,14 @@ namespace Aps.Controllers
         }
 
         /// <summary>
-        /// 查询所有排程
+        /// 简单排程
         /// </summary>
-        /// <response code="200">查询成功</response>
+        /// <remarks>简单排程，适用于初始情况资源都为可用的情况下</remarks>
+        /// <response code="200">开始排程计算</response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [SwaggerResponse(StatusCodes.Status200OK, "开始排程，并返回一个未完成的排程记录，可以使用记" +
+                                                  "录ID稍后查询排程进度", typeof(ScheduleRecordDto))]
         public async Task<ActionResult<ScheduleRecordDto>> Schedule()
         {
             var orders = await _context.ApsOrders
@@ -84,9 +88,14 @@ namespace Aps.Controllers
             return Ok(returnDto);
         }
 
+        /// <summary>
+        /// 查询所有排程记录
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerResponse(StatusCodes.Status200OK, "查询成功", typeof(ScheduleRecordDto))]
         public async Task<ActionResult<IEnumerable<ScheduleRecordDto>>> GetScheduleRecords()
         {
             var scheduleRecords = await _scheduleRecordRepository.GetAllListAsync();
@@ -112,6 +121,7 @@ namespace Aps.Controllers
             {
                 return NotFound();
             }
+
             var returnDto = _mapper.Map<ScheduleRecord, ScheduleRecordDto>(scheduleRecord);
             return returnDto;
         }
@@ -159,10 +169,16 @@ namespace Aps.Controllers
             var scheduleRecord = await scheduleContext.ExecuteSchedule();
             var returnDto = _mapper.Map<ScheduleRecord, ScheduleRecordDto>(scheduleRecord);
 
-            return returnDto;
+            return Ok(returnDto);
         }
 
+
+        /// <summary>
+        /// 插单（未完成）
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("{InsertSchedule}")]
+        [ProducesResponseType(typeof(ScheduleRecordDto), StatusCodes.Status200OK)]
         public async Task<ActionResult<ScheduleRecordDto>> InsertSchedule()
         {
             var orders = await _context.ApsOrders
@@ -194,7 +210,16 @@ namespace Aps.Controllers
                 .ToListAsync();
 
             //TODO Complete Insert Controller
-            return Ok();
+
+            var scheduleContext = new ScheduleContext
+            {
+                ScheduleStrategy = new InsertScheduleStrategy(_scheduleTool, orders, resources)
+            };
+
+            var scheduleRecord = await scheduleContext.ExecuteSchedule();
+
+            ScheduleRecordDto scheduleRecordDto = _mapper.Map<ScheduleRecord, ScheduleRecordDto>(scheduleRecord);
+            return Ok(scheduleRecordDto);
         }
     }
 }
