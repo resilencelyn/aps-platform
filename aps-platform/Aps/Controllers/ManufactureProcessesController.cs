@@ -33,7 +33,7 @@ namespace Aps.Controllers
             _resourceRepository = resourceRepository ?? throw new ArgumentNullException(nameof(resourceRepository));
         }
 
-        // GET: api/ManufactureProcesses
+        
         /// <summary>
         /// 查询所有加工工艺
         /// </summary>
@@ -44,7 +44,7 @@ namespace Aps.Controllers
                 await _repository.GetAllListAsync()));
         }
 
-        // GET: api/ManufactureProcesses/5
+        
         /// <summary>
         /// 通过ID查询加工工艺
         /// </summary>
@@ -77,6 +77,7 @@ namespace Aps.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
         public async Task<IActionResult> PutApsManufactureProcess(string id,

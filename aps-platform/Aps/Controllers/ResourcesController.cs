@@ -183,6 +183,7 @@ namespace Aps.Controllers
         /// 查询所有资源类别
         /// </summary>
         [HttpGet("{resourceId}/category/", Name = nameof(GetResourceCategory))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ResourceClassWithResourceDto>>> GetResourceCategory(
             string resourceId)
         {

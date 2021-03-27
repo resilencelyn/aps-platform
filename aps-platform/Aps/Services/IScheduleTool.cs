@@ -10,13 +10,13 @@ namespace Aps.Services
     {
         CpModel Model { get; }
         CpSolver Solver { get; }
-        ICollection<ApsOrder> OrdersList { get; set; }
+        IEnumerable<ApsOrder> OrdersList { get; set; }
         Dictionary<ApsProduct, int> ProductPrerequisite { get; }
         Dictionary<ApsSemiProduct, int> SemiProductPrerequisite { get; }
         List<ApsManufactureProcess> ManufactureProcesses { get; }
         IEnumerable<ApsAssemblyProcess> AssemblyProcesses { get; }
         IDictionary<ApsManufactureProcess, int> ManufactureProcessRequisite { get; }
-        Dictionary<JobNavigation, ScheduleManufactureJob> ScheduleManufactureJobs { get; set; }
+        Dictionary<ManufactureJobNavigation, ApsManufactureJob> ScheduleManufactureJobs { get; set; }
 
         Dictionary<ApsOrder, List<ProductInstance>> ProductInstances { get; }
 
@@ -25,12 +25,16 @@ namespace Aps.Services
             get;
         }
 
-        void SetProductPrerequisite(List<ApsOrder> orders);
+        void SetProductPrerequisite(IEnumerable<ApsOrder> orders);
         void GenerateProcess();
-        void GenerateJobsFromOrders();
+        void GenerateJob();
+        void SetStreamJob();
         void SetBatchJob();
-        Task AssignResource();
-        void SetPreJobConstraint();
+        void AssignResource(IEnumerable<ApsResource> resources);
+        public void SetPreJobConstraint();
+
+        public void SetResourceAvailableTime(IDictionary<ApsResource, int> resourceAvailableTime);
+
         void SetObjective();
         Task<ScheduleRecord> Solve();
     }

@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\aps-platform"
+    "\\aps-platform",
+    "\\aps-platform\\Aps.Shared"
   ],
   "SelectedNode": "\\aps-platform\\高级计划与排产.sln",
   "PreviewInSolutionExplorer": false

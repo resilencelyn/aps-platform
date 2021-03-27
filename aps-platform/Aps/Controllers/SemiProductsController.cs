@@ -37,6 +37,7 @@ namespace Aps.Controllers
         /// 查询所有半成品
         /// </summary>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<SemiProductDto>>> GetApsSemiProducts()
         {
             var semiProducts = await _repository.GetAllListAsync();
@@ -217,8 +218,8 @@ namespace Aps.Controllers
         /// <summary>
         /// 为半成品添加加工工序
         /// </summary>
-        /// <param name="semiProductId"></param>
-        /// <param name="model"></param>
+        /// <param name="semiProductId">半成品ID</param>
+        /// <param name="model">添加的工序</param>
         /// <returns></returns>
         [HttpPost("{semiProductId}/process/")]
         [ProducesResponseType(typeof(ManufactureProcessDto), 201)]
@@ -250,8 +251,8 @@ namespace Aps.Controllers
         /// <summary>
         /// 为半成品删除删除加工工序
         /// </summary>
-        /// <param name="semiProductId"></param>
-        /// <param name="processId"></param>
+        /// <param name="semiProductId">半成品ID</param>
+        /// <param name="processId">工序ID</param>
         /// <returns></returns>
         [HttpDelete("{semiProductId}/process/{processId}")]
         [ProducesResponseType(204)]

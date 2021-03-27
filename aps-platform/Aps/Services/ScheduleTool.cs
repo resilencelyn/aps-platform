@@ -1,58 +1,39 @@
 ﻿using Aps.Infrastructure;
 using Aps.Shared.Entity;
 using Aps.Shared.Extensions;
-using Aps.Shared.Model;
 using AutoMapper;
 using Google.OrTools.Sat;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Aps.Infrastructure.Repositories;
-using Aps.Shared.Enum;
 using Aps.Threading;
-using Microsoft.Extensions.Hosting;
 using ValueUtils;
 
 namespace Aps.Services
 {
-    public class JobVar
-    {
-        public IntVar StartVar { get; set; }
-        public IntVar EndVar { get; set; }
-        public IntervalVar Interval { get; set; }
-
-        public void Deconstruct(out IntVar startVar, out IntVar endVar, out IntervalVar interval)
-        {
-            startVar = StartVar;
-            endVar = EndVar;
-            interval = Interval;
-        }
-
-        public JobVar(IntVar startVar, IntVar endVar, IntervalVar interval)
-        {
-            StartVar = startVar ?? throw new ArgumentNullException(nameof(startVar));
-            EndVar = endVar ?? throw new ArgumentNullException(nameof(endVar));
-            Interval = interval ?? throw new ArgumentNullException(nameof(interval));
-        }
-    }
-
-    public sealed class JobNavigation : ValueObject<JobNavigation>
+    public sealed class ManufactureJobNavigation : ValueObject<ManufactureJobNavigation>
     {
         public ApsOrder Order { get; set; }
         public ProductInstance ProductInstance { get; set; }
         public SemiProductInstance SemiProductInstance { get; set; }
         public ApsManufactureProcess ManufactureProcess { get; set; }
 
-        public JobNavigation(ApsOrder order, ProductInstance productInstance, SemiProductInstance semiProductInstance,
+        public ManufactureJobNavigation(ApsOrder order, ProductInstance productInstance,
+            SemiProductInstance semiProductInstance,
             ApsManufactureProcess manufactureProcess)
         {
             Order = order;
             ProductInstance = productInstance;
             SemiProductInstance = semiProductInstance;
             ManufactureProcess = manufactureProcess;
+        }
+
+        public override string ToString()
+        {
+            return
+                $"{nameof(Order)}: {Order}, {nameof(ProductInstance)}: {ProductInstance}, {nameof(SemiProductInstance)}: {SemiProductInstance}, {nameof(ManufactureProcess)}: {ManufactureProcess}";
         }
 
         public void Deconstruct(out ApsOrder order, out ProductInstance productInstance,
@@ -65,14 +46,35 @@ namespace Aps.Services
         }
     }
 
-    public class ScheduleAssemblyJob : ApsAssemblyJob
+    public sealed class AssemblyJobNavigation : ValueObject<AssemblyJobNavigation>
     {
-        public JobVar Vars { get; set; }
-    }
+        public ApsOrder Order { get; set; }
 
-    public class ScheduleManufactureJob : ApsManufactureJob
-    {
-        public JobVar Vars { get; set; }
+        public ProductInstance ProductInstance { get; set; }
+
+        public ApsAssemblyProcess AssemblyProcess { get; set; }
+
+        public AssemblyJobNavigation(ApsOrder order, ProductInstance productInstance,
+            ApsAssemblyProcess assemblyProcess)
+        {
+            Order = order ?? throw new ArgumentNullException(nameof(order));
+            ProductInstance = productInstance ?? throw new ArgumentNullException(nameof(productInstance));
+            AssemblyProcess = assemblyProcess ?? throw new ArgumentNullException(nameof(assemblyProcess));
+        }
+
+        public void Deconstruct(out ApsOrder order, out ProductInstance productInstance,
+            out ApsAssemblyProcess assemblyProcess)
+        {
+            order = Order;
+            productInstance = ProductInstance;
+            assemblyProcess = AssemblyProcess;
+        }
+
+        public override string ToString()
+        {
+            return
+                $"{nameof(Order)}: {Order}, {nameof(ProductInstance)}: {ProductInstance}, {nameof(AssemblyProcess)}: {AssemblyProcess}";
+        }
     }
 
     public class ScheduleTool : IScheduleTool
@@ -80,15 +82,16 @@ namespace Aps.Services
         private const int Ub = 1000000;
         private readonly ApsContext _context;
         private readonly IScheduleClass _scheduleClass;
-        private readonly IRepository<ScheduleRecord, Guid> _scheduleRecordRepository;
-        private readonly IRepository<ApsJob, Guid> _jobRepository;
-        private List<ScheduleManufactureJob> _jobs;
+        private readonly IMapper _mapper;
+
+        private List<ApsJob> _jobs;
         private List<ApsResource> _resources;
 
+        private Dictionary<Guid, List<ApsManufactureJob>> _batchJobDictionary;
 
         public CpModel Model { get; } = new CpModel();
         public CpSolver Solver { get; } = new CpSolver();
-        public ICollection<ApsOrder> OrdersList { get; set; }
+        public IEnumerable<ApsOrder> OrdersList { get; set; }
 
         public Dictionary<ApsProduct, int> ProductPrerequisite { get; private set; }
 
@@ -100,9 +103,8 @@ namespace Aps.Services
         public IDictionary<ApsManufactureProcess, int> ManufactureProcessRequisite { get; private set; }
 
 
-        public Dictionary<JobNavigation, ScheduleManufactureJob> ScheduleManufactureJobs { get; set; }
-            = new Dictionary<JobNavigation, ScheduleManufactureJob>();
-
+        public Dictionary<ManufactureJobNavigation, ApsManufactureJob> ScheduleManufactureJobs { get; set; }
+        public Dictionary<AssemblyJobNavigation, ApsAssemblyJob> ScheduleAssemblyJobs { get; set; }
 
         public Dictionary<ApsOrder, List<ProductInstance>> ProductInstances { get; } =
             new Dictionary<ApsOrder, List<ProductInstance>>();
@@ -115,30 +117,26 @@ namespace Aps.Services
 
         public ScheduleTool(ApsContext context,
             IScheduleClass scheduleClass,
-            IRepository<ScheduleRecord, Guid> scheduleRecordRepository,
-            IRepository<ApsJob, Guid> jobRepository)
+            IMapper mapper)
         {
             _context = context;
             _scheduleClass = scheduleClass ?? throw new ArgumentNullException(nameof(scheduleClass));
-            _scheduleRecordRepository = scheduleRecordRepository ??
-                                        throw new ArgumentNullException(nameof(scheduleRecordRepository));
-            _jobRepository = jobRepository;
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public void SetProductPrerequisite(List<ApsOrder> orders)
+        public void SetProductPrerequisite(IEnumerable<ApsOrder> orders)
         {
-            OrdersList = orders;
+            OrdersList = orders.ToList();
 
-            ProductPrerequisite = orders.GroupBy(
+            ProductPrerequisite = OrdersList.GroupBy(
                 o => o.Product,
                 (product, groupOrders) =>
-                {
-                    return new
+                    new
                     {
                         product,
                         amount = groupOrders.Sum(x => x.Amount)
-                    };
-                }).ToDictionary(x => x.product, x => x.amount);
+                    }
+            ).ToDictionary(x => x.product, x => x.amount);
 
             SemiProductPrerequisite = new Dictionary<ApsSemiProduct, int>();
 
@@ -147,6 +145,7 @@ namespace Aps.Services
                 foreach (var productAssembleBySemiProduct in product.AssembleBySemiProducts)
                 {
                     var semiProduct = productAssembleBySemiProduct.ApsSemiProduct;
+
                     if (SemiProductPrerequisite.ContainsKey(semiProduct))
                     {
                         SemiProductPrerequisite[semiProduct] += productAssembleBySemiProduct.Amount * amount;
@@ -159,6 +158,7 @@ namespace Aps.Services
             }
         }
 
+
         public void GenerateProcess()
         {
             ManufactureProcesses = new List<ApsManufactureProcess>();
@@ -168,25 +168,28 @@ namespace Aps.Services
 
             ManufactureProcessRequisite = new Dictionary<ApsManufactureProcess, int>();
 
-            foreach (var x in SemiProductPrerequisite)
+            foreach (var (semiProduct, value) in SemiProductPrerequisite)
             {
-                var apsManufactureProcesses = x.Key.ApsManufactureProcesses;
+                var apsManufactureProcesses = semiProduct.ApsManufactureProcesses;
                 foreach (var p in apsManufactureProcesses)
                 {
                     if (ManufactureProcessRequisite.ContainsKey(p))
                     {
-                        ManufactureProcessRequisite[p] = ManufactureProcessRequisite[p] + x.Value;
+                        ManufactureProcessRequisite[p] = ManufactureProcessRequisite[p] + value;
                     }
                     else
                     {
-                        ManufactureProcessRequisite.Add(p, x.Value);
+                        ManufactureProcessRequisite.Add(p, value);
                     }
                 }
             }
         }
 
-        public void GenerateJobsFromOrders()
+        public void GenerateJob()
         {
+            ScheduleManufactureJobs = new Dictionary<ManufactureJobNavigation, ApsManufactureJob>();
+            ScheduleAssemblyJobs = new Dictionary<AssemblyJobNavigation, ApsAssemblyJob>();
+
             foreach (var order in OrdersList)
             {
                 ProductInstances.Add(order, new List<ProductInstance>());
@@ -196,6 +199,19 @@ namespace Aps.Services
                 {
                     var productInstance = new ProductInstance(Guid.NewGuid(), orderProduct, order);
                     ProductInstances[order].Add(productInstance);
+
+                    // var assemblyProcess = order.Product.ApsAssemblyProcess;
+                    // var assemblyJobNavigation = new AssemblyJobNavigation(order, productInstance, assemblyProcess);
+                    //
+                    // ScheduleAssemblyJobs.Add(assemblyJobNavigation, new ApsAssemblyJob
+                    // {
+                    //     Id = Guid.NewGuid(),
+                    //     ApsOrder = order,
+                    //     ApsProduct = orderProduct,
+                    //     ProductInstance = productInstance,
+                    //     Duration = assemblyProcess.ProductionTime,
+                    //     Workspace = Workspace.加工,
+                    // });
 
                     SemiProductInstances.Add((order, productInstance), new List<SemiProductInstance>());
 
@@ -212,15 +228,8 @@ namespace Aps.Services
                             SemiProductInstances[(order, productInstance)].Add(semiProductInstance);
                             foreach (var manufactureProcess in processes)
                             {
-                                var duration = manufactureProcess.ProductionTime;
-                                string suffix = $"Order:{order.Id}_" +
-                                                $"Product:{productInstance.Id}_" +
-                                                $"SemiProduct:{semiProductInstance.Id}_" +
-                                                $"Process:{manufactureProcess.Id}_" +
-                                                $"Duration:{duration}";
-
-
-                                var jobNavigation = new JobNavigation(order, productInstance, semiProductInstance,
+                                var jobNavigation = new ManufactureJobNavigation(order, productInstance,
+                                    semiProductInstance,
                                     manufactureProcess);
 
 
@@ -228,7 +237,7 @@ namespace Aps.Services
                                 {
                                     ScheduleManufactureJobs.Add(
                                         jobNavigation
-                                        , new ScheduleManufactureJob
+                                        , new ApsManufactureJob()
                                         {
                                             Id = Guid.NewGuid(),
                                             ApsOrder = order,
@@ -243,15 +252,9 @@ namespace Aps.Services
                                 }
                                 else
                                 {
-                                    IntVar startVar = Model.NewIntVar(0, Ub, "start" + suffix);
-                                    IntVar endVar = Model.NewIntVar(0, Ub, "end" + suffix);
-                                    IntervalVar interval =
-                                        Model.NewIntervalVar(startVar, (int) duration.TotalMinutes, endVar,
-                                            "interval" + suffix);
-
                                     ScheduleManufactureJobs.Add(
                                         jobNavigation
-                                        , new ScheduleManufactureJob
+                                        , new ApsManufactureJob()
                                         {
                                             Id = Guid.NewGuid(),
                                             ApsOrder = order,
@@ -261,7 +264,6 @@ namespace Aps.Services
                                             SemiProductInstance = semiProductInstance,
                                             ApsManufactureProcess = manufactureProcess,
                                             Duration = manufactureProcess.ProductionTime,
-                                            Vars = new JobVar(startVar, endVar, interval),
                                             Workspace = Workspace.加工,
                                         });
                                 }
@@ -272,6 +274,31 @@ namespace Aps.Services
             }
         }
 
+        public void SetStreamJob()
+        {
+            foreach (var scheduleManufactureJob in ScheduleManufactureJobs.Values.Where(x =>
+                x.ApsManufactureProcess.ProductionMode == ProductionMode.Sp))
+            {
+                var jobDuration = scheduleManufactureJob.ApsManufactureProcess.ProductionTime;
+
+                string suffix = $"Order:{scheduleManufactureJob.ApsOrder.Id}_" +
+                                $"Product:{scheduleManufactureJob.ProductInstance.Id}_" +
+                                $"SemiProduct:{scheduleManufactureJob.SemiProductInstance.Id}_" +
+                                $"Process:{scheduleManufactureJob.ApsManufactureProcess.Id}_" +
+                                $"Duration:{jobDuration}";
+
+
+                IntVar startVar = Model.NewIntVar(0, Ub, "start" + suffix);
+                IntVar endVar = Model.NewIntVar(0, Ub, "end" + suffix);
+                IntervalVar interval =
+                    Model.NewIntervalVar(startVar, (int) jobDuration.TotalMinutes, endVar, "interval" + suffix);
+
+
+                scheduleManufactureJob.Vars = new JobVar(startVar, endVar, interval);
+            }
+        }
+
+
         public void SetBatchJob()
         {
             var jobGroupByProcess = ScheduleManufactureJobs
@@ -280,22 +307,17 @@ namespace Aps.Services
                 .GroupBy(x => x.Key.ManufactureProcess,
                     (process, jobPairs) =>
                         jobPairs.Select(x => x.Value).ToList())
-                .ToDictionary(x => x[0].ApsManufactureProcess);
+                .ToDictionary(x => x.First().ApsManufactureProcess);
 
 
             foreach (var (manufactureProcess, requisite) in ManufactureProcessRequisite.Where(x =>
                 x.Key.ProductionMode == ProductionMode.Bp))
             {
-                int jobProductTimes;
                 var batch = manufactureProcess.MaximumProductionQuantity.GetValueOrDefault(1);
-                if (requisite % manufactureProcess.MaximumProductionQuantity == 0)
-                {
-                    jobProductTimes = requisite / batch;
-                }
-                else
-                {
-                    jobProductTimes = requisite / batch + 1;
-                }
+
+                var jobProductTimes = requisite % manufactureProcess.MaximumProductionQuantity == 0
+                    ? requisite / batch
+                    : requisite / batch + 1;
 
                 int remainder = requisite;
                 int producted = 0;
@@ -343,42 +365,77 @@ namespace Aps.Services
             }
         }
 
-        public async Task AssignResource()
+        public void SetExternalManufactureJob(IEnumerable<ApsManufactureJob> manufactureJobs)
         {
-            var resourceJobsFromBp = ScheduleManufactureJobs
+            foreach (var manufactureJob in manufactureJobs)
+            {
+                var jobNavigation = new ManufactureJobNavigation(manufactureJob.ApsOrder,
+                    manufactureJob.ProductInstance,
+                    manufactureJob.SemiProductInstance, manufactureJob.ApsManufactureProcess);
+
+                var scheduleManufactureJob = _mapper.Map<ApsManufactureJob, ApsManufactureJob>(manufactureJob);
+
+                var suffix = jobNavigation.ToString();
+
+                var startVar = Model.NewIntVar(0, Ub, "start" + suffix);
+                var endVar = Model.NewIntVar(0, Ub, "end" + suffix);
+                var interval = Model.NewIntervalVar(startVar, (int) manufactureJob.Duration.TotalMinutes, endVar,
+                    "interval" + suffix);
+
+                scheduleManufactureJob.Vars = new JobVar(startVar, endVar, interval);
+
+                ScheduleManufactureJobs.Add(jobNavigation, scheduleManufactureJob);
+            }
+        }
+
+        public void AssignResource(IEnumerable<ApsResource> resources)
+        {
+            var resourceJobsFromBpDistinct = ScheduleManufactureJobs
                 .Where(x => x.Key.ManufactureProcess.ProductionMode == ProductionMode.Bp)
                 .GroupBy(x => x.Value.Vars,
                     (interval, pairs) => pairs.First().Value).ToList();
+
+
+            _batchJobDictionary = new Dictionary<Guid, List<ApsManufactureJob>>();
+
+            foreach (var batchJob in ScheduleManufactureJobs.Values.Where(x =>
+                x.ApsManufactureProcess.ProductionMode == ProductionMode.Bp))
+            {
+                if (_batchJobDictionary.ContainsKey(batchJob.BatchId))
+                {
+                    _batchJobDictionary[batchJob.BatchId].Add(batchJob);
+                }
+                else
+                {
+                    _batchJobDictionary.Add(batchJob.BatchId, new List<ApsManufactureJob>());
+                    _batchJobDictionary[batchJob.BatchId].Add(batchJob);
+                }
+            }
 
             var resourceJobsFromSp = ScheduleManufactureJobs
                 .Where(x => x.Key.ManufactureProcess.ProductionMode == ProductionMode.Sp)
                 .Select(x => x.Value);
 
-            _jobs = new List<ScheduleManufactureJob>(resourceJobsFromSp);
-            _jobs.AddRange(resourceJobsFromBp);
+            _jobs = new List<ApsJob>(resourceJobsFromSp);
+            _jobs.AddRange(resourceJobsFromBpDistinct);
 
-            _resources = await _context.ApsResources
-                // .AsNoTracking()
-                .Include(x => x.ResourceAttributes)
-                .ThenInclude(x => x.ResourceClass)
-                .Where(x => x.Type != ResourceType.人员 && x.Workspace != Workspace.装配)
-                .ToListAsync();
+            _resources = resources.ToList();
 
             var jobCount = _jobs.Count;
             var resourcesCount = _resources.Count;
 
             var resourceJobMatrix = new Dictionary<int, IntVar>[jobCount, resourcesCount];
 
-            for (int i = 0; i < jobCount; i++)
+            for (var i = 0; i < jobCount; i++)
             {
-                for (int j = 0; j < resourcesCount; j++)
+                for (var j = 0; j < resourcesCount; j++)
                 {
                     resourceJobMatrix[i, j] = new Dictionary<int, IntVar>();
                     var resource = _resources[j];
                     foreach (var resourceAttribute in resource.ResourceAttributes)
                     {
                         var intVar = Model.NewIntVar(0, 1,
-                            $"Job:{_jobs[i].ApsManufactureProcess.PrevPart}_," +
+                            $"Job:{_jobs[i].Id}_," +
                             $"Resource:{resource.Id}_," +
                             $"Class:{resourceAttribute.ResourceClass.ResourceClassName}");
                         resourceJobMatrix[i, j].Add(resourceAttribute.ResourceClass.Id, intVar);
@@ -387,15 +444,20 @@ namespace Aps.Services
             }
 
 
-            for (int i = 0; i < jobCount; i++)
+            for (var i = 0; i < jobCount; i++)
             {
                 var job = _jobs[i];
-                var processResourcesNeed = job.ApsManufactureProcess.ApsResources;
+                var processResourcesNeed =
+                    (job as ApsManufactureJob)?.ApsManufactureProcess.ApsResources;
 
+                if (processResourcesNeed == null)
+                {
+                    continue;
+                }
 
                 var processResourcesVarFromClass = new Dictionary<int, List<IntVar>>();
 
-                for (int j = 0; j < resourcesCount; j++)
+                for (var j = 0; j < resourcesCount; j++)
                 {
                     var resourceAsClass = new List<IntVar>();
                     foreach (var (resourceClassId, performed) in resourceJobMatrix[i, j])
@@ -434,13 +496,14 @@ namespace Aps.Services
             }
 
 
-            IntervalVar[,] resourceIntervals = new IntervalVar[jobCount, resourcesCount];
+            var resourceIntervals = new IntervalVar[jobCount, resourcesCount];
 
             ResourcePerformed = new IntVar[jobCount, resourcesCount];
 
             for (int i = 0; i < jobCount; i++)
             {
-                _jobs[i].Vars.Deconstruct(out IntVar startVar, out IntVar endVar, out IntervalVar intervalVar);
+                _jobs[i].Vars.Deconstruct(out var startVar, out var endVar, out _);
+
                 var duration = (int) _jobs[i].Duration.TotalMinutes;
 
                 for (int j = 0; j < resourcesCount; j++)
@@ -467,14 +530,6 @@ namespace Aps.Services
 
                 Model.AddNoOverlap(resourceInterval);
             }
-            // foreach (var scheduleManufactureJob in ScheduleManufactureJobs.Values)
-            // {
-            //     var index = _jobs.IndexOf(scheduleManufactureJob);
-            //     if (index>=0)
-            //     {
-            //         
-            //     }
-            // }
         }
 
         public void SetPreJobConstraint()
@@ -482,18 +537,40 @@ namespace Aps.Services
             foreach (var ((order, productInstance, semiProductInstance, manufactureProcess), job) in
                 ScheduleManufactureJobs)
             {
-                if (manufactureProcess.PrevPartId != null)
+                if (manufactureProcess.PrevPartId == null) continue;
+
+                var preProcess =
+                    ManufactureProcesses.FirstOrDefault(x => x.Id == manufactureProcess.PrevPartId);
+
+                var preJob =
+                    ScheduleManufactureJobs
+                        [new ManufactureJobNavigation(order, productInstance, semiProductInstance, preProcess)];
+
+                if (preJob == null) continue;
+                Model.Add(preJob.Vars.EndVar <= job.Vars.StartVar);
+
+                job.PreJob = preJob;
+                job.PreJobId = preJob.Id;
+            }
+        }
+
+        public void SetResourceAvailableTime(IDictionary<ApsResource, int> resourceAvailableTime)
+        {
+            foreach (var (resource, availableTime) in resourceAvailableTime)
+            {
+                var indexOfResource = _resources.IndexOf(resource);
+
+                if (indexOfResource == -1)
                 {
-                    var preProcess =
-                        ManufactureProcesses.FirstOrDefault(x => x.Id == manufactureProcess.PrevPartId);
+                    throw new ArgumentException(
+                        $"{nameof(resourceAvailableTime)}不在资源中");
+                }
 
-                    var preJob =
-                        ScheduleManufactureJobs
-                            [new JobNavigation(order, productInstance, semiProductInstance, preProcess)];
-                    Model.Add(preJob.Vars.EndVar < job.Vars.StartVar);
-
-                    job.PreJob = preJob;
-                    job.PreJobId = preJob.Id;
+                for (var i = 0; i < _jobs.Count; i++)
+                {
+                    var job = _jobs[i];
+                    Model.Add(job.Vars.StartVar >= availableTime)
+                        .OnlyEnforceIf(ResourcePerformed[i, indexOfResource]);
                 }
             }
         }
@@ -510,7 +587,6 @@ namespace Aps.Services
 
         public async Task<ScheduleRecord> Solve()
         {
-
             var scheduleRecord = new ScheduleRecord
             {
                 Id = Guid.NewGuid(),
@@ -524,25 +600,15 @@ namespace Aps.Services
             var entityEntry = await _context.AddAsync(scheduleRecord);
             await _context.SaveChangesAsync();
 
-
-            var scheduleModel = new ScheduleModel
-            {
-                ScheduleManufactureJobs = ScheduleManufactureJobs,
-                Jobs = _jobs,
-                ScheduleRecord = entityEntry.Entity,
-                Model = Model,
-                ResourcePerformed = ResourcePerformed,
-                Resources = _resources
-            };
+            var scheduleModel = new ScheduleModel(Model, entityEntry.Entity, ScheduleManufactureJobs, _jobs, _resources,
+                ResourcePerformed, _batchJobDictionary);
 
             _scheduleClass.ScheduleModel = scheduleModel;
 
-            var schedule = new Thread(new ThreadStart(_scheduleClass.ExecuteAsync));
+            var schedule = new Thread(_scheduleClass.ExecuteAsync);
+
             schedule.Start();
             schedule.IsBackground = true;
-
-            // _scheduleHostService.ScheduleModel = scheduleModel;
-            // await _scheduleHostService.StartAsync(new CancellationToken());
 
             return scheduleRecord;
         }

@@ -61,3 +61,12 @@ D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\obj\Debug\netcore
 D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\obj\Debug\netcoreapp3.1\Aps.dll
 D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\obj\Debug\netcoreapp3.1\Aps.pdb
 D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\obj\Debug\netcoreapp3.1\Aps.genruntimeconfig.cache
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\bin\Debug\netcoreapp3.1\xunit.runner.visualstudio.dotnetcore.testadapter.dll
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\bin\Debug\netcoreapp3.1\xunit.runner.reporters.netcoreapp10.dll
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\bin\Debug\netcoreapp3.1\xunit.runner.utility.netcoreapp10.dll
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\bin\Debug\netcoreapp3.1\Microsoft.ApplicationInsights.dll
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\bin\Debug\netcoreapp3.1\ValueUtils.dll
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\bin\Debug\netcoreapp3.1\xunit.abstractions.dll
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\bin\Debug\netcoreapp3.1\xunit.assert.dll
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\bin\Debug\netcoreapp3.1\xunit.core.dll
+D:\大学\2021服务外包\repos\aps-platform\aps-platform\Aps\bin\Debug\netcoreapp3.1\xunit.execution.dotnet.dll

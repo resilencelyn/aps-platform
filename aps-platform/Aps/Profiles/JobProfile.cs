@@ -2,6 +2,7 @@
 using Aps.Shared.Model;
 using AutoMapper;
 using System;
+using Aps.Services;
 using Aps.Shared.Extensions;
 
 namespace Aps.Profiles
@@ -12,6 +13,10 @@ namespace Aps.Profiles
         {
             CreateMap<RecordState, string>().ConvertUsing(e => e.ToString());
             CreateMap<Guid, string>().ConvertUsing(e => e.ToString());
+
+            // CreateMap<ApsManufactureJob, ScheduleJob>()
+            //     .ReverseMap();
+
 
             CreateMap<ApsJob, JobDto>()
                 .Include<ApsManufactureJob, JobDto>();

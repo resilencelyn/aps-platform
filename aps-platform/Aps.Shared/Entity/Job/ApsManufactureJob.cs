@@ -12,5 +12,7 @@ namespace Aps.Shared.Entity
 
         public Guid PreJobId { get; set; }
         public Guid BatchId { get; set; }
+
+
     }
 }

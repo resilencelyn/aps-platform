@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Aps.Shared.Extensions;
 
 namespace Aps.Shared.Entity
@@ -21,5 +22,9 @@ namespace Aps.Shared.Entity
         public ScheduleRecord ScheduleRecord { get; set; }
         public List<ApsResource> ApsResource { get; set; } = new List<ApsResource>();
 
+        public ApsProcess Process { get; set; }
+        
+        [NotMapped]
+        public JobVar Vars { get; set; }
     }
 }

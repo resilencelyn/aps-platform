@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "gpmDElWYMWw3DTF10JDjHBxCIaJEavkFzeWr/RWVCQ30iigYxxUWxkoQKsDzBZdL9hpNZaG5j3SfXZAJ/9XoYw==",
+  "dgSpecHash": "QqMucdxcV1uLjJX5HLX0W+mLsQHYrSn5hw+bCvCmMdTB/D2snBKesre4OOkjZuJplvqjhz7VyGPq9h04B+IOhg==",
   "success": true,
   "projectFilePath": "D:\\大学\\2021服务外包\\repos\\aps-platform\\aps-platform\\Aps\\Aps.csproj",
   "expectedPackageFiles": [
@@ -38,7 +38,7 @@
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.win32.primitives\\4.3.0\\microsoft.win32.primitives.4.3.0.nupkg.sha512",
     "C:\\Users\\zhangbig\\.nuget\\packages\\mysqlconnector\\1.1.0\\mysqlconnector.1.1.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\netstandard.library\\1.6.1\\netstandard.library.1.6.1.nupkg.sha512",
-    "C:\\Users\\zhangbig\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
+    "C:\\Users\\zhangbig\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512",
     "C:\\Users\\zhangbig\\.nuget\\packages\\newtonsoft.json.bson\\1.0.2\\newtonsoft.json.bson.1.0.2.nupkg.sha512",
     "C:\\Users\\zhangbig\\.nuget\\packages\\pomelo.entityframeworkcore.mysql\\5.0.0-alpha.2\\pomelo.entityframeworkcore.mysql.5.0.0-alpha.2.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
@@ -137,7 +137,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8”而不是项目目标框架“.NETCoreApp,Version=v3.1”还原包“Google.OrTools.runtime.win-x64 8.2.8710”。此包可能与项目不完全兼容。",
+      "message": "Package 'Google.OrTools.runtime.win-x64 8.2.8710' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework '.NETCoreApp,Version=v3.1'. This package may not be fully compatible with your project.",
       "libraryId": "Google.OrTools.runtime.win-x64",
       "targetGraphs": [
         ".NETCoreApp,Version=v3.1"

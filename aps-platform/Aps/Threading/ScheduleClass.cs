@@ -18,11 +18,34 @@ namespace Aps.Threading
         public CpModel Model { get; set; }
         public ScheduleRecord ScheduleRecord { get; set; }
 
-        public Dictionary<JobNavigation, ScheduleManufactureJob> ScheduleManufactureJobs { get; set; }
+        public Dictionary<ManufactureJobNavigation, ApsManufactureJob> ScheduleManufactureJobs { get; set; }
 
-        public List<ScheduleManufactureJob> Jobs { get; set; }
+        public Dictionary<AssemblyJobNavigation, ApsAssemblyJob> ScheduleAssemblyJobs { get; set; }
+
+        public List<ApsJob> DistinctJobs { get; set; }
         public List<ApsResource> Resources { get; set; }
         public IntVar[,] ResourcePerformed { get; set; }
+
+        public Dictionary<Guid, List<ApsManufactureJob>> BatchJobDictionary { get; set; }
+
+        public ScheduleModel(CpModel model, ScheduleRecord scheduleRecord,
+            Dictionary<ManufactureJobNavigation, ApsManufactureJob> scheduleManufactureJobs,
+            List<ApsJob> jobs, List<ApsResource> resources, IntVar[,] resourcePerformed,
+            Dictionary<Guid, List<ApsManufactureJob>> batchJobDictionary)
+        {
+            Model = model ?? throw new ArgumentNullException(nameof(model));
+
+            ScheduleRecord = scheduleRecord ?? throw new ArgumentNullException(nameof(scheduleRecord));
+
+            ScheduleManufactureJobs = scheduleManufactureJobs ??
+                                      throw new ArgumentNullException(nameof(scheduleManufactureJobs));
+            DistinctJobs = jobs ?? throw new ArgumentNullException(nameof(jobs));
+
+            Resources = resources ?? throw new ArgumentNullException(nameof(resources));
+
+            ResourcePerformed = resourcePerformed ?? throw new ArgumentNullException(nameof(resourcePerformed));
+            BatchJobDictionary = batchJobDictionary ?? throw new ArgumentNullException(nameof(batchJobDictionary));
+        }
     }
 
     public class ScheduleClass : IScheduleClass
@@ -31,7 +54,7 @@ namespace Aps.Threading
 
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public ScheduleModel ScheduleModel { get; set; } = new ScheduleModel();
+        public ScheduleModel ScheduleModel { get; set; }
 
         public ScheduleClass(IServiceScopeFactory serviceScopeFactory)
         {
@@ -90,21 +113,18 @@ namespace Aps.Threading
             }
 
 
-            
-
             using var scope = _serviceScopeFactory.CreateScope();
 
             var context = scope.ServiceProvider.GetRequiredService<ApsContext>();
 
-            
 
-            for (int i = 0; i < ScheduleModel.Jobs.Count; i++)
+            for (int i = 0; i < ScheduleModel.DistinctJobs.Count; i++)
             {
-                var job = ScheduleModel.Jobs[i];
+                var job = ScheduleModel.DistinctJobs[i];
                 for (int j = 0; j < ScheduleModel.Resources.Count; j++)
                 {
                     var resource = ScheduleModel.Resources[j];
-                    
+
 
                     if (_solver.Value(ScheduleModel.ResourcePerformed[i, j]) == 1)
                     {
@@ -115,47 +135,19 @@ namespace Aps.Threading
 
             foreach (var scheduleManufactureJob in ScheduleModel.ScheduleManufactureJobs.Values)
             {
-                var jobFilterBatch = ScheduleModel.Jobs.FirstOrDefault(x => x.Id == scheduleManufactureJob.Id);
-
-                if (jobFilterBatch!=null)
+                if (scheduleManufactureJob.BatchId != Guid.Empty && scheduleManufactureJob.ApsResource.Any())
                 {
-                    scheduleManufactureJob.ApsResource.AddRange(jobFilterBatch.ApsResource);
-                }
-                else
-                {
-                    var batchId = scheduleManufactureJob.BatchId;
-
-                    var jobInBatch = ScheduleModel.Jobs.FirstOrDefault(x => x.BatchId == batchId);
-                    if (jobInBatch == null)
+                    foreach (var batchJob in ScheduleModel.BatchJobDictionary[scheduleManufactureJob.BatchId])
                     {
-                        throw new Exception();
-                    }
-                    else
-                    {
-                        scheduleManufactureJob.ApsResource.AddRange(jobInBatch.ApsResource);
+                        batchJob.ApsResource = scheduleManufactureJob.ApsResource;
                     }
                 }
             }
 
             context.UpdateRange(ScheduleModel.ScheduleManufactureJobs.Values.ToList());
 
-            // for (var i = 0; i < ScheduleModel.Resources.Count; i++)
-            // {
-            //     var resource = ScheduleModel.Resources[i];
-            //     context.Attach(resource);
-            //     for (var j = 0; j < ScheduleModel.Jobs.Count; j++)
-            //     {
-            //         var job = ScheduleModel.Jobs[j];
-            //
-            //         if (_solver.Value(ScheduleModel.ResourcePerformed[j, i]) == 1)
-            //         {
-            //             resource.WorkJobs.Add(job);
-            //         }
-            //     }
-            // }
-
             await context.SaveChangesAsync();
-            
+
 
             var scheduleRecordRepository =
                 scope.ServiceProvider.GetRequiredService<IRepository<ScheduleRecord, Guid>>();

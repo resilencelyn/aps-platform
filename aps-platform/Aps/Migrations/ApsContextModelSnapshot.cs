@@ -57,6 +57,9 @@ namespace Aps.Migrations
                     b.Property<DateTime?>("End")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("ProcessId")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+
                     b.Property<Guid?>("ProductInstanceId")
                         .HasColumnType("char(36)");
 
@@ -71,6 +74,8 @@ namespace Aps.Migrations
                     b.HasIndex("ApsOrderId");
 
                     b.HasIndex("ApsProductId");
+
+                    b.HasIndex("ProcessId");
 
                     b.HasIndex("ProductInstanceId");
 
@@ -439,6 +444,11 @@ namespace Aps.Migrations
                         .HasForeignKey("ApsProductId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Aps.Shared.Entity.ApsProcess", "Process")
+                        .WithMany()
+                        .HasForeignKey("ProcessId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Aps.Shared.Entity.ProductInstance", "ProductInstance")
                         .WithMany()
                         .HasForeignKey("ProductInstanceId")
@@ -447,6 +457,8 @@ namespace Aps.Migrations
                     b.Navigation("ApsOrder");
 
                     b.Navigation("ApsProduct");
+
+                    b.Navigation("Process");
 
                     b.Navigation("ProductInstance");
                 });
@@ -590,7 +602,7 @@ namespace Aps.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Aps.Shared.Entity.ScheduleRecord", "ScheduleRecord")
-                        .WithMany()
+                        .WithMany("ApsAssemblyJobs")
                         .HasForeignKey("ScheduleRecordId")
                         .OnDelete(DeleteBehavior.Restrict);
 
@@ -685,6 +697,8 @@ namespace Aps.Migrations
 
             modelBuilder.Entity("Aps.Shared.Entity.ScheduleRecord", b =>
                 {
+                    b.Navigation("ApsAssemblyJobs");
+
                     b.Navigation("Jobs");
 
                     b.Navigation("Orders");
