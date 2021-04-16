@@ -41,16 +41,15 @@ namespace Aps.Controllers
         /// 简单排程
         /// </summary>
         /// <remarks>简单排程，适用于初始情况资源都为可用的情况下</remarks>
-        /// <response code="200">开始排程计算</response>
+        /// <response code="200">开始排程，并返回一个未完成的排程记录，可以使用记录ID稍后查询排程进度</response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [SwaggerResponse(StatusCodes.Status200OK, "开始排程，并返回一个未完成的排程记录，可以使用记" +
-                                                  "录ID稍后查询排程进度", typeof(ScheduleRecordDto))]
-        public async Task<ActionResult<ScheduleRecordDto>> Schedule()
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
+        public async Task<ActionResult<ScheduleRecordDto>> Schedule(string orderId)
         {
             var orders = await _context.ApsOrders
                 // .AsNoTracking()
-                .Take(1)
                 .Include(x => x.Product)
                 .ThenInclude(x => x.ApsAssemblyProcess)
                 .ThenInclude(x => x.ApsResources)
@@ -67,9 +66,14 @@ namespace Aps.Controllers
                 .ThenInclude(x => x.ApsManufactureProcesses)
                 .ThenInclude(x => x.PrevPart)
                 // .AsSplitQuery()
+                .Where(x => x.Amount == 1 && x.Id == orderId)
                 .ToListAsync();
 
-
+            if (!orders.Any())
+            {
+                return NotFound();
+            }
+            
             var resources = await _context.ApsResources
                 .Include(x => x.ResourceAttributes)
                 .ThenInclude(x => x.ResourceClass)
@@ -131,11 +135,10 @@ namespace Aps.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("{TailSchedule}")]
-        public async Task<ActionResult<ScheduleRecordDto>> TailSchedule()
+        public async Task<ActionResult<ScheduleRecordDto>> TailSchedule(string orderId)
         {
             var orders = await _context.ApsOrders
-                .AsNoTracking()
-                .Take(1)
+                // .AsNoTracking()
                 .Include(x => x.Product)
                 .ThenInclude(x => x.ApsAssemblyProcess)
                 .ThenInclude(x => x.ApsResources)
@@ -152,6 +155,8 @@ namespace Aps.Controllers
                 .ThenInclude(x => x.ApsManufactureProcesses)
                 .ThenInclude(x => x.PrevPart)
                 // .AsSplitQuery()
+                .Where(x => x.Amount == 1 && x.Id == orderId)
+                .Take(1)
                 .ToListAsync();
 
             var resources = await _context.ApsResources
@@ -179,9 +184,11 @@ namespace Aps.Controllers
         /// <returns></returns>
         [HttpPost("{InsertSchedule}")]
         [ProducesResponseType(typeof(ScheduleRecordDto), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ScheduleRecordDto>> InsertSchedule()
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
+        public async Task<ActionResult<ScheduleRecordDto>> InsertSchedule(string orderId)
         {
-            var orders = await _context.ApsOrders
+            var order = await _context.ApsOrders
                 .AsNoTracking()
                 .Take(1)
                 .Include(x => x.Product)
@@ -200,7 +207,12 @@ namespace Aps.Controllers
                 .ThenInclude(x => x.ApsManufactureProcesses)
                 .ThenInclude(x => x.PrevPart)
                 // .AsSplitQuery()
-                .ToListAsync();
+                .FirstOrDefaultAsync(x => x.Id == orderId);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
 
             var resources = await _context.ApsResources
                 .Include(x => x.ResourceAttributes)
@@ -209,16 +221,14 @@ namespace Aps.Controllers
                             && x.Workspace != Workspace.装配)
                 .ToListAsync();
 
-            //TODO Complete Insert Controller
-
             var scheduleContext = new ScheduleContext
             {
-                ScheduleStrategy = new InsertScheduleStrategy(_scheduleTool, orders, resources)
+                ScheduleStrategy = new InsertScheduleStrategy(_scheduleTool, order, resources)
             };
 
             var scheduleRecord = await scheduleContext.ExecuteSchedule();
 
-            ScheduleRecordDto scheduleRecordDto = _mapper.Map<ScheduleRecord, ScheduleRecordDto>(scheduleRecord);
+            var scheduleRecordDto = _mapper.Map<ScheduleRecord, ScheduleRecordDto>(scheduleRecord);
             return Ok(scheduleRecordDto);
         }
     }

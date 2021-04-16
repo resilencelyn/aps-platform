@@ -25,7 +25,7 @@ namespace Aps.Helper
 
         public async Task<ScheduleRecord> Schedule()
         {
-            var resourceAvailableTime = ResourceAvailableTimeCompute(_resources.ToList());
+            var resourceAvailableTime = ComputeResourceAvailableTimeCompute(_resources.ToList());
 
             _scheduleTool.SetProductPrerequisite(_orders);
             _scheduleTool.GenerateProcess();
@@ -36,28 +36,45 @@ namespace Aps.Helper
             _scheduleTool.SetResourceAvailableTime(resourceAvailableTime);
             _scheduleTool.SetPreJobConstraint();
             _scheduleTool.SetObjective();
+            _scheduleTool.StartTime = ComputeScheduleStartTime(_resources.ToList());
             var scheduleRecord = await _scheduleTool.Solve();
 
             return scheduleRecord;
         }
 
-        public static Dictionary<ApsResource, int> ResourceAvailableTimeCompute(List<ApsResource> resources)
+        public static Dictionary<ApsResource, TimeSpan> ComputeResourceAvailableTimeCompute(
+            List<ApsResource> resources)
         {
-            var resourceAvailableTime = new Dictionary<ApsResource, int>();
+            var resourceAvailableTime = new Dictionary<ApsResource, TimeSpan>();
 
             var earliestCompleteResourceTime = resources.Min(x =>
                 x.WorkJobs.Max(job => job.End));
 
             foreach (var resource in resources)
             {
-                var completeResourceTime = resource.WorkJobs.Max(x => x.End) - earliestCompleteResourceTime;
+                var resourceCompleteTime = resource.WorkJobs.Max(x => x.End);
+                if (resourceCompleteTime < DateTime.Now)
+                {
+                    resourceAvailableTime.Add(resource, TimeSpan.Zero);
+                }
+                else
+                {
+                    var completeResourceTimeSpan = resourceCompleteTime - earliestCompleteResourceTime;
+                    var ceilingTime = completeResourceTimeSpan.GetValueOrDefault(TimeSpan.Zero);
 
-                var ceilingTime =
-                    (int) Math.Ceiling(completeResourceTime.GetValueOrDefault(TimeSpan.Zero).TotalMinutes);
-                resourceAvailableTime.Add(resource, ceilingTime);
+                    resourceAvailableTime.Add(resource, ceilingTime);
+                }
             }
 
             return resourceAvailableTime;
+        }
+
+        public static DateTime? ComputeScheduleStartTime(List<ApsResource> resources)
+        {
+            var earliestCompleteResourceTime = resources.Min(x =>
+                x.WorkJobs.Max(job => job.End));
+
+            return earliestCompleteResourceTime;
         }
     }
 }

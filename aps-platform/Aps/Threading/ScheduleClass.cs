@@ -26,50 +26,45 @@ namespace Aps.Threading
         public List<ApsResource> Resources { get; set; }
         public IntVar[,] ResourcePerformed { get; set; }
 
+        public DateTime? StartTime { get; set; }
         public Dictionary<Guid, List<ApsManufactureJob>> BatchJobDictionary { get; set; }
 
         public ScheduleModel(CpModel model, ScheduleRecord scheduleRecord,
             Dictionary<ManufactureJobNavigation, ApsManufactureJob> scheduleManufactureJobs,
             List<ApsJob> jobs, List<ApsResource> resources, IntVar[,] resourcePerformed,
-            Dictionary<Guid, List<ApsManufactureJob>> batchJobDictionary)
+            Dictionary<Guid, List<ApsManufactureJob>> batchJobDictionary, DateTime? startTime, Dictionary<AssemblyJobNavigation, ApsAssemblyJob> scheduleAssemblyJobs)
         {
             Model = model ?? throw new ArgumentNullException(nameof(model));
 
             ScheduleRecord = scheduleRecord ?? throw new ArgumentNullException(nameof(scheduleRecord));
-
             ScheduleManufactureJobs = scheduleManufactureJobs ??
                                       throw new ArgumentNullException(nameof(scheduleManufactureJobs));
             DistinctJobs = jobs ?? throw new ArgumentNullException(nameof(jobs));
-
             Resources = resources ?? throw new ArgumentNullException(nameof(resources));
-
             ResourcePerformed = resourcePerformed ?? throw new ArgumentNullException(nameof(resourcePerformed));
             BatchJobDictionary = batchJobDictionary ?? throw new ArgumentNullException(nameof(batchJobDictionary));
+            StartTime = startTime;
+            ScheduleAssemblyJobs = scheduleAssemblyJobs;
         }
     }
 
     public class ScheduleClass : IScheduleClass
     {
         private readonly CpSolver _solver = new CpSolver();
-
         private readonly IServiceScopeFactory _serviceScopeFactory;
-
         public ScheduleModel ScheduleModel { get; set; }
-
         public ScheduleClass(IServiceScopeFactory serviceScopeFactory)
         {
             _serviceScopeFactory = serviceScopeFactory;
         }
-
-
+        
         public async void ExecuteAsync()
         {
             // Solver.StringParameters = "max_time_in_seconds:30.0";
             _solver.StringParameters = " num_search_workers:6";
 
-            CpSolverStatus cpSolverStatus = await Task.Run(() => _solver.Solve(ScheduleModel.Model));
+            var cpSolverStatus = await Task.Run(() => _solver.Solve(ScheduleModel.Model));
             Console.WriteLine(cpSolverStatus);
-
 
             switch (cpSolverStatus)
             {
@@ -94,24 +89,42 @@ namespace Aps.Threading
 
             Console.WriteLine(objectiveValueString);
 
-            var now = DateTime.Now;
+            var startTime = ScheduleModel.StartTime.GetValueOrDefault(DateTime.Now);
+            
             foreach (var job in ScheduleModel.ScheduleManufactureJobs.Values.ToList())
             {
                 job.Vars.Deconstruct(out var startVar, out var endVar, out _);
 
                 var startValue = _solver.Value(startVar);
-                job.Start = now.AddMinutes(solutionDictionary.ContainsKey(startVar)
+                job.Start = startTime.AddMinutes(solutionDictionary.ContainsKey(startVar)
                     ? solutionDictionary[startVar]
                     : startValue);
 
                 var endValue = _solver.Value(endVar);
-                job.End = now.AddMinutes(solutionDictionary.ContainsKey(endVar)
+                job.End = startTime.AddMinutes(solutionDictionary.ContainsKey(endVar)
                     ? solutionDictionary[endVar]
                     : endValue);
 
                 job.ScheduleRecord = ScheduleModel.ScheduleRecord;
             }
 
+            foreach (var job in ScheduleModel.ScheduleAssemblyJobs.Values.ToList())
+            {
+                job.Vars.Deconstruct(out var startVar, out var endVar, out _);
+
+                var startValue = _solver.Value(startVar);
+                job.Start = startTime.AddMinutes(solutionDictionary.ContainsKey(startVar)
+                    ? solutionDictionary[startVar]
+                    : startValue);
+
+                var endValue = _solver.Value(endVar);
+                job.End = startTime.AddMinutes(solutionDictionary.ContainsKey(endVar)
+                    ? solutionDictionary[endVar]
+                    : endValue);
+
+                job.ScheduleRecord = ScheduleModel.ScheduleRecord;
+            }
+            
 
             using var scope = _serviceScopeFactory.CreateScope();
 
@@ -145,6 +158,7 @@ namespace Aps.Threading
             }
 
             context.UpdateRange(ScheduleModel.ScheduleManufactureJobs.Values.ToList());
+            context.UpdateRange(ScheduleModel.ScheduleAssemblyJobs.Values.ToList());
 
             await context.SaveChangesAsync();
 

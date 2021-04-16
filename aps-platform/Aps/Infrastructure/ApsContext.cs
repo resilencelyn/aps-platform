@@ -1,4 +1,5 @@
-﻿using Aps.Shared.Entity;
+﻿using System.Collections.Generic;
+using Aps.Shared.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
@@ -126,8 +127,25 @@ namespace Aps.Infrastructure
                 .WithOne(x => x.ScheduleRecord)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<ScheduleRecord>()
+                .HasMany(x => x.ApsAssemblyJobs)
+                .WithOne(x => x.ScheduleRecord)
+                .OnDelete(DeleteBehavior.Cascade);
 
-
+            modelBuilder.Entity<ApsJob>()
+                .HasMany(x => x.ApsResource)
+                .WithMany(x => x.WorkJobs)
+                .UsingEntity<Dictionary<string, object>>(
+                "ApsJobApsResource",
+                j => j
+                    .HasOne<ApsResource>()
+                    .WithMany()
+                    .OnDelete(DeleteBehavior.Cascade),
+                j => j
+                    .HasOne<ApsJob>()
+                    .WithMany()
+                    .OnDelete(DeleteBehavior.Cascade)
+                );
         }
 
         public ApsContext(DbContextOptions<ApsContext> options) : base(options)

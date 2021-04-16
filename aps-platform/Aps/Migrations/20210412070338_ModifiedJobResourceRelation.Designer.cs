@@ -3,14 +3,16 @@ using System;
 using Aps.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Aps.Migrations
 {
     [DbContext(typeof(ApsContext))]
-    partial class ApsContextModelSnapshot : ModelSnapshot
+    [Migration("20210412070338_ModifiedJobResourceRelation")]
+    partial class ModifiedJobResourceRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -609,7 +611,7 @@ namespace Aps.Migrations
                     b.HasOne("Aps.Shared.Entity.ScheduleRecord", "ScheduleRecord")
                         .WithMany("ApsAssemblyJobs")
                         .HasForeignKey("ScheduleRecordId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ApsAssemblyProcess");
 

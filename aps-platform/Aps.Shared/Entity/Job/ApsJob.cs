@@ -19,7 +19,6 @@ namespace Aps.Shared.Entity
 
         public Workspace Workspace { get; set; }
 
-        public ScheduleRecord ScheduleRecord { get; set; }
         public List<ApsResource> ApsResource { get; set; } = new List<ApsResource>();
 
         public ApsProcess Process { get; set; }

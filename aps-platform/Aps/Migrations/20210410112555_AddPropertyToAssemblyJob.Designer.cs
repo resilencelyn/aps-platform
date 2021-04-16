@@ -3,19 +3,21 @@ using System;
 using Aps.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Aps.Migrations
 {
     [DbContext(typeof(ApsContext))]
-    partial class ApsContextModelSnapshot : ModelSnapshot
+    [Migration("20210410112555_AddPropertyToAssemblyJob")]
+    partial class AddPropertyToAssemblyJob
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.5");
+                .HasAnnotation("ProductVersion", "5.0.2");
 
             modelBuilder.Entity("Aps.Shared.Entity.ApsAssemblyProcessSemiProduct", b =>
                 {
@@ -324,13 +326,13 @@ namespace Aps.Migrations
 
             modelBuilder.Entity("ApsJobApsResource", b =>
                 {
-                    b.Property<string>("ApsResourceId1")
+                    b.Property<string>("ApsResourceId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<Guid>("WorkJobsId")
                         .HasColumnType("char(36)");
 
-                    b.HasKey("ApsResourceId1", "WorkJobsId");
+                    b.HasKey("ApsResourceId", "WorkJobsId");
 
                     b.HasIndex("WorkJobsId");
 
@@ -588,14 +590,14 @@ namespace Aps.Migrations
                 {
                     b.HasOne("Aps.Shared.Entity.ApsResource", null)
                         .WithMany()
-                        .HasForeignKey("ApsResourceId1")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ApsResourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Aps.Shared.Entity.ApsJob", null)
                         .WithMany()
                         .HasForeignKey("WorkJobsId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -609,7 +611,7 @@ namespace Aps.Migrations
                     b.HasOne("Aps.Shared.Entity.ScheduleRecord", "ScheduleRecord")
                         .WithMany("ApsAssemblyJobs")
                         .HasForeignKey("ScheduleRecordId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ApsAssemblyProcess");
 

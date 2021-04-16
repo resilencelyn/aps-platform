@@ -33,6 +33,7 @@ namespace Aps.Helper
             _scheduleTool.SetBatchJob();
             _scheduleTool.AssignResource(_resources);
             _scheduleTool.SetPreJobConstraint();
+            _scheduleTool.SetAssemblyConstraint();
             _scheduleTool.SetObjective();
             var scheduleRecord = await _scheduleTool.Solve();
 

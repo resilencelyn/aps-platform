@@ -1,4 +1,5 @@
-﻿using Aps.Shared.Entity;
+﻿using System;
+using Aps.Shared.Entity;
 using Aps.Shared.Model;
 using Google.OrTools.Sat;
 using System.Collections.Generic;
@@ -25,15 +26,22 @@ namespace Aps.Services
             get;
         }
 
+        public DateTime? StartTime { get; set; }
+
         void SetProductPrerequisite(IEnumerable<ApsOrder> orders);
         void GenerateProcess();
         void GenerateJob();
         void SetStreamJob();
         void SetBatchJob();
-        void AssignResource(IEnumerable<ApsResource> resources);
-        public void SetPreJobConstraint();
 
-        public void SetResourceAvailableTime(IDictionary<ApsResource, int> resourceAvailableTime);
+        void SetExternalManufactureJob(IEnumerable<ApsManufactureJob> manufactureJobs);
+
+        void AssignResource(IEnumerable<ApsResource> resources);
+        void SetPreJobConstraint();
+
+        void SetAssemblyConstraint();
+        
+        void SetResourceAvailableTime(IDictionary<ApsResource, TimeSpan> resourceAvailableTime);
 
         void SetObjective();
         Task<ScheduleRecord> Solve();

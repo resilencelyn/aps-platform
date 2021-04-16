@@ -361,8 +361,35 @@
         </member>
         <member name="M:Aps.Controllers.ScheduleController.Schedule">
             <summary>
-            查询所有排程
+            简单排程
             </summary>
+            <remarks>简单排程，适用于初始情况资源都为可用的情况下</remarks>
+            <response code="200">开始排程，并返回一个未完成的排程记录，可以使用记录ID稍后查询排程进度</response>
+        </member>
+        <member name="M:Aps.Controllers.ScheduleController.GetScheduleRecords">
+            <summary>
+            查询所有排程记录
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Aps.Controllers.ScheduleController.GetScheduleRecord(System.Guid)">
+            <summary>
+            查询排程记录
+            </summary>
+            <param name="recordId">排程记录ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:Aps.Controllers.ScheduleController.TailSchedule">
+            <summary>
+            滚动排程
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Aps.Controllers.ScheduleController.InsertSchedule(System.String)">
+            <summary>
+            插单（未完成）
+            </summary>
+            <returns></returns>
         </member>
         <member name="M:Aps.Controllers.SemiProductsController.GetApsSemiProducts">
             <summary>
@@ -418,16 +445,16 @@
             <summary>
             为半成品添加加工工序
             </summary>
-            <param name="semiProductId"></param>
-            <param name="model"></param>
+            <param name="semiProductId">半成品ID</param>
+            <param name="model">添加的工序</param>
             <returns></returns>
         </member>
         <member name="M:Aps.Controllers.SemiProductsController.DeleteProcessForSemiProduct(System.String,System.String)">
             <summary>
             为半成品删除删除加工工序
             </summary>
-            <param name="semiProductId"></param>
-            <param name="processId"></param>
+            <param name="semiProductId">半成品ID</param>
+            <param name="processId">工序ID</param>
             <returns></returns>
         </member>
         <member name="T:Aps.Infrastructure.Repositories.IRepository`2">
