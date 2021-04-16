@@ -359,7 +359,7 @@
             <response code="204">删除成功</response>
             <response code="404">未能找到所删除的资源类别</response>
         </member>
-        <member name="M:Aps.Controllers.ScheduleController.Schedule">
+        <member name="M:Aps.Controllers.ScheduleController.Schedule(System.String)">
             <summary>
             简单排程
             </summary>
@@ -379,7 +379,7 @@
             <param name="recordId">排程记录ID</param>
             <returns></returns>
         </member>
-        <member name="M:Aps.Controllers.ScheduleController.TailSchedule">
+        <member name="M:Aps.Controllers.ScheduleController.TailSchedule(System.String)">
             <summary>
             滚动排程
             </summary>
