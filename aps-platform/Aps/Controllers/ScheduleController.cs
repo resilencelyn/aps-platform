@@ -113,7 +113,10 @@ namespace Aps.Controllers
         {
             scheduleRecord.Resources = _context.ApsResources
                 .Include(x => x.WorkJobs)
-                .AsNoTracking().ToList().Select(
+                .AsNoTracking().ToList()
+                .OrderBy(x =>
+                    int.Parse(x.Id.Split('_').Last()))
+                .Select(
                     y =>
                     {
                         var scheduleRecordJobs = y.WorkJobs.Where(z =>
