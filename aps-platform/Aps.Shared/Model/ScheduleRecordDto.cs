@@ -11,7 +11,10 @@ namespace Aps.Shared.Model
 
 
         public ICollection<OrderDto> Orders { get; set; }
+        
+        public DateTime ScheduleStartTime { get; set; }
         public DateTime ScheduleFinishTime { get; set; }
+        
         public ICollection<JobDto> Jobs { get; set; } = new List<JobDto>();
 
         public ICollection<ResourceDto> Resources { get; set; } = new List<ResourceDto>();

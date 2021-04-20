@@ -132,10 +132,12 @@ namespace Aps.Threading
             }
 
 
+            ScheduleModel.ScheduleRecord.ScheduleStartTime = startTime;
+            ScheduleModel.ScheduleRecord.ScheduleFinishTime = ScheduleModel.DistinctJobs.Max(x => x.End);
+
             using var scope = _serviceScopeFactory.CreateScope();
 
             var context = scope.ServiceProvider.GetRequiredService<ApsContext>();
-
 
             for (int i = 0; i < ScheduleModel.DistinctJobs.Count; i++)
             {

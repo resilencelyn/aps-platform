@@ -37,13 +37,14 @@ namespace Aps.Helper
             var apsJobs = jobs.ToList();
             _scheduleTool.SetExternalManufactureJob(apsJobs.OfType<ApsManufactureJob>());
             _scheduleTool.SetExternalAssemblyJob(apsJobs.OfType<ApsAssemblyJob>());
-            
+
             _scheduleTool.AssignResource(_resources);
-            _scheduleTool.SetResourceAvailableTime(ComputeInsertTimeResource(_order.EarliestStartTime, _resources));
+            _scheduleTool.SetResourceAvailableTime(ComputeInsertTimeResource(
+                _order.EarliestStartTime > DateTime.Now ? _order.EarliestStartTime : DateTime.Now, _resources));
             _scheduleTool.SetPreJobConstraint();
             _scheduleTool.SetObjective();
             var scheduleRecord = await _scheduleTool.Solve(ScheduleType.Insert);
-            
+
             return scheduleRecord;
         }
 
@@ -67,7 +68,7 @@ namespace Aps.Helper
         public static IEnumerable<ApsJob> GetRescheduleJobs(IEnumerable<ApsResource> resources, DateTime start,
             DateTime end)
         {
-            return resources.SelectMany(x => x.WorkJobs )
+            return resources.SelectMany(x => x.WorkJobs)
                 .Where(j => j.Start >= start && j.End <= end).ToList()
                 .ToImmutableList();
         }
