@@ -14,6 +14,7 @@ using Aps.Shared.Extensions;
 using Aps.Shared.Model;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using MoreLinq;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Aps.Controllers
@@ -73,7 +74,7 @@ namespace Aps.Controllers
             {
                 return NotFound();
             }
-            
+
             var resources = await _context.ApsResources
                 .Include(x => x.ResourceAttributes)
                 .ThenInclude(x => x.ResourceClass)
@@ -103,9 +104,32 @@ namespace Aps.Controllers
         public async Task<ActionResult<IEnumerable<ScheduleRecordDto>>> GetScheduleRecords()
         {
             var scheduleRecords = await _scheduleRecordRepository.GetAllListAsync();
-
+            scheduleRecords.ForEach(GenerateScheduleRecordResource);
             var returnDto = _mapper.Map<List<ScheduleRecord>, IEnumerable<ScheduleRecordDto>>(scheduleRecords);
             return Ok(returnDto);
+        }
+
+        private void GenerateScheduleRecordResource(ScheduleRecord scheduleRecord)
+        {
+            scheduleRecord.Resources = _context.ApsResources
+                .Include(x => x.WorkJobs)
+                .AsNoTracking().ToList().Select(
+                    y =>
+                    {
+                        var scheduleRecordJobs = y.WorkJobs.Where(z =>
+                        {
+                            return z switch
+                            {
+                                ApsAssemblyJob assemblyJob => scheduleRecord.ApsAssemblyJobs.Any(j =>
+                                    j.Id == assemblyJob.Id),
+                                ApsManufactureJob manufactureJob => scheduleRecord.Jobs.Any(j =>
+                                    j.Id == manufactureJob.Id),
+                                _ => false
+                            };
+                        });
+                        y.WorkJobs = scheduleRecordJobs.ToList();
+                        return y;
+                    }).ToList();
         }
 
         /// <summary>
@@ -126,6 +150,7 @@ namespace Aps.Controllers
                 return NotFound();
             }
 
+            GenerateScheduleRecordResource(scheduleRecord);
             var returnDto = _mapper.Map<ScheduleRecord, ScheduleRecordDto>(scheduleRecord);
             return returnDto;
         }
@@ -172,6 +197,7 @@ namespace Aps.Controllers
             };
 
             var scheduleRecord = await scheduleContext.ExecuteSchedule();
+
             var returnDto = _mapper.Map<ScheduleRecord, ScheduleRecordDto>(scheduleRecord);
 
             return Ok(returnDto);

@@ -37,7 +37,7 @@ namespace Aps.Helper
             _scheduleTool.SetPreJobConstraint();
             _scheduleTool.SetObjective();
             _scheduleTool.StartTime = ComputeScheduleStartTime(_resources.ToList());
-            var scheduleRecord = await _scheduleTool.Solve();
+            var scheduleRecord = await _scheduleTool.Solve(ScheduleType.Tail);
 
             return scheduleRecord;
         }

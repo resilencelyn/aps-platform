@@ -33,13 +33,16 @@ namespace Aps.Helper
             _scheduleTool.SetBatchJob();
 
             var jobs = GetRescheduleJobs(_resources, _order.EarliestStartTime, _order.LatestEndTime);
+
+            var apsJobs = jobs.ToList();
+            _scheduleTool.SetExternalManufactureJob(apsJobs.OfType<ApsManufactureJob>());
+            _scheduleTool.SetExternalAssemblyJob(apsJobs.OfType<ApsAssemblyJob>());
             
-            _scheduleTool.SetExternalManufactureJob(jobs.OfType<ApsManufactureJob>());
             _scheduleTool.AssignResource(_resources);
             _scheduleTool.SetResourceAvailableTime(ComputeInsertTimeResource(_order.EarliestStartTime, _resources));
             _scheduleTool.SetPreJobConstraint();
             _scheduleTool.SetObjective();
-            var scheduleRecord = await _scheduleTool.Solve();
+            var scheduleRecord = await _scheduleTool.Solve(ScheduleType.Insert);
             
             return scheduleRecord;
         }

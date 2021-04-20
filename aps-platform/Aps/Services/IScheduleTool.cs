@@ -4,6 +4,7 @@ using Aps.Shared.Model;
 using Google.OrTools.Sat;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Aps.Helper;
 
 namespace Aps.Services
 {
@@ -35,7 +36,8 @@ namespace Aps.Services
         void SetBatchJob();
 
         void SetExternalManufactureJob(IEnumerable<ApsManufactureJob> manufactureJobs);
-
+        void SetExternalAssemblyJob(IEnumerable<ApsAssemblyJob> assemblyJobs);
+        
         void AssignResource(IEnumerable<ApsResource> resources);
         void SetPreJobConstraint();
 
@@ -44,6 +46,6 @@ namespace Aps.Services
         void SetResourceAvailableTime(IDictionary<ApsResource, TimeSpan> resourceAvailableTime);
 
         void SetObjective();
-        Task<ScheduleRecord> Solve();
+        Task<ScheduleRecord> Solve(ScheduleType scheduleType);
     }
 }

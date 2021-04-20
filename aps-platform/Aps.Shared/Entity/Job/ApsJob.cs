@@ -10,7 +10,9 @@ namespace Aps.Shared.Entity
     {
         [Key] public Guid Id { get; set; }
         public ApsOrder ApsOrder { get; set; }
+        public string ApsOrderId { get; set; }
         public ApsProduct ApsProduct { get; set; }
+        public string ApsProductId { get; set; }
         public ProductInstance ProductInstance { get; set; }
 
         public DateTime? Start { get; set; }

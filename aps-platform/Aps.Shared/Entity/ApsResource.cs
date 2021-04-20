@@ -14,6 +14,6 @@ namespace Aps.Shared.Entity
         [Required] public List<ResourceClassWithResource> ResourceAttributes { get; set; }
         [Required] public Workspace Workspace { get; set; }
 
-        public ICollection<ApsJob> WorkJobs { get; set; } = new List<ApsJob>();
+        public List<ApsJob> WorkJobs { get; set; } = new List<ApsJob>();
     }
 }

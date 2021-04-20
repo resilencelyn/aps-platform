@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Aps.Helper;
 using Aps.Infrastructure;
 using Aps.Infrastructure.Repositories;
 using Aps.Services;
@@ -10,11 +11,13 @@ using Aps.Shared.Extensions;
 using Google.OrTools.Sat;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MoreLinq;
 
 namespace Aps.Threading
 {
     public class ScheduleModel
     {
+        public ScheduleType ScheduleType { get; }
         public CpModel Model { get; set; }
         public ScheduleRecord ScheduleRecord { get; set; }
 
@@ -32,8 +35,10 @@ namespace Aps.Threading
         public ScheduleModel(CpModel model, ScheduleRecord scheduleRecord,
             Dictionary<ManufactureJobNavigation, ApsManufactureJob> scheduleManufactureJobs,
             List<ApsJob> jobs, List<ApsResource> resources, IntVar[,] resourcePerformed,
-            Dictionary<Guid, List<ApsManufactureJob>> batchJobDictionary, DateTime? startTime, Dictionary<AssemblyJobNavigation, ApsAssemblyJob> scheduleAssemblyJobs)
+            Dictionary<Guid, List<ApsManufactureJob>> batchJobDictionary, DateTime? startTime,
+            Dictionary<AssemblyJobNavigation, ApsAssemblyJob> scheduleAssemblyJobs, ScheduleType scheduleType)
         {
+            ScheduleType = scheduleType;
             Model = model ?? throw new ArgumentNullException(nameof(model));
 
             ScheduleRecord = scheduleRecord ?? throw new ArgumentNullException(nameof(scheduleRecord));
@@ -53,11 +58,12 @@ namespace Aps.Threading
         private readonly CpSolver _solver = new CpSolver();
         private readonly IServiceScopeFactory _serviceScopeFactory;
         public ScheduleModel ScheduleModel { get; set; }
+
         public ScheduleClass(IServiceScopeFactory serviceScopeFactory)
         {
             _serviceScopeFactory = serviceScopeFactory;
         }
-        
+
         public async void ExecuteAsync()
         {
             // Solver.StringParameters = "max_time_in_seconds:30.0";
@@ -90,7 +96,7 @@ namespace Aps.Threading
             Console.WriteLine(objectiveValueString);
 
             var startTime = ScheduleModel.StartTime.GetValueOrDefault(DateTime.Now);
-            
+
             foreach (var job in ScheduleModel.ScheduleManufactureJobs.Values.ToList())
             {
                 job.Vars.Deconstruct(out var startVar, out var endVar, out _);
@@ -124,7 +130,7 @@ namespace Aps.Threading
 
                 job.ScheduleRecord = ScheduleModel.ScheduleRecord;
             }
-            
+
 
             using var scope = _serviceScopeFactory.CreateScope();
 
@@ -137,7 +143,6 @@ namespace Aps.Threading
                 for (int j = 0; j < ScheduleModel.Resources.Count; j++)
                 {
                     var resource = ScheduleModel.Resources[j];
-
 
                     if (_solver.Value(ScheduleModel.ResourcePerformed[i, j]) == 1)
                     {
@@ -168,6 +173,35 @@ namespace Aps.Threading
             await scheduleRecordRepository.UpdateAsync(ScheduleModel.ScheduleRecord);
 
             await context.SaveChangesAsync();
+
+
+            if (ScheduleModel.ScheduleType == ScheduleType.Insert)
+            {
+                foreach (var resource in ScheduleModel.Resources)
+                {
+                    var latestJobDateTime = resource.WorkJobs.Where(x =>
+                    {
+                        return x switch
+                        {
+                            ApsAssemblyJob assemblyJob => ScheduleModel.ScheduleAssemblyJobs.ContainsValue(assemblyJob),
+                            ApsManufactureJob manufactureJob => ScheduleModel.ScheduleManufactureJobs.ContainsValue(
+                                manufactureJob),
+                            _ => false
+                        };
+                    }).Max(x => x.End.GetValueOrDefault());
+
+                    var lateJobs = resource.WorkJobs.Where(x =>
+                        x.Start > ScheduleModel.ScheduleRecord.Orders.Max(order => order.LatestEndTime)).ToList();
+
+                    var delayTime = latestJobDateTime - lateJobs.Min(x => x.Start).GetValueOrDefault();
+
+                    lateJobs.ForEach(j =>
+                    {
+                        j.Start += delayTime;
+                        j.End += delayTime;
+                    });
+                }
+            }
         }
     }
 }

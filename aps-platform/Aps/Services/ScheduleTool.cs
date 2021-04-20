@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Aps.Helper;
 using Aps.Threading;
 using MoreLinq;
 using ValueUtils;
@@ -261,7 +262,7 @@ namespace Aps.Services
                                         jobNavigation
                                         , manufactureJob);
                                 }
-                                
+
                                 assemblyJob.ManufactureJobs.Add(manufactureJob);
                             }
                         }
@@ -383,7 +384,6 @@ namespace Aps.Services
                     manufactureJob.ProductInstance,
                     manufactureJob.SemiProductInstance, manufactureJob.ApsManufactureProcess);
 
-                var scheduleManufactureJob = _mapper.Map<ApsManufactureJob, ApsManufactureJob>(manufactureJob);
 
                 var suffix = jobNavigation.ToString();
 
@@ -392,9 +392,29 @@ namespace Aps.Services
                 var interval = Model.NewIntervalVar(startVar, (int) manufactureJob.Duration.TotalMinutes, endVar,
                     "interval" + suffix);
 
-                scheduleManufactureJob.Vars = new JobVar(startVar, endVar, interval);
+                manufactureJob.Vars = new JobVar(startVar, endVar, interval);
 
-                ScheduleManufactureJobs.Add(jobNavigation, scheduleManufactureJob);
+                ScheduleManufactureJobs.Add(jobNavigation, manufactureJob);
+            }
+        }
+
+        public void SetExternalAssemblyJob(IEnumerable<ApsAssemblyJob> assemblyJobs)
+        {
+            foreach (var assemblyJob in assemblyJobs)
+            {
+                var assemblyJobNavigation = new AssemblyJobNavigation(assemblyJob.ApsOrder, assemblyJob.ProductInstance,
+                    assemblyJob.ApsAssemblyProcess);
+
+                var suffix = assemblyJobNavigation.ToString();
+
+                var startVar = Model.NewIntVar(0, Ub, "start" + suffix);
+                var endVar = Model.NewIntVar(0, Ub, "end" + suffix);
+                var interval = Model.NewIntervalVar(startVar, (int) assemblyJob.Duration.TotalMinutes, endVar,
+                    "interval" + suffix);
+
+                assemblyJob.Vars = new JobVar(startVar, endVar, interval);
+
+                ScheduleAssemblyJobs.Add(assemblyJobNavigation, assemblyJob);
             }
         }
 
@@ -568,7 +588,8 @@ namespace Aps.Services
                 var manufactureJobFinishedTime = Model.NewIntVar(0, Ub, "manufactureJob");
 
                 Model.AddMaxEquality(manufactureJobFinishedTime,
-                    assemblyJob.ManufactureJobs.Select(x => x.Vars.EndVar));
+                    assemblyJob.ManufactureJobs.Where(x => ScheduleManufactureJobs.ContainsValue(x))
+                        .Select(x => x.Vars.EndVar));
 
                 Model.Add(assemblyJob.Vars.StartVar >= manufactureJobFinishedTime);
             }
@@ -603,8 +624,9 @@ namespace Aps.Services
 
             Model.Minimize(objective);
         }
+        
 
-        public async Task<ScheduleRecord> Solve()
+        public async Task<ScheduleRecord> Solve(ScheduleType scheduleType)
         {
             var scheduleRecord = new ScheduleRecord
             {
@@ -621,7 +643,7 @@ namespace Aps.Services
             await _context.SaveChangesAsync();
 
             var scheduleModel = new ScheduleModel(Model, entityEntry.Entity, ScheduleManufactureJobs, _jobs, _resources,
-                ResourcePerformed, _batchJobDictionary, StartTime, ScheduleAssemblyJobs);
+                ResourcePerformed, _batchJobDictionary, StartTime, ScheduleAssemblyJobs, scheduleType);
 
             _scheduleClass.ScheduleModel = scheduleModel;
 

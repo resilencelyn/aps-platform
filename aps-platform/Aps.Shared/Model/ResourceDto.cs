@@ -15,5 +15,7 @@ namespace Aps.Shared.Model
         [Required] public Workspace Workspace { get; set; }
 
         public ResourceState ResourceState { get; set; }
+
+        public List<JobDto> WorkJobs { get; set; }
     }
 }

@@ -14,6 +14,8 @@ namespace Aps.Shared.Model
         public DateTime ScheduleFinishTime { get; set; }
         public ICollection<JobDto> Jobs { get; set; } = new List<JobDto>();
 
+        public ICollection<ResourceDto> Resources { get; set; } = new List<ResourceDto>();
+        
         public RecordState RecordState { get; set; }
     }
 
