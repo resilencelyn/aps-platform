@@ -21,7 +21,6 @@ namespace Aps.Services
                 .AsNoTracking()
                 .Include(x => x.Jobs)
                 .ThenInclude(x => x.ApsResource)
-                
                 .Include(x => x.Orders)
                 .AsSplitQuery();
         }
@@ -33,7 +32,12 @@ namespace Aps.Services
 
         public override Task<ScheduleRecord> FirstOrDefaultAsync(Expression<Func<ScheduleRecord, bool>> predicate)
         {
-            return GetAll().FirstOrDefaultAsync(predicate);
+            return GetAll()
+                .Include(x => x.Jobs)
+                .ThenInclude(x => x.PreJob)
+                .Include(x => x.ApsAssemblyJobs)
+                .ThenInclude(x => x.ManufactureJobs)
+                .FirstOrDefaultAsync(predicate);
         }
     }
 }

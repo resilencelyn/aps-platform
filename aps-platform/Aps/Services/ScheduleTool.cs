@@ -615,6 +615,17 @@ namespace Aps.Services
             }
         }
 
+        public void SetOrderFinishTimeConstraint()
+        {
+            var startTime = StartTime.GetValueOrDefault(DateTime.Now);
+
+            foreach (var assemblyJob in ScheduleAssemblyJobs.Values)
+            {
+                var lastTimeSpan = assemblyJob.ApsOrder.LatestEndTime - startTime;
+                Model.Add(assemblyJob.Vars.EndVar <= (int)lastTimeSpan.TotalMinutes);
+            }
+        }
+        
         public void SetObjective()
         {
             var objective = Model.NewIntVar(0, Ub, "Objective");
@@ -654,5 +665,7 @@ namespace Aps.Services
 
             return scheduleRecord;
         }
+
+        
     }
 }

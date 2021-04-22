@@ -109,7 +109,7 @@ namespace Aps.Threading
                 var endValue = _solver.Value(endVar);
                 job.End = startTime.AddMinutes(solutionDictionary.ContainsKey(endVar)
                     ? solutionDictionary[endVar]
-                    : endValue);
+                    : endValue - 1);
 
                 job.ScheduleRecord = ScheduleModel.ScheduleRecord;
             }

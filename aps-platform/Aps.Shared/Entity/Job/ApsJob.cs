@@ -24,8 +24,8 @@ namespace Aps.Shared.Entity
         public List<ApsResource> ApsResource { get; set; } = new List<ApsResource>();
 
         public ApsProcess Process { get; set; }
-        
-        [NotMapped]
-        public JobVar Vars { get; set; }
+        public string ProcessId { get; set; }
+
+        [NotMapped] public JobVar Vars { get; set; }
     }
 }

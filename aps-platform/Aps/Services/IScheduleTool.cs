@@ -47,5 +47,6 @@ namespace Aps.Services
 
         void SetObjective();
         Task<ScheduleRecord> Solve(ScheduleType scheduleType);
+        void SetOrderFinishTimeConstraint();
     }
 }

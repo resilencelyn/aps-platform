@@ -166,6 +166,12 @@
             </summary>
             <param name="model">所添加的订单</param>
         </member>
+        <member name="M:Aps.Controllers.OrdersController.CreateManyOrder(System.Collections.Generic.IEnumerable{Aps.Shared.Model.OrderAddDto})">
+            <summary>
+            批量添加订单
+            </summary>
+            <param name="models">所添加的订单</param>
+        </member>
         <member name="M:Aps.Controllers.OrdersController.DeleteOrder(System.String)">
             <summary>
             删除订单

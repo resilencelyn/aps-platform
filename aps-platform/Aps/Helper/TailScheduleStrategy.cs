@@ -27,6 +27,7 @@ namespace Aps.Helper
         {
             var resourceAvailableTime = ComputeResourceAvailableTimeCompute(_resources.ToList());
 
+            _scheduleTool.StartTime = ComputeScheduleStartTime(_resources.ToList());
             _scheduleTool.SetProductPrerequisite(_orders);
             _scheduleTool.GenerateProcess();
             _scheduleTool.GenerateJob();
@@ -35,8 +36,8 @@ namespace Aps.Helper
             _scheduleTool.AssignResource(_resources);
             _scheduleTool.SetResourceAvailableTime(resourceAvailableTime);
             _scheduleTool.SetPreJobConstraint();
+            _scheduleTool.SetOrderFinishTimeConstraint();
             _scheduleTool.SetObjective();
-            _scheduleTool.StartTime = ComputeScheduleStartTime(_resources.ToList());
             var scheduleRecord = await _scheduleTool.Solve(ScheduleType.Tail);
 
             return scheduleRecord;

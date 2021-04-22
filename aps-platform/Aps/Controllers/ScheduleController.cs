@@ -246,8 +246,7 @@ namespace Aps.Controllers
             var resources = await _context.ApsResources
                 .Include(x => x.ResourceAttributes)
                 .ThenInclude(x => x.ResourceClass)
-                .Where(x => x.Type != ResourceType.人员
-                            && x.Workspace != Workspace.装配)
+                .Where(x => x.Type != ResourceType.人员 && x.Workspace != Workspace.装配)
                 .ToListAsync();
 
             var scheduleContext = new ScheduleContext
@@ -259,6 +258,56 @@ namespace Aps.Controllers
 
             var scheduleRecordDto = _mapper.Map<ScheduleRecord, ScheduleRecordDto>(scheduleRecord);
             return Ok(scheduleRecordDto);
+        }
+
+
+        [HttpGet("/AdjustScheduleRecord")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<ScheduleRecordDto>> AdjustScheduleRecord(
+            [FromQuery] Guid scheduleRecordId,
+            [FromQuery] Guid jobId,
+            [FromQuery] DateTime adjustTo)
+        {
+            var scheduleRecord = await _scheduleRecordRepository.FirstOrDefaultAsync(x => x.Id == scheduleRecordId);
+
+            if (scheduleRecord == null)
+            {
+                return NotFound();
+            }
+
+            if (scheduleRecord.Jobs.Any(x => x.Id == jobId))
+            {
+                var adjustJob = scheduleRecord.Jobs.First(x => x.Id == jobId);
+
+                if (!(adjustTo >= adjustJob.PreJob.End)) return BadRequest("无法满足前后置需求");
+
+                adjustJob.Start = adjustTo;
+                adjustJob.End = adjustTo + adjustJob.Duration;
+
+                _context.Update(adjustJob);
+                await _context.SaveChangesAsync();
+
+                return _mapper.Map<ScheduleRecord, ScheduleRecordDto>(scheduleRecord);
+            }
+
+            if (scheduleRecord.ApsAssemblyJobs.Any(x => x.Id == jobId))
+            {
+                var adjustJob = scheduleRecord.ApsAssemblyJobs.First(x => x.Id == jobId);
+
+                if (!(adjustTo >= adjustJob.ManufactureJobs.Max(x => x.End))) return BadRequest("无法满足前后置需求");
+
+                adjustJob.Start = adjustTo;
+                adjustJob.End = adjustTo + adjustJob.Duration;
+
+                _context.Update(adjustJob);
+                await _context.SaveChangesAsync();
+
+                return _mapper.Map<ScheduleRecord, ScheduleRecordDto>(scheduleRecord);
+            }
+
+            return NotFound();
         }
     }
 }

@@ -134,6 +134,10 @@ namespace Aps.Controllers
             }
             catch (DbUpdateException)
             {
+                if (model.Id == null)
+                {
+                    return BadRequest($"{model.Id}不存在");
+                }
                 if (ApsOrderExists(model.Id))
                 {
                     return Conflict();
@@ -148,6 +152,52 @@ namespace Aps.Controllers
             var orderDto = _mapper.Map<ApsOrder, OrderDto>(orderInserted);
 
             return CreatedAtAction(nameof(GetOrder), new { id = orderDto.Id }, orderDto);
+        }
+
+
+        /// <summary>
+        /// 批量添加订单
+        /// </summary>
+        /// <param name="models">所添加的订单</param>
+        [HttpPost("CreateMany")]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesDefaultResponseType]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<OrderDto>> CreateManyOrder(IEnumerable<OrderAddDto> models)
+        {
+            var orders = _mapper.Map<IEnumerable<OrderAddDto>, List<ApsOrder>>(models);
+            var returnDto = new List<OrderDto>();
+
+            foreach (var order in orders)
+            {
+                var product = order.Product;
+                order.Product = null;
+
+                var productFromRepository = await _productRepository.FirstOrDefaultAsync(x => x.Id == product.Id) ??
+                                            await _productRepository.InsertAsync(product);
+                ApsOrder orderInserted;
+                try
+                {
+                    orderInserted = await _repository.InsertAsync(order);
+                }
+                catch (DbUpdateException)
+                {
+                    if (ApsOrderExists(order.Id))
+                    {
+                        return Conflict();
+                    }
+
+                    throw;
+                }
+
+                orderInserted.Product = productFromRepository;
+                await _repository.SaveAsync();
+
+                var orderDto = _mapper.Map<ApsOrder, OrderDto>(orderInserted);
+                returnDto.Add(orderDto);
+            }
+            
+            return Ok(returnDto);
         }
 
         
