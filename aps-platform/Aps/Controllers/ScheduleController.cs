@@ -307,7 +307,6 @@ namespace Aps.Controllers
                 adjustJob.Start = adjustTo;
                 adjustJob.End = adjustTo + adjustJob.Duration;
                 
-                _context.Attach(adjustJob);
                 await _context.SaveChangesAsync();
                 
                 scheduleRecord.ScheduleStartTime = scheduleRecord.Jobs.Min(x => x.Start);
