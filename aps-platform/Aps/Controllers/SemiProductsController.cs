@@ -119,14 +119,6 @@ namespace Aps.Controllers
         {
             var semiProduct = _mapper.Map<SemiProductAddOrUpdateDto, ApsSemiProduct>(model);
 
-            foreach (var manufactureProcess in semiProduct.ApsManufactureProcesses)
-            {
-                if (await _manufactureRepository.FirstOrDefaultAsync(x => x.Id == manufactureProcess.Id) != null)
-                {
-                    return BadRequest($"创建半成品时，其加工工序必须编写新的加工工序");
-                }
-            }
-
             try
             {
                 await _repository.InsertAsync(semiProduct);
@@ -143,7 +135,7 @@ namespace Aps.Controllers
 
             var returnDto = _mapper.Map<ApsSemiProduct, SemiProductDto>(semiProduct);
 
-            return CreatedAtAction("GetApsSemiProduct", new { id = returnDto.Id }, returnDto);
+            return CreatedAtAction("GetApsSemiProduct", new {id = returnDto.Id}, returnDto);
         }
 
 
@@ -230,14 +222,9 @@ namespace Aps.Controllers
         {
             var manufactureProcess = _mapper.Map<ManufactureProcessAddDto, ApsManufactureProcess>(model);
             var semiProduct = await _repository.FirstOrDefaultAsync(x => x.Id == semiProductId);
+            
 
-
-            if (await _manufactureRepository.FirstOrDefaultAsync(x => x.Id == manufactureProcess.Id) != null)
-            {
-                return Conflict();
-            }
-
-            var processInserted = await _manufactureRepository.InsertAsync(manufactureProcess);
+            var processInserted = await _manufactureRepository.UpdateAsync(manufactureProcess);
 
             semiProduct.ApsManufactureProcesses.Add(processInserted);
             await _repository.UpdateAsync(semiProduct);
@@ -245,7 +232,7 @@ namespace Aps.Controllers
             var returnDto = _mapper.Map<ApsManufactureProcess, ManufactureProcessDto>(processInserted);
 
             return CreatedAtAction(nameof(GetProcessFromSemiProduct),
-                new { semiProductId, processId = returnDto.Id }, returnDto);
+                new {semiProductId, processId = returnDto.Id}, returnDto);
         }
 
         /// <summary>

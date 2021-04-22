@@ -280,6 +280,17 @@ namespace Aps.Controllers
             {
                 var adjustJob = scheduleRecord.Jobs.First(x => x.Id == jobId);
 
+                foreach (var resource in adjustJob.ApsResource)
+                {
+                    foreach (var job in resource.WorkJobs)
+                    {
+                        if (adjustTo < job.Start + job.Duration || adjustTo + adjustJob.Duration > job.Start )
+                        {
+                            return BadRequest();
+                        }
+                    }
+                }
+                
                 if (!(adjustTo >= adjustJob.PreJob.End)) return BadRequest("无法满足前后置需求");
 
                 adjustJob.Start = adjustTo;
@@ -295,6 +306,17 @@ namespace Aps.Controllers
             {
                 var adjustJob = scheduleRecord.ApsAssemblyJobs.First(x => x.Id == jobId);
 
+                foreach (var resource in adjustJob.ApsResource)
+                {
+                    foreach (var job in resource.WorkJobs)
+                    {
+                        if (adjustTo < job.Start + job.Duration || adjustTo + adjustJob.Duration > job.Start )
+                        {
+                            return BadRequest();
+                        }
+                    }
+                }
+                
                 if (!(adjustTo >= adjustJob.ManufactureJobs.Max(x => x.End))) return BadRequest("无法满足前后置需求");
 
                 adjustJob.Start = adjustTo;
