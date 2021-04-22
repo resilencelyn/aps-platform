@@ -393,8 +393,17 @@
         </member>
         <member name="M:Aps.Controllers.ScheduleController.InsertSchedule(System.String)">
             <summary>
-            插单（未完成）
+            插单
             </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Aps.Controllers.ScheduleController.AdjustScheduleRecord(System.Guid,System.Guid,System.DateTime)">
+            <summary>
+            手动调整
+            </summary>
+            <param name="scheduleRecordId">排产记录Id</param>
+            <param name="jobId">作业ID</param>
+            <param name="adjustTo">调整时间</param>
             <returns></returns>
         </member>
         <member name="M:Aps.Controllers.SemiProductsController.GetApsSemiProducts">

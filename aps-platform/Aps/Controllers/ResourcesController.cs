@@ -302,6 +302,13 @@ namespace Aps.Controllers
         }
 
 
+        [HttpGet("/resourceClass")]
+        public async Task<ActionResult<List<ResourceClass>>> GetResourceClass()
+        {
+            var resourceClasses = await _resourceClassRepository.GetAllListAsync();
+            return resourceClasses;
+        }
+        
         private bool ApsResourceExists(string id)
         {
             return _context.ApsResources.Any(e => e.Id == id);

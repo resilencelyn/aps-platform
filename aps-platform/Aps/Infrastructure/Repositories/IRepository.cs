@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Aps.Shared.Model;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Aps.Infrastructure.Repositories
 {

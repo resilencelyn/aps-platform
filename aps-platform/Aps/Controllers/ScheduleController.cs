@@ -260,6 +260,13 @@ namespace Aps.Controllers
         }
 
 
+        /// <summary>
+        /// 手动调整
+        /// </summary>
+        /// <param name="scheduleRecordId">排产记录Id</param>
+        /// <param name="jobId">作业ID</param>
+        /// <param name="adjustTo">调整时间</param>
+        /// <returns></returns>
         [HttpGet("/AdjustScheduleRecord")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
@@ -284,19 +291,26 @@ namespace Aps.Controllers
                 {
                     foreach (var job in resource.WorkJobs)
                     {
-                        if (adjustTo < job.Start + job.Duration || adjustTo + adjustJob.Duration > job.Start )
+                        if ((adjustTo < job.Start + job.Duration && adjustTo >= job.Start) ||
+                            adjustTo + adjustJob.Duration > job.Start &&  adjustTo + adjustJob.Duration <= job.End)
                         {
                             return BadRequest();
                         }
                     }
                 }
-                
-                if (!(adjustTo >= adjustJob.PreJob.End)) return BadRequest("无法满足前后置需求");
+
+                if (adjustJob.PreJobId!=Guid.Empty)
+                {
+                    if (!(adjustTo >= adjustJob.PreJob.End)) return BadRequest("无法满足前后置需求");
+                }
 
                 adjustJob.Start = adjustTo;
                 adjustJob.End = adjustTo + adjustJob.Duration;
 
-                _context.Update(adjustJob);
+                scheduleRecord.ScheduleStartTime = scheduleRecord.Jobs.Min(x => x.Start);
+                scheduleRecord.ScheduleFinishTime = scheduleRecord.Jobs.Max(x => x.End);
+                
+
                 await _context.SaveChangesAsync();
 
                 return _mapper.Map<ScheduleRecord, ScheduleRecordDto>(scheduleRecord);
