@@ -34,6 +34,7 @@ namespace Aps.Helper
             _scheduleTool.AssignResource(_resources);
             _scheduleTool.SetPreJobConstraint();
             _scheduleTool.SetAssemblyConstraint();
+            _scheduleTool.SetOrderFinishTimeConstraint();
             _scheduleTool.SetObjective();
             var scheduleRecord = await _scheduleTool.Solve(ScheduleType.Normal);
 

@@ -218,7 +218,6 @@ namespace Aps.Controllers
         public async Task<ActionResult<ScheduleRecordDto>> InsertSchedule(string orderId)
         {
             var order = await _context.ApsOrders
-                .AsNoTracking()
                 .Take(1)
                 .Include(x => x.Product)
                 .ThenInclude(x => x.ApsAssemblyProcess)

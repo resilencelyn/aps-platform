@@ -42,6 +42,9 @@ namespace Aps.Helper
             _scheduleTool.SetResourceAvailableTime(ComputeInsertTimeResource(
                 _order.EarliestStartTime > DateTime.Now ? _order.EarliestStartTime : DateTime.Now, _resources));
             _scheduleTool.SetPreJobConstraint();
+            
+            _scheduleTool.SetAssemblyConstraint();
+            _scheduleTool.SetOrderFinishTimeConstraint();
             _scheduleTool.SetObjective();
             var scheduleRecord = await _scheduleTool.Solve(ScheduleType.Insert);
 
