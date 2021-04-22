@@ -37,6 +37,8 @@ namespace Aps.Services
                 .ThenInclude(x => x.PreJob)
                 .Include(x => x.ApsAssemblyJobs)
                 .ThenInclude(x => x.ManufactureJobs)
+                .Include(x => x.Resources)
+                .ThenInclude(x => x.WorkJobs)
                 .FirstOrDefaultAsync(predicate);
         }
     }
