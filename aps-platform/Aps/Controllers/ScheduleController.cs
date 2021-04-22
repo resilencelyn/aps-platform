@@ -162,7 +162,7 @@ namespace Aps.Controllers
         /// 滚动排程
         /// </summary>
         /// <returns></returns>
-        [HttpPost("{TailSchedule}")]
+        [HttpPost("/Tail/{orderId}")]
         public async Task<ActionResult<ScheduleRecordDto>> TailSchedule(string orderId)
         {
             var orders = await _context.ApsOrders
@@ -211,7 +211,7 @@ namespace Aps.Controllers
         /// 插单（未完成）
         /// </summary>
         /// <returns></returns>
-        [HttpPost("{InsertSchedule}")]
+        [HttpPost("/insert/{orderId}")]
         [ProducesResponseType(typeof(ScheduleRecordDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
